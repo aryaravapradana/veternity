@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useEffect } from "react"
 import { GlobalRope } from "./global-rope"
 import { motion } from "framer-motion"
 import { AnimatedTractorGraphic } from "./animated-graphic"
@@ -69,13 +69,13 @@ type FeatureType = {
 const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?: string, index: number }) => {
   const isCenter = layout === "center-stack";
   const isLeft = layout === "left-card";
-  const flexDir = isCenter ? "md:flex-col text-center" : (isLeft ? "md:flex-row-reverse text-left" : "md:flex-row text-left");
+  const flexDir = isCenter ? "md:flex-row text-left items-center" : (isLeft ? "md:flex-row-reverse text-left items-center" : "md:flex-row text-left items-center");
 
   const cardRef = useRef<HTMLDivElement>(null);
   console.log("Forcing Turbopack to recompile FeatureCard!", feature.title);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       // The tip of the drawn SVG line is always exactly at the vertical center of the viewport.
       // Card turns ON when the line enters it (top hits center).
       // Card stays ON forever as you scroll down (end: "max").
@@ -91,10 +91,10 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   }, []);
 
   const renderCardContent = (active: boolean) => (
-    <div className={`w-full flex flex-col items-center gap-12 md:gap-20 ${flexDir} p-10 md:p-16 relative`}>
+    <div className={`w-full flex flex-col gap-6 md:gap-10 ${flexDir} p-6 md:p-10 relative`}>
       {/* Graphic Container - Carries the rope anchor ONLY on base layer */}
       <div 
-        className={`relative flex items-center justify-center flex-shrink-0 group ${isCenter ? "w-64 h-64 md:w-96 md:h-96" : "w-56 h-56 md:w-80 md:h-80"}`} 
+        className={`relative flex items-center justify-center flex-shrink-0 group w-56 h-56 md:w-72 md:h-72`} 
         {...(!active ? { "data-rope-anchor": true } : {})}
       >
         {/* Aesthetic Pedestal Removed */}
@@ -108,7 +108,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
       </div>
 
       {/* Text Container (Subtle downward parallax to create visual separation) */}
-      <div className={`flex-1 w-full relative z-10 flex flex-col ${isCenter ? "items-center" : "items-start"}`} data-parallax="-0.4">
+      <div className={`flex-1 w-full relative z-10 flex flex-col items-start`} data-parallax="-0.4">
         {/* Super Premium Module Tag */}
         <div className="inline-flex items-center gap-3 mb-4 md:mb-6">
           {!isCenter && <span className={`w-6 h-[1px] transition-colors duration-0 ${active ? 'bg-white/40' : 'bg-slate-300'}`}></span>}
@@ -121,7 +121,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
         <h3 className={`text-3xl md:text-4xl lg:text-5xl font-black mb-6 tracking-tighter leading-[1.1] transition-colors duration-0 text-white`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
           {feature.title}
         </h3>
-        <p className={`font-medium leading-relaxed text-lg md:text-xl transition-colors duration-0 ${isCenter ? "max-w-2xl" : "max-w-md"} ${active ? 'text-white/90' : 'text-slate-300'}`}>
+        <p className={`font-medium leading-relaxed text-lg md:text-xl transition-colors duration-0 max-w-md ${active ? 'text-white/90' : 'text-slate-300'}`}>
           {feature.description}
         </p>
 
@@ -137,7 +137,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   );
 
   return (
-    <div ref={cardRef} className={`group/card relative overflow-clip transition-transform duration-700 hover:-translate-y-2 border border-slate-700/60 rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full ${isCenter ? "max-w-5xl" : "max-w-4xl"} bg-slate-800`}>
+    <div ref={cardRef} className={`group/card relative overflow-clip transition-transform duration-700 hover:-translate-y-2 border border-slate-700/60 rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full ${isCenter ? "max-w-4xl" : "max-w-3xl"} bg-slate-800`}>
       
       {/* BASE LAYER (Dark Text, White BG) */}
       {renderCardContent(false)}
@@ -189,7 +189,7 @@ export function FeaturesRopeSection() {
         </div>
 
         {/* Features Timeline - Unified Cards */}
-        <div className="flex flex-col gap-24 md:gap-32 relative">
+        <div className="flex flex-col relative">
           
           {features.map((feature, index) => {
             return (
@@ -201,7 +201,10 @@ export function FeaturesRopeSection() {
                 transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
                 className={`flex w-full mx-auto
                   ${feature.layout === "center-stack" ? "justify-center" : 
-                    feature.layout === "left-card" ? "justify-start" : "justify-end"}`}
+                    feature.layout === "left-card" ? "justify-start" : "justify-end"}
+                  ${index === features.length - 1 ? "" : 
+                    (index === 2 || index === 3) ? "mb-[8rem] md:mb-[15rem]" : "mb-[15rem] md:mb-[34rem]"}
+                `}
               >
                 <FeatureCard feature={feature} layout={feature.layout} index={index} />
               </motion.div>

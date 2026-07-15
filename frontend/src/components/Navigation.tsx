@@ -2,11 +2,8 @@
 
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { LayoutDashboard, Bird, Package, Settings, Users, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 export default function Navigation() {
-  const pathname = usePathname();
-
   const links = [
     {
       title: "Dashboard",

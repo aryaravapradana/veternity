@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react/no-unescaped-entities */
 import { motion } from "framer-motion";
 import { Bird, Package, TrendingDown, ThermometerSun, Sparkles } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";

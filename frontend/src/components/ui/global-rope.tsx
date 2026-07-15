@@ -10,6 +10,7 @@ if (typeof window !== 'undefined') {
 
 export const GlobalRope = () => {
   const pathRef = useRef<SVGPathElement>(null)
+  const glowRef = useRef<SVGPathElement>(null)
   
   const [svgHeight, setSvgHeight] = useState(1000)
   const [svgWidth, setSvgWidth] = useState(1920)
@@ -68,10 +69,10 @@ export const GlobalRope = () => {
                 const cp2y = P1.y - distY * 0.5;
                 d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
             } else if (i === anchors.length - 2) {
-                const cp1x = P0.x + (swingAmount * 0.3 * -dir);
-                const cp1y = P0.y - distY * 0.5; 
-                const cp2x = P1.x + (swingAmount * 0.4 * dir);
-                const cp2y = P1.y - distY * 0.8; 
+                const cp1x = P0.x;
+                const cp1y = P0.y + distY * 0.5; 
+                const cp2x = P1.x;
+                const cp2y = P1.y - distY * 0.5; 
                 d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
             } else {
                 const cp1x = P0.x + (swingAmount * dir);
@@ -120,11 +121,16 @@ export const GlobalRope = () => {
     // Generate the perfectly intersecting swinging path
     const d = buildRopePath(rawAnchors, totalWidth);
     pathEl.setAttribute('d', d);
+    if (glowRef.current) glowRef.current.setAttribute('d', d);
 
     // Setup DrawSVG animation using strokeDashoffset natively for extreme performance
     const length = pathEl.getTotalLength();
     pathEl.style.strokeDasharray = `${length}px`;
     pathEl.style.strokeDashoffset = `${length}px`;
+    if (glowRef.current) {
+      glowRef.current.style.strokeDasharray = `${length}px`;
+      glowRef.current.style.strokeDashoffset = `${length}px`;
+    }
     
     ScrollTrigger.getAll().forEach(st => {
       if (st.trigger === wrapper) st.kill()
@@ -135,8 +141,15 @@ export const GlobalRope = () => {
         start: () => `top+=${rawAnchors[0].y}px center`,
         end: () => `top+=${rawAnchors[rawAnchors.length - 1].y}px center`,
         onUpdate: (self) => {
-            // Apply smoothing buffer manually if needed, but native assignment is usually fast enough
-            pathEl.style.strokeDashoffset = `${length - (length * self.progress)}px`;
+            // PERFORMANCE: Native assignment synced perfectly with the browser painting cycle
+            requestAnimationFrame(() => {
+              if (pathEl) {
+                pathEl.style.strokeDashoffset = `${length - (length * self.progress)}px`;
+              }
+              if (glowRef.current) {
+                glowRef.current.style.strokeDashoffset = `${length - (length * self.progress)}px`;
+              }
+            });
         }
     });
 
@@ -181,27 +194,42 @@ export const GlobalRope = () => {
         style={{ zIndex: 10, height: `${svgHeight}px` }}
     >
         <svg 
-            width={svgWidth} 
-            height={svgHeight} 
+            width="100%" 
+            height="100%" 
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            preserveAspectRatio="none"
             className="absolute top-0 left-0 w-full overflow-visible"
-            style={{ height: `${svgHeight}px`, zIndex: 50, pointerEvents: 'none', willChange: 'stroke-dashoffset', overflow: 'visible' }}
+            style={{ height: `${svgHeight}px`, zIndex: 50, pointerEvents: 'none', willChange: 'transform' }}
         >
             <defs>
-                <linearGradient id="userGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="rope-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop stopColor="#F5990D"/>
                     <stop offset="1" stopColor="#C25939"/>
                 </linearGradient>
             </defs>
 
+            {/* Glow behind the rope */}
+            <path
+              ref={glowRef}
+              d=""
+              fill="none"
+              stroke="#F5990D"
+              strokeWidth={strokeW * 1.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="opacity-20 blur-xl"
+              style={{ willChange: "stroke-dashoffset" }}
+            />
             <path 
                 ref={pathRef}
                 fill="none" 
-                stroke="url(#userGradient)" 
+                stroke="url(#rope-gradient)" 
                 strokeWidth={strokeW}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="drop-shadow-2xl"
                 style={{
-                  filter: 'drop-shadow(0px 10px 20px rgba(245, 153, 13, 0.4))'
+                  willChange: 'stroke-dashoffset'
                 }}
             />
         </svg>
