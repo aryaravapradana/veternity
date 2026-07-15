@@ -61,13 +61,13 @@ export default function LandingPage() {
       </motion.div>
 
       {/* Hero Section - Earthy Redesign */}
-      <section className="relative min-h-[90vh] flex flex-col justify-center px-6 overflow-hidden bg-[#F8F6F0]">
+      <section className="relative min-h-[90vh] flex flex-col justify-start pt-28 px-6 overflow-hidden bg-[#F8F6F0]">
         {/* Soft Organic Background Gradients */}
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 w-[1000px] h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
-        <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center text-center pt-32 pb-12">
+        <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center text-center pb-12">
           
           {/* Text Content - Centered */}
           <motion.div
@@ -76,15 +76,6 @@ export default function LandingPage() {
             transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
             className="relative flex flex-col items-center justify-center w-full"
           >
-            <div className="mb-8">
-              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md text-[#2B4C3B] font-semibold text-sm border border-[#E2DCD0] shadow-[0_8px_16px_-6px_rgba(43,76,59,0.08)]">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4A7C59] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3A6B49]"></span>
-                </span>
-                Free for all MSME Farmers
-              </span>
-            </div>
 
             <h1 
               className="text-5xl md:text-6xl lg:text-[5rem] font-bold text-[#1C241E] tracking-tight mb-8 leading-[1.05]"
@@ -132,12 +123,12 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, type: "spring", bounce: 0.1, delay: 0.2 }}
-        className="relative w-full flex items-center justify-center -mt-20 z-20 pointer-events-none"
+        className="relative w-full flex items-center justify-center -mt-[19rem] z-20 pointer-events-none overflow-visible"
       >
         <img 
           src="/hero section.png" 
           alt="FarmPro Hero" 
-          className="w-full max-w-[140000px] h-auto drop-shadow-[0_30px_60px_rgba(0,0,0,0.1)] rounded-t-[3rem] sm:rounded-t-[4rem] border-t border-l border-r border-[#E8E3D2]/50 pointer-events-auto" 
+          className="w-[220vw] max-w-[6000px] min-w-[2000px] h-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.2)] rounded-t-[6rem] sm:rounded-t-[8rem] pointer-events-none translate-x-8" 
         />
       </motion.div>
 
