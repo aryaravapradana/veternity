@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import {
@@ -6,8 +7,6 @@ import {
   IconDroplet,
   IconHeartbeat,
   IconTractor,
-  IconUsers,
-  IconWifi,
 } from "@tabler/icons-react";
 
 export default function BentoGridDemo() {

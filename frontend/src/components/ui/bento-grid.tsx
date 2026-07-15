@@ -25,6 +25,7 @@ export const BentoGridItem = ({
   title,
   description,
   header,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   icon,
 }: {
   className?: string;

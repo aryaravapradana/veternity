@@ -23,7 +23,7 @@ export function AnimatedLogomark({ className }: { className?: string }) {
       scale: 1,
       transition: { 
         duration: 2, 
-        ease: "easeInOut" 
+        ease: [1.00, 0.05, 0.15, 1]
       } 
     }
   }
@@ -35,7 +35,7 @@ export function AnimatedLogomark({ className }: { className?: string }) {
       transition: {
         delay: 1.5,
         duration: 1,
-        ease: "easeOut"
+        ease: [1.00, 0.05, 0.15, 1]
       }
     }
   }

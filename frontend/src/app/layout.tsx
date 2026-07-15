@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { PageTransition } from "@/components/page-transition";
 
 export default function RootLayout({
   children,
@@ -21,7 +22,9 @@ export default function RootLayout({
     <html lang="en" className={`${nunito.variable} ${playfair.variable}`}>
       <body className={`${nunito.className} bg-forest text-white selection:bg-vibrant selection:text-white min-h-screen`}>
         <SmoothScroll>
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </SmoothScroll>
       </body>
     </html>

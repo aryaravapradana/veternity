@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -34,10 +35,13 @@ export const AnimatedTestimonials = ({
 
   useEffect(() => {
     if (autoplay) {
-      const interval = setInterval(handleNext, 5000);
+      const interval = setInterval(() => {
+        handleNext();
+      }, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay, testimonials.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay]);
 
   // Deterministic rotations to prevent Next.js hydration errors caused by Math.random()
   const rotations = [-7, 5, -3, 8, -5, 4, -9, 6, -2, 7];
