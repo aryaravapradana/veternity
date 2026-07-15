@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* FarmPro Exact Background Colors */
+  --color-rust: #C25939;
+  --color-vibrant: #F5990D;
+  --color-olive: #767C15;
+  --color-forest: #32452C;
+  --color-sage: #B4C179;
+
+  --animate-aurora: aurora 60s linear infinite;
+}
+
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+@layer base {
+  :root {
+    --background: #F8FAFC; /* Soft cool gray-blue background */
+    --foreground: #334155; /* Slate text */
+  }
+
+  /* CRITICAL FIX: Disable browser scroll anchoring to prevent SVG bounding box updates from teleporting the scroll position */
+  html, body {
+    overflow-anchor: none;
+    overscroll-behavior-y: none; /* also prevents rubber-banding on Mac/Windows precision touchpads which breaks GSAP */
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Utilities for the friendly aesthetic */
+.puffy-shadow {
+  box-shadow: 0 12px 36px -6px rgba(14, 165, 233, 0.08), 0 4px 12px -4px rgba(14, 165, 233, 0.04);
+}
+
+.puffy-shadow-hover {
+  box-shadow: 0 20px 40px -8px rgba(14, 165, 233, 0.12), 0 8px 16px -4px rgba(14, 165, 233, 0.06);
+}
