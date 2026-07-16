@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useGlobalLoading } from "@/components/loading-context";
+import { Loader2 } from "lucide-react";
 
 export function SplashScreen() {
   const [targetRadius, setTargetRadius] = useState(15000);
   const [targetScale, setTargetScale] = useState(80);
+  const { isGlobalReady } = useGlobalLoading();
 
   useEffect(() => {
     const w = window.innerWidth;
@@ -27,8 +30,10 @@ export function SplashScreen() {
       Math.hypot(w - originXPhysical, h - originYPhysical) // Bottom-right
     );
     
-    // Perfect target radius plus a tiny 5px buffer to prevent floating point gaps
-    const requiredRadius = (maxCornerDist / ratio) + 5; 
+    // Perfect target radius plus a MASSIVE 10000 unit buffer 
+    // This ensures that if the mobile viewport grows (e.g. address bar hides), 
+    // the circle hole remains larger than the screen, preventing the circle from "sitting on the screen".
+    const requiredRadius = (maxCornerDist / ratio) + 10000; 
     setTargetRadius(requiredRadius);
 
     // For scale, we need the logo's bounds to clear the screen. 
@@ -66,7 +71,7 @@ export function SplashScreen() {
         Creates a white background and logo that BOTH get an expanding circular hole 
         originating from the logo mark.
       */}
-      <svg className="absolute inset-0 w-full h-full">
+      <svg className="absolute inset-0 w-full h-full z-0">
         <defs>
           <mask id="splash-mask">
             {/* Keep the background everywhere initially */}
@@ -78,7 +83,7 @@ export function SplashScreen() {
                 cy="497"
                 fill="black"
                 initial={{ r: 0 }}
-                animate={{ r: targetRadius, transition: enterTransition }}
+                animate={{ r: isGlobalReady ? targetRadius : 0, transition: enterTransition }}
                 exit={{ r: 0, transition: exitTransition }}
               />
             </svg>
@@ -95,6 +100,21 @@ export function SplashScreen() {
           </svg>
         </g>
       </svg>
+
+      {/* Loading Indicator - Placed AFTER the SVG so it renders on top of the solid white background */}
+      <AnimatePresence>
+        {!isGlobalReady && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1, transition: { delay: 0.3 } }} 
+            exit={{ opacity: 0 }} 
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+          >
+            <Loader2 className="w-8 h-8 text-[#2B4C3B] animate-spin" />
+            <span className="text-[#2B4C3B] font-bold text-sm tracking-widest uppercase">Loading...</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -21,14 +21,19 @@ export const GlobalRope = () => {
   const buildRopePath = (anchors: {x: number, y: number}[], totalWidth: number) => {
     if (!anchors || anchors.length < 2) return "";
 
+    const isMobile = window.innerWidth < 1024;
+    
+    // Disable rope completely on mobile (accordion layout handles it)
+    if (isMobile) return "";
+
     let d = `M ${anchors[0].x},${anchors[0].y}`;
 
     for (let i = 0; i < anchors.length - 1; i++) {
         const P0 = anchors[i];
         const P1 = anchors[i + 1];
         const distY = P1.y - P0.y;
-        
-        // The user wants wild left/right swings that still intersect the centered PNGs.
+
+        // Desktop wild left/right swings that still intersect the centered PNGs.
         // To do this, endpoints remain at P0/P1, but control points are pushed extremely far left/right.
         const swing = totalWidth * 0.35; // 35% of screen width swing
         
@@ -202,7 +207,7 @@ export const GlobalRope = () => {
             style={{ height: `${svgHeight}px`, zIndex: 50, pointerEvents: 'none', willChange: 'transform' }}
         >
             <defs>
-                <linearGradient id="rope-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="rope-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={svgHeight}>
                     <stop stopColor="#F5990D"/>
                     <stop offset="1" stopColor="#C25939"/>
                 </linearGradient>

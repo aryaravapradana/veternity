@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Flock {
+  id          String   @id @default(uuid())
+  name        String
+  hatchDate   DateTime
+  targetWeight Float
+  status      String   @default("ACTIVE") // ACTIVE, HARVESTED
+  userId      String   // Map to Supabase Auth User ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  tasks       Task[]
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  flockId     String
+  flock       Flock    @relation(fields: [flockId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  type        String   // EXPENSE, REVENUE
+  category    String   // FEED, VACCINE, SALES, UTILITIES
+  amount      Float
+  description String?
+  userId      String   // Map to Supabase Auth User ID
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CommodityPrice {
+  id          String   @id @default(uuid())
+  commodity   String   // CORN, SOYBEAN, RICE_BRAN
+  pricePerKg  Float
+  region      String
+  recordedAt  DateTime @default(now())
+}
+
+enum Role {
+  PRODUCER
+  BUYER
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  username    String   @unique
+  password    String
+  email       String?
+  role        Role     @default(BUYER)
+  fullName    String?
+  farmName    String?
+  location    String?
+  contact     String?
+  avatarUrl   String?
+  bannerUrl   String?
+  livestockTypes String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products       Product[]
+  ordersAsBuyer  Order[] @relation("BuyerOrders")
+  ordersAsSeller Order[] @relation("SellerOrders")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  sellerId    String
+  title       String
+  description String?
+  category    String   @default("Lainnya")
+  price       Float
+  stock       Int      @default(0)
+  minOrder    Int      @default(1)
+  unit        String   @default("kg") // kg, ekor, liter
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  seller      Profile  @relation(fields: [sellerId], references: [id])
+  orderItems  OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  buyerId     String
+  sellerId    String
+  totalAmount Float
+  shippingAddress String?
+  shippingMethod  String?
+  paymentMethod   String?
+  shippingFee     Float       @default(0)
+  platformFee     Float       @default(0)
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  buyer       Profile     @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller      Profile     @relation("SellerOrders", fields: [sellerId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  priceAtTime Float
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+}

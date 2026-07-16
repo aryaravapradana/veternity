@@ -16,99 +16,102 @@ export function EditorialGallery() {
   console.log("Forcing Turbopack to recompile EditorialGallery!");
 
   useGSAP(() => {
-    const panels = gsap.utils.toArray('.panel') as HTMLElement[]
-    
-    // Initially hide all panel contents
-    panels.forEach(panel => {
-      const content = panel.querySelector('.panel-content')
-      if (content) {
-        gsap.set(content, { opacity: 0, y: 30 })
-      }
-    })
+    let mm = gsap.matchMedia();
 
-    // Panel 1 content is visible immediately since it's the first panel
-    const firstContent = panels[0].querySelector('.panel-content')
-    if (firstContent) {
-      gsap.to(firstContent, { opacity: 1, y: 0, duration: 1, ease: "power3.out", delay: 0.2 })
-    }
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "+=400%", // 4 panels to animate in
-        scrub: 1, // Smooth scrub for the mask
-        pin: true,
-      }
-    })
-
-    panels.forEach((panel, i) => {
-      if (i === 0) return
+    mm.add("(min-width: 768px)", () => {
+      const panels = gsap.utils.toArray('.panel') as HTMLElement[]
       
-      const isCircle = i % 2 !== 0; // panel 2, 4 get circles
-      const content = panel.querySelector('.panel-content');
-      
-      let isVisible = false;
+      // Initially hide all panel contents
+      panels.forEach(panel => {
+        const content = panel.querySelector('.panel-content')
+        if (content) {
+          gsap.set(content, { opacity: 0, y: 30 })
+        }
+      })
 
-      if (isCircle) {
-        gsap.set(panel, { 
-          clipPath: "circle(0% at 50% 50%)",
-          WebkitClipPath: "circle(0% at 50% 50%)" 
-        });
-        tl.to(panel, {
-          clipPath: "circle(150% at 50% 50%)",
-          WebkitClipPath: "circle(150% at 50% 50%)",
-          ease: "power2.inOut",
-          duration: 1,
-          onUpdate: function() {
-            if (this.progress() > 0.85 && !isVisible) {
-              isVisible = true;
-              gsap.to(content, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", overwrite: "auto" });
-            } else if (this.progress() <= 0.85 && isVisible) {
-              isVisible = false;
-              gsap.to(content, { opacity: 0, y: 30, duration: 0.3, ease: "power3.in", overwrite: "auto" });
-            }
+      // Panel 1 content is visible immediately since it's the first panel
+      const firstContent = panels[0].querySelector('.panel-content')
+      if (firstContent) {
+        gsap.to(firstContent, { opacity: 1, y: 0, duration: 1, ease: "power3.out", delay: 0.2 })
+      }
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=400%", // 4 panels to animate in
+          scrub: 1, // Smooth scrub for the mask
+          pin: true,
+        }
+      })
+
+      panels.forEach((panel, i) => {
+        if (i === 0) return
+        
+        const isCircle = i % 2 !== 0; // panel 2, 4 get circles
+        const content = panel.querySelector('.panel-content');
+        
+        let isVisible = false;
+
+        if (isCircle) {
+          gsap.set(panel, { 
+            clipPath: "circle(0% at 50% 50%)",
+            WebkitClipPath: "circle(0% at 50% 50%)" 
+          });
+          tl.to(panel, {
+            clipPath: "circle(150% at 50% 50%)",
+            WebkitClipPath: "circle(150% at 50% 50%)",
+            ease: "none"
+          });
+        } else {
+          gsap.set(panel, { 
+            clipPath: "inset(100% 0 0 0)" 
+          });
+          tl.to(panel, {
+            clipPath: "inset(0% 0 0 0)",
+            ease: "none"
+          });
+        }
+
+        // Add a callback to animate the content IN when the panel is fully revealed
+        tl.call(() => {
+          if (!isVisible) {
+            isVisible = true;
+            gsap.to(content, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
           }
-        });
-      } else {
-        gsap.set(panel, { 
-          clipPath: "polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)",
-          WebkitClipPath: "polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)"
-        });
-        tl.to(panel, {
-          clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-          WebkitClipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-          ease: "power2.inOut",
-          duration: 1,
-          onUpdate: function() {
-            if (this.progress() > 0.85 && !isVisible) {
-              isVisible = true;
-              gsap.to(content, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", overwrite: "auto" });
-            } else if (this.progress() <= 0.85 && isVisible) {
-              isVisible = false;
-              gsap.to(content, { opacity: 0, y: 30, duration: 0.3, ease: "power3.in", overwrite: "auto" });
-            }
-          }
-        });
-      }
-      
-      const img = panel.querySelector('.parallax-img')
-      if (img) {
-        tl.fromTo(img, 
-          { scale: 1.1 }, 
-          { scale: 1, duration: 1, ease: "none" }, 
-          "<"
-        )
-      }
-    })
+        }, undefined, "-=0.3");
+        
+        // Parallax image within the panel
+        const img = panel.querySelector('.parallax-img');
+        if (img) {
+          tl.fromTo(img, 
+            { scale: 1.15, y: isCircle ? -30 : 50 }, 
+            { scale: 1, y: 0, ease: "none" }, 
+            "<"
+          );
+        }
+      });
+    });
 
+    mm.add("(max-width: 767px)", () => {
+      const panels = gsap.utils.toArray('.panel') as HTMLElement[]
+      panels.forEach(panel => {
+        const content = panel.querySelector('.panel-content')
+        if (content) {
+          gsap.set(content, { opacity: 1, y: 0 })
+        }
+        gsap.set(panel, { clearProps: "all" })
+      })
+    });
+
+    return () => mm.revert();
   }, { scope: containerRef })
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-clip bg-slate-50 font-sans">
+    <div ref={containerRef} className="relative min-h-[100vh] h-[100vh] w-full bg-slate-900 editorial-gallery-container flex md:block overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory md:snap-none">
       
       {/* PANEL 1: Review 1 */}
-      <div className="panel absolute inset-0 w-full h-full bg-slate-100 z-10 overflow-clip">
+      <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-10 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
           <img src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=2000&auto=format&fit=crop" alt="Farmer Portrait" className="w-full h-full object-cover" />
         </div>
@@ -133,7 +136,7 @@ export function EditorialGallery() {
       </div>
 
       {/* PANEL 2: Review 2 */}
-      <div className="panel absolute inset-0 w-full h-full bg-slate-100 z-20 overflow-clip">
+      <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-20 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
           <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=2000&auto=format&fit=crop" alt="Agricultural Engineer" className="w-full h-full object-cover object-top" />
         </div>
@@ -158,7 +161,7 @@ export function EditorialGallery() {
       </div>
 
       {/* PANEL 3: Review 3 */}
-      <div className="panel absolute inset-0 w-full h-full bg-slate-100 z-30 overflow-clip">
+      <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-30 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
           <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2000&auto=format&fit=crop" alt="Farm Operations" className="w-full h-full object-cover" />
         </div>
@@ -183,7 +186,7 @@ export function EditorialGallery() {
       </div>
 
       {/* PANEL 4: Review 4 */}
-      <div className="panel absolute inset-0 w-full h-full bg-slate-100 z-40 overflow-clip">
+      <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-40 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
           <img src="https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=2000&auto=format&fit=crop" alt="Farmer Check" className="w-full h-full object-cover" />
         </div>

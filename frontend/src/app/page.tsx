@@ -24,10 +24,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-transparent font-sans overflow-x-hidden relative">
       
-      {/* Public Navbar - Floating Glass Pill */}
+      {/* Public Navbar - Floating Glass Pill (Desktop) */}
       <motion.div 
         style={{ y: navY, opacity: navOpacity, willChange: "transform, opacity" }}
-        className="fixed top-6 sm:top-10 inset-x-0 z-50 flex justify-center w-full px-4 sm:px-6 pointer-events-none"
+        className="hidden md:flex fixed top-6 sm:top-10 inset-x-0 z-50 justify-center w-full px-4 sm:px-6 pointer-events-none"
       >
         <nav className="w-full max-w-5xl overflow-clip pointer-events-auto bg-white/60 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 rounded-full shadow-[0_20px_40px_-10px_rgba(14,165,233,0.15),0_0_20px_rgba(255,255,255,0.5)_inset]">
           <div className="px-2 sm:px-4 h-16 flex items-center justify-between">
@@ -60,57 +60,79 @@ export default function LandingPage() {
         </nav>
       </motion.div>
 
-      {/* Hero Section - Earthy Redesign */}
-      <section className="relative min-h-[90vh] flex flex-col justify-start pt-28 px-6 overflow-hidden bg-[#F8F6F0]">
-        {/* Soft Organic Background Gradients */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 w-[1000px] h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* Mobile Bottom Navbar */}
+      <motion.div 
+        style={{ y: navY, opacity: navOpacity, willChange: "transform, opacity" }}
+        className="md:hidden fixed bottom-6 inset-x-0 z-50 flex justify-center w-full px-4 pointer-events-none"
+      >
+        <nav className="w-full max-w-sm overflow-clip pointer-events-auto bg-white/70 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 rounded-full shadow-[0_-20px_40px_-10px_rgba(14,165,233,0.15),0_0_20px_rgba(255,255,255,0.5)_inset]">
+          <div className="px-6 h-16 flex items-center justify-between">
+            <Link href="#features" className="flex flex-col items-center gap-1 text-slate-500 hover:text-sky-600 transition-colors">
+              <span className="text-[11px] font-bold">Platform</span>
+            </Link>
+            <div className="w-14 h-14 bg-gradient-to-br from-[#2B4C3B] to-[#4A7C59] rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white/80 -mt-6">
+              <Bird size={24} strokeWidth={2.5} />
+            </div>
+            <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-500 hover:text-sky-600 transition-colors">
+              <span className="text-[11px] font-bold">Log In</span>
+            </Link>
+          </div>
+        </nav>
+      </motion.div>
 
-        <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center text-center pb-12">
-          
-          {/* Text Content - Centered */}
+      {/* MOBILE-ONLY Hero Section (Editorial Full Bleed) */}
+      <section className="md:hidden relative w-full h-[100vh] flex flex-col justify-end overflow-hidden bg-[#F8F6F0]">
+        {/* Full-Bleed Background Image with Blend Modes */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <img 
+            src="/hero section.png" 
+            alt="FarmPro Hero Mobile Backdrop" 
+            className="w-full h-full object-cover object-top opacity-80" 
+          />
+          {/* Heavy Gradient Overlay to make text legible */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8F6F0] via-[#F8F6F0]/90 to-transparent h-full w-full" />
+        </div>
+
+        {/* Text Content - Bottom Left Anchored */}
+        <div className="relative z-10 w-full px-5 pb-32 flex flex-col items-start text-left">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
-            className="relative flex flex-col items-center justify-center w-full"
+            className="w-full"
           >
-
             <h1 
-              className="text-5xl md:text-6xl lg:text-[5rem] font-bold text-[#1C241E] tracking-tight mb-8 leading-[1.05]"
+              className="text-[3.25rem] font-black text-[#1C241E] tracking-tighter mb-5 leading-[0.95]"
               style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}
             >
-              Empowering farmers with <br className="hidden md:block" />
+              Empowering <br /> farmers with <br />
               <FlipWords 
                 duration={3500}
-                words={["beautiful precision.", "actionable insights.", "smart analytics."]} 
-                className="text-[#3A6B49] bg-clip-text -ml-2 font-black tracking-tight" 
+                words={["precision.", "insights.", "analytics."]} 
+                className="text-[#3A6B49] bg-clip-text -ml-2 font-black tracking-tighter" 
               />
             </h1>
 
-            <p className="text-lg md:text-xl text-[#5A635B] font-medium max-w-2xl mb-10 leading-relaxed mx-auto">
-              A non-profit initiative bringing enterprise-grade analytics, AI-driven insights, and seamless inventory tracking to local farmers at zero cost.
+            <p className="text-lg text-[#5A635B] font-medium max-w-[85%] mb-8 leading-tight">
+              Enterprise-grade analytics & AI-driven insights for local farmers at zero cost.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-              <Link href="/dashboard" className="w-full sm:w-auto">
+            <div className="flex flex-col w-full gap-3">
+              <Link href="/register" className="w-full">
                 <motion.button 
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full sm:w-auto bg-[#2B4C3B] hover:bg-[#1E362A] text-[#F8F6F0] px-9 py-4 rounded-full font-bold text-lg shadow-[0_12px_24px_-8px_rgba(43,76,59,0.4)] transition-all flex items-center justify-center gap-3 group"
+                  className="w-full bg-[#2B4C3B] text-[#F8F6F0] py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 px-6 shadow-[0_8px_20px_rgba(43,76,59,0.3)]"
                 >
-                  Join the Initiative 
-                  <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+                  Create Account 
+                  <ArrowRight size={20} strokeWidth={2.5} />
                 </motion.button>
               </Link>
-              <Link href="/test" className="w-full sm:w-auto">
+              <Link href="/login" className="w-full">
                 <motion.button 
-                  whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.8)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full sm:w-auto bg-white/50 text-[#3F4841] border border-[#D5D0C5] backdrop-blur-sm px-9 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="w-full bg-transparent text-[#2B4C3B] border-2 border-[#2B4C3B] py-4 rounded-2xl font-bold text-lg flex items-center justify-center"
                 >
-                  Test Transition 🚀
+                  Log In
                 </motion.button>
               </Link>
             </div>
@@ -118,17 +140,74 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Full-width Hero Image breaking out of section constraints */}
+      {/* DESKTOP-ONLY Hero Section - Earthy Redesign */}
+      <section className="hidden md:flex relative w-full flex-col justify-start pt-28 min-h-[90vh] overflow-hidden bg-[#F8F6F0]">
+        {/* Soft Organic Background Gradients */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 w-[1000px] h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+
+        {/* Text Content Container */}
+        <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center text-center px-4 sm:px-6 mb-12 pb-12">
+          
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
+            className="relative flex flex-col items-center justify-center w-full"
+          >
+            <h1 
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-[5rem] font-bold text-[#1C241E] tracking-tight mb-6 md:mb-8 leading-[1.1] md:leading-[1.05]"
+              style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}
+            >
+              Empowering farmers with <br />
+              <FlipWords 
+                duration={3500}
+                words={["beautiful precision.", "actionable insights.", "smart analytics."]} 
+                className="text-[#3A6B49] bg-clip-text -ml-2 font-black tracking-tight" 
+              />
+            </h1>
+
+            <p className="text-base sm:text-lg md:text-xl text-[#5A635B] font-medium max-w-2xl mb-8 md:mb-10 leading-relaxed mx-auto">
+              A non-profit initiative bringing enterprise-grade analytics, AI-driven insights, and seamless inventory tracking to local farmers at zero cost.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+              <Link href="/register" className="w-full sm:w-auto">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full sm:w-auto bg-[#2B4C3B] hover:bg-[#1E362A] text-[#F8F6F0] px-9 py-4 rounded-full font-bold text-lg shadow-[0_12px_24px_-8px_rgba(43,76,59,0.4)] transition-all flex items-center justify-center gap-3 group"
+                >
+                  Register Account
+                  <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+              </Link>
+              <Link href="/login" className="w-full sm:w-auto">
+                <motion.button 
+                  whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.8)" }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full sm:w-auto bg-white/50 text-[#3F4841] border border-[#D5D0C5] backdrop-blur-sm px-9 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+                >
+                  Log In
+                </motion.button>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* DESKTOP-ONLY Breakout Hero Image (Extreme widths and negative margins) */}
       <motion.div 
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, type: "spring", bounce: 0.1, delay: 0.2 }}
-        className="relative w-full flex items-center justify-center -mt-[19rem] z-20 pointer-events-none overflow-visible"
+        className="hidden md:flex relative w-full items-center justify-center -mt-[19rem] z-20 pointer-events-none overflow-visible"
       >
         <img 
           src="/hero section.png" 
-          alt="FarmPro Hero" 
-          className="w-[220vw] max-w-[6000px] min-w-[2000px] h-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.2)] rounded-t-[6rem] sm:rounded-t-[8rem] pointer-events-none translate-x-8" 
+          alt="FarmPro Hero Desktop" 
+          className="w-[220vw] max-w-[6000px] min-w-[2000px] h-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.2)] rounded-t-[8rem] pointer-events-none translate-x-8" 
         />
       </motion.div>
 

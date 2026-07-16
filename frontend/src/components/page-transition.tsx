@@ -30,7 +30,13 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div key={pathname} className="min-h-screen flex flex-col">
+      <motion.div 
+        key={pathname} 
+        className="min-h-screen flex flex-col"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 1 }}
+      >
         <SplashScreen />
         <FrozenRouter>{children}</FrozenRouter>
       </motion.div>

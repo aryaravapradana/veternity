@@ -26,8 +26,8 @@
 
 @layer base {
   :root {
-    --background: #F8FAFC; /* Soft cool gray-blue background */
-    --foreground: #334155; /* Slate text */
+    --background: #F8F6F0; /* Earthy warm off-white */
+    --foreground: #1C241E; /* Deep forest green-black text */
   }
 
   /* CRITICAL FIX: Disable browser scroll anchoring to prevent SVG bounding box updates from teleporting the scroll position */
@@ -40,6 +40,7 @@
 @layer base {
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-family: 'Stack Sans Notch', var(--font-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

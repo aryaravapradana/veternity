@@ -1,0 +1,419 @@
+"use client";
+
+import { useState, useEffect, useCallback, memo } from "react";
+import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Menu, Zap, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { FlipWords } from "@/components/ui/flip-words";
+import { usePageLoading } from "@/components/loading-context";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  { name: "Semua", icon: "🌾" },
+  { name: "Sayuran", icon: "🥬" },
+  { name: "Buah-buahan", icon: "🍎" },
+  { name: "Ternak (Hidup)", icon: "🐄" },
+  { name: "Daging", icon: "🥩" },
+  { name: "Telur", icon: "🥚" },
+  { name: "Susu & Olahan", icon: "🥛" },
+  { name: "Pupuk & Bibit", icon: "🌱" },
+  { name: "Alat Tani", icon: "🚜" },
+];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-700",
+  PROCESSING: "bg-blue-100 text-blue-700",
+  SHIPPED: "bg-indigo-100 text-indigo-700",
+  COMPLETED: "bg-emerald-100 text-emerald-700",
+  CANCELLED: "bg-red-100 text-red-700",
+};
+
+// ─── Product Card ─────────────────────────────────────────────────────────────
+const ProductCard = memo(function ProductCard({ p, index, onClick, onAddToCart }: { p: any; index: number; onClick: () => void; onAddToCart: (e: React.MouseEvent) => void }) {
+  return (
+    <motion.div
+      onClick={p.stock > 0 ? onClick : undefined}
+      whileHover={p.stock > 0 ? { y: -4, boxShadow: "0 12px 24px -12px rgba(43,76,59,0.15)" } : {}}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className={`bg-white border border-[#E8E3D2] rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative ${
+        p.stock > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
+      }`}
+    >
+      {/* Product Image */}
+      <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
+        {p.imageUrl ? (
+          <img
+            src={p.imageUrl}
+            alt={p.title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Package size={40} className="text-[#C4BAA8] opacity-60" />
+        )}
+        
+        {p.stock === 0 && (
+          <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[2px]">
+            <span className="bg-[#C25939] text-white font-black px-4 py-2 rounded-xl text-sm shadow-lg rotate-[-10deg]">
+              HABIS
+            </span>
+          </div>
+        )}
+        {index < 2 && p.stock > 0 && (
+          <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
+            <Star size={10} fill="currentColor" /> TERLARIS
+          </div>
+        )}
+      </div>
+
+      {/* Product Info */}
+      <div className="flex flex-col items-center text-center flex-1">
+        <h3 className="font-black text-[#1C241E] text-[15px] leading-tight mb-1 line-clamp-1 w-full" title={p.title}>{p.title}</h3>
+        <p className="text-[#5A635B] text-xs font-semibold">{p.category || "Produk"}</p>
+        <p className="text-[#A4B0A7] text-[11px] font-bold mt-1.5 mb-3">Stok {p.stock} {p.unit}</p>
+        
+        <p className="text-xl font-black text-[#2B4C3B] mt-auto">
+          Rp {p.price?.toLocaleString()}
+        </p>
+      </div>
+
+      {/* Add Button */}
+      {p.stock > 0 ? (
+        <button 
+          onClick={onAddToCart}
+          className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
+        >
+          <Plus size={20} strokeWidth={3} />
+        </button>
+      ) : (
+        <div className="mt-5 w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center">
+          <X size={20} strokeWidth={3} />
+        </div>
+      )}
+    </motion.div>
+  );
+});
+
+// Removed OrderRow as it's now in dedicated Orders page
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
+export default function MarketplacePage() {
+  const [profile, setProfile] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  usePageLoading(loading);
+  const router = useRouter();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [cartCount, setCartCount] = useState(0);
+
+  const addToCart = (e: React.MouseEvent, p: any) => {
+    e.stopPropagation();
+    const sessionStr = localStorage.getItem("farmpro_session");
+    if (!sessionStr) { router.push("/login"); return; }
+    const session = JSON.parse(sessionStr);
+
+    let savedCart: any[] = [];
+    try {
+      const stored = localStorage.getItem("farmpro_cart");
+      if (stored) savedCart = JSON.parse(stored);
+    } catch (e) {}
+
+    const existing = savedCart.find((item: any) => item.productId === p.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      savedCart.push({
+        id: "cart_" + Date.now(),
+        productId: p.id,
+        quantity: 1,
+        buyerId: session.id,
+        product: p
+      });
+    }
+
+    localStorage.setItem("farmpro_cart", JSON.stringify(savedCart));
+    setCartCount(savedCart.length);
+  };
+
+  const { scrollY } = useScroll();
+  const heroOpacity = useTransform(scrollY, [0, 280], [1, 0]);
+  const heroY = useTransform(scrollY, [0, 280], [0, -60]);
+
+  useEffect(() => { loadData(); }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    const sessionStr = localStorage.getItem("farmpro_session");
+    if (!sessionStr) { router.push("/login"); return; }
+    const session = JSON.parse(sessionStr);
+    setProfile(session);
+    const [prodRes, ordRes] = await Promise.all([
+      fetch(`${API_BASE}/api/products`),
+      fetch(`${API_BASE}/api/orders/BUYER/${session.id}`),
+    ]);
+    setProducts(await prodRes.json());
+    setOrders(await ordRes.json());
+    
+    const savedCart = localStorage.getItem("farmpro_cart");
+    if (savedCart) {
+      setCartCount(JSON.parse(savedCart).length);
+    }
+    
+    setLoading(false);
+  };
+
+
+
+  const filteredProducts = products.filter(p =>
+    (selectedCategory === "Semua" || p.category === selectedCategory) &&
+    p.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) return null;
+
+  return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+
+      {/* ── Top Navbar ── */}
+      <div className="px-4 pt-4 md:px-8">
+        <nav className="bg-[#2B4C3B] text-white rounded-[2rem] p-4 flex items-center justify-between shadow-md">
+          {/* Left: Menu & Logo */}
+          <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors hidden sm:block">
+              <Menu size={24} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <ShoppingCart size={16} className="text-[#EEF2E6]" />
+              </div>
+              <span className="font-black text-xl tracking-tight hidden sm:block">FarmPro</span>
+            </div>
+          </div>
+
+          {/* Center: Search */}
+          <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
+            <input 
+              type="text" 
+              placeholder="Cari sayuran, buah, atau ternak..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white text-[#1C241E] font-semibold text-sm rounded-full py-3 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#EEF2E6]/50"
+            />
+            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A635B]" />
+          </div>
+
+          {/* Right: Info & Profile */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="hidden lg:flex items-center gap-2 text-[#EEF2E6] text-sm font-bold bg-white/10 px-4 py-2 rounded-full">
+              <Zap size={16} className="text-[#F5990D] fill-[#F5990D]" />
+              Pesan sekarang, dikirim dalam 15 menit!
+            </div>
+            <button onClick={() => router.push("/marketplace/cart")} className="relative transition-transform hover:scale-105">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <ShoppingCart size={20} className="text-[#2B4C3B]" />
+              </div>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B4C3B]">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => router.push("/settings")} className="w-10 h-10 rounded-full bg-[#E8E3D2] border-2 border-[#EEF2E6] overflow-hidden transition-transform hover:scale-105">
+              <img src={profile?.avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Felix"} alt="Profile" className="w-full h-full object-cover" />
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* ── Hero Section ── */}
+      <div className="px-4 md:px-8 mt-4 relative z-10">
+        <div className="bg-[#2B4C3B] rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg min-h-[400px]">
+          {/* Subtle background decoration */}
+          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
+          
+          <div className="relative z-10 max-w-xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-[1.05] tracking-tight mb-6">
+              Hasil panen segar <br /> langsung ke pintu Anda
+            </h1>
+            <p className="text-[#A4C4A8] text-base sm:text-lg font-medium mb-8 max-w-md">
+              Dapatkan produk organik dan kebutuhan harian yang bersumber dari petani lokal dengan potongan harga hingga 40%.
+            </p>
+            <button 
+              onClick={() => document.getElementById("search-mobile")?.focus()}
+              className="bg-[#EEF2E6] hover:bg-white text-[#2B4C3B] px-8 py-3.5 rounded-full font-black text-lg transition-colors shadow-lg"
+            >
+              Belanja Sekarang
+            </button>
+          </div>
+
+          <div className="relative z-10 mt-12 md:mt-0 md:absolute md:-bottom-12 md:right-12 lg:right-24 h-64 md:h-96 w-64 md:w-96 flex items-end justify-center">
+            {/* Image Slot Placeholder */}
+            <div className="w-full h-full bg-[#3A6B49]/50 backdrop-blur-sm rounded-t-[3rem] rounded-b-xl border-2 border-dashed border-[#A4C4A8] flex items-center justify-center relative overflow-hidden">
+              <span className="text-[#A4C4A8] font-bold tracking-widest text-sm uppercase">Image Slot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Search - Only visible on small screens */}
+      <div className="md:hidden px-4 mt-6 relative z-20">
+        <div className="relative">
+          <input 
+            id="search-mobile"
+            type="text" 
+            placeholder="Cari sayuran, buah, atau ternak..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white text-[#1C241E] font-semibold text-sm rounded-full py-3 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#2B4C3B] border border-[#E8E3D2]"
+          />
+          <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A635B]" />
+        </div>
+      </div>
+
+      {/* ── Categories Scroll ── */}
+      <div className="mt-6 md:-mt-8 relative z-20 w-full max-w-[1400px] mx-auto">
+        <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-6 pt-2 snap-x px-4 md:px-8 xl:justify-center">
+          {CATEGORIES.map(cat => (
+            <div 
+              key={cat.name}
+              onClick={() => setSelectedCategory(cat.name)}
+              className={`snap-start shrink-0 w-44 border rounded-[2rem] p-5 flex flex-col min-h-[140px] relative overflow-hidden group cursor-pointer hover:-translate-y-1 transition-all duration-200 ${
+                selectedCategory === cat.name 
+                  ? "bg-[#2B4C3B] border-[#2B4C3B] shadow-[0_12px_24px_-12px_rgba(43,76,59,0.3)]" 
+                  : "bg-white border-[#E8E3D2] shadow-[0_8px_24px_-12px_rgba(43,76,59,0.12)]"
+              }`}
+            >
+              <h3 className={`font-black text-base ${selectedCategory === cat.name ? "text-white" : "text-[#1C241E]"}`}>{cat.name}</h3>
+              <p className={`text-xs font-semibold ${selectedCategory === cat.name ? "text-[#A4C4A8]" : "text-[#7A8678]"}`}>Kategori</p>
+              <span className={`text-4xl absolute bottom-3 right-3 group-hover:scale-110 transition-transform origin-bottom-right ${selectedCategory === cat.name ? "opacity-100" : "opacity-80"}`}>{cat.icon}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Products Section ── */}
+      <div className="px-4 md:px-8 mt-12 max-w-[1400px] mx-auto pb-12">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl md:text-3xl font-black text-[#1C241E] tracking-tight">
+            {selectedCategory === "Semua" ? "Mungkin Anda butuhkan" : selectedCategory}
+          </h2>
+          <button className="flex items-center gap-1 text-[#C25939] font-bold text-sm hover:gap-2 transition-all">
+            Lihat lainnya <ChevronRight size={16} strokeWidth={3} />
+          </button>
+        </div>
+
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 border-2 border-dashed border-[#DDE2D6] rounded-[2rem] bg-white max-w-2xl mx-auto">
+            <h3 className="text-xl font-black text-[#5A635B] mb-2">Produk tidak ditemukan</h3>
+            <p className="text-[#A4B0A7] text-sm font-medium">Coba ubah kata kunci atau kategori pencarian.</p>
+          </div>
+        ) : (
+          <div className="flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1 xl:justify-center">
+            {filteredProducts.map((p, i) => (
+              <div key={p.id} className="snap-start shrink-0 w-48 bg-white border border-[#E8E3D2] rounded-[2rem] p-4 flex flex-col shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group hover:-translate-y-1 transition-transform relative cursor-pointer" onClick={() => router.push(`/marketplace/product/${p.id}`)}>
+                
+                {/* Product Image Placeholder */}
+                <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-95 transition-transform overflow-hidden relative shrink-0">
+                  {p.imageUrl ? (
+                    <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <Package size={40} className="text-[#C4BAA8] opacity-60" />
+                  )}
+                  {p.stock === 0 && (
+                    <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[2px]">
+                      <span className="bg-[#C25939] text-white font-black px-3 py-1 rounded-xl text-xs shadow-lg rotate-[-10deg]">
+                        HABIS
+                      </span>
+                    </div>
+                  )}
+                  {i < 2 && p.stock > 0 && (
+                    <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
+                      <Star size={10} fill="currentColor" /> TERLARIS
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info */}
+                <div className="flex flex-col items-center text-center flex-1">
+                  <h3 className="font-black text-[#1C241E] text-[15px] leading-tight mb-1 line-clamp-1 w-full" title={p.title}>{p.title}</h3>
+                  <p className="text-[#5A635B] text-xs font-semibold">{p.category}</p>
+                  <p className="text-[#A4B0A7] text-[11px] font-bold mt-1.5 mb-3">Stok {p.stock} {p.unit}</p>
+                  
+                  <p className="text-xl font-black text-[#2B4C3B] mt-auto">
+                    Rp {p.price?.toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Add Button */}
+                {p.stock > 0 ? (
+                  <button 
+                    onClick={(e) => addToCart(e, p)}
+                    className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
+                  >
+                    <Plus size={20} strokeWidth={3} />
+                  </button>
+                ) : (
+                  <div className="mt-5 w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center">
+                    <X size={20} strokeWidth={3} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+
+      {/* ── Footer ── */}
+      <footer className="bg-[#1C241E] text-white pt-16 pb-8 rounded-t-[3rem] mt-10 relative z-20 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#2B4C3B] rounded-xl flex items-center justify-center">
+                <Store size={20} className="text-[#F5990D]" />
+              </div>
+              <span className="font-black text-white text-2xl">Pasar Tani</span>
+            </div>
+            <p className="text-[#A4C4A8] text-sm font-medium leading-relaxed max-w-sm">
+              Platform jual beli hasil pertanian langsung dari petani lokal. Mendorong kesejahteraan petani dengan harga yang lebih adil dan transparan.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-black text-lg mb-6 text-white">Layanan Kami</h4>
+            <ul className="space-y-3 text-sm font-medium text-[#A4C4A8]">
+              <li><Link href="#" className="hover:text-white transition-colors">Bantuan & FAQ</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Cara Berjualan</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Kebijakan Privasi</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Syarat & Ketentuan</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-lg mb-6 text-white">Hubungi Kami</h4>
+            <ul className="space-y-3 text-sm font-medium text-[#A4C4A8]">
+              <li>Jl. Pertanian Raya No. 42, Sleman, DI Yogyakarta</li>
+              <li>Email: halo@pasartani.id</li>
+              <li>Telepon: 0812-3456-7890</li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-[#A4C4A8]">
+          <p>© 2026 Pasar Tani. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <span>Dibuat dengan ❤️ di Yogyakarta</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

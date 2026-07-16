@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import { GlobalRope } from "./global-rope"
 import { motion } from "framer-motion"
 import { AnimatedTractorGraphic } from "./animated-graphic"
@@ -15,43 +15,43 @@ if (typeof window !== "undefined") {
 
 const features = [
   {
-    title: "24/7 AI Monitoring",
-    description: "Our advanced computer vision models watch your coop around the clock, instantly detecting anomalies in flock behavior, mobility issues, or early signs of distress before they become critical.",
-    icon: "👁️",
+    title: "AI Veterinary Assistant",
+    description: "Pranata's integrated LLM acts as your on-demand poultry expert. Describe symptoms or upload flock images to receive instant, data-backed diagnostic insights and treatment recommendations.",
+    icon: "🤖",
     graphic: <AnimatedTractorGraphic />,
     layout: "center-stack"
   },
   {
-    title: "Micro-Climate Sensors",
-    description: "Continuous real-time tracking of temperature, humidity, and ammonia levels. The system autonomously adjusts ventilation to maintain the absolute perfect environment for growth.",
-    icon: "🌡️",
+    title: "Weather-Synced Risk Engine",
+    description: "By integrating real-time regional weather data, Pranata automatically alerts you to incoming extreme conditions (like heatwaves) and provides actionable steps to prevent flock stress.",
+    icon: "⛅",
     graphic: <AnimatedFeatureGraphic />,
     layout: "left-card"
   },
   {
-    title: "Predictive Yield Analytics",
-    description: "Leveraging historical data and current growth rates, FarmPro's machine learning models forecast your final harvest weight and date with unprecedented 98% accuracy.",
-    icon: "📈",
+    title: "Automated Task Scheduler",
+    description: "Input your flock's hatch date, and Pranata instantly generates a comprehensive daily schedule for feeding adjustments, vaccinations, and harvesting protocols.",
+    icon: "📅",
     graphic: <AnimatedThirdGraphic />,
     layout: "right-card"
   },
   {
-    title: "Automated Supply Chain",
-    description: "Smart silos track your feed and water consumption rates automatically. When supplies dip below optimal thresholds, the system directly alerts your cooperative suppliers.",
-    icon: "📦",
+    title: "Feed Cost Optimizer",
+    description: "Utilizing real-time national commodity data (Bapanas/PIHPS), Pranata calculates the absolute cheapest feed mix from local ingredients that still hits your flock's precise nutritional targets.",
+    icon: "🌾",
     graphic: (
-      <div className="w-full h-full border-2 border-dashed border-sage/50 rounded-[2.5rem] flex items-center justify-center text-sage/80 font-bold tracking-widest text-sm relative z-10 group-hover:-translate-y-4 group-hover:scale-105 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+      <div className="w-full h-full border-2 border-dashed border-slate-700/50 rounded-[2rem] flex items-center justify-center text-slate-500 font-bold tracking-widest text-sm relative z-10 group-hover:-translate-y-4 group-hover:scale-105 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
         SVG 4 PENDING
       </div>
     ),
     layout: "left-card"
   },
   {
-    title: "Resource Mastery",
-    description: "A centralized dashboard that optimizes your energy and water consumption. Achieve peak sustainability while reducing operational overhead by up to 30%.",
-    icon: "💧",
+    title: "Financial ROI Ledger",
+    description: "Track daily operational expenses and project your final harvest profit margins instantly, fueled by live regional market poultry prices.",
+    icon: "💰",
     graphic: (
-      <div className="w-full h-full border-2 border-dashed border-sage/50 rounded-[2.5rem] flex items-center justify-center text-sage/80 font-bold tracking-widest text-sm relative z-10 group-hover:-translate-y-4 group-hover:scale-105 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+      <div className="w-full h-full border-2 border-dashed border-slate-700/50 rounded-[2rem] flex items-center justify-center text-slate-500 font-bold tracking-widest text-sm relative z-10 group-hover:-translate-y-4 group-hover:scale-105 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
         SVG 5 PENDING
       </div>
     ),
@@ -69,7 +69,9 @@ type FeatureType = {
 const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?: string, index: number }) => {
   const isCenter = layout === "center-stack";
   const isLeft = layout === "left-card";
-  const flexDir = isCenter ? "md:flex-row text-left items-center" : (isLeft ? "md:flex-row-reverse text-left items-center" : "md:flex-row text-left items-center");
+  
+  // Desktop layout logic (lg and above), mobile uses side-by-side
+  const flexDir = isCenter ? "flex-row items-center" : (isLeft ? "flex-row-reverse items-center" : "flex-row items-center");
 
   const cardRef = useRef<HTMLDivElement>(null);
   console.log("Forcing Turbopack to recompile FeatureCard!", feature.title);
@@ -91,15 +93,12 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   }, []);
 
   const renderCardContent = (active: boolean) => (
-    <div className={`w-full flex flex-col gap-6 md:gap-10 ${flexDir} p-6 md:p-10 relative`}>
-      {/* Graphic Container - Carries the rope anchor ONLY on base layer */}
+    <div className={`w-full flex ${flexDir} gap-4 lg:gap-10 p-4 lg:p-10 relative`}>
+      {/* Graphic Container */}
       <div 
-        className={`relative flex items-center justify-center flex-shrink-0 group w-56 h-56 md:w-72 md:h-72`} 
+        className={`relative flex items-center justify-center flex-shrink-0 group w-20 h-20 sm:w-32 sm:h-32 lg:w-72 lg:h-72`} 
         {...(!active ? { "data-rope-anchor": true } : {})}
       >
-        {/* Aesthetic Pedestal Removed */}
-        
-        {/* The Animated SVG (Subtle upward parallax) - Rendered ONLY in base layer but with z-50 to poke through overlay */}
         <div data-parallax="0.6" className="w-full h-full relative z-50">
           <div className="w-full h-full drop-shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:-translate-y-2">
             {!active && feature.graphic}
@@ -107,28 +106,28 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
         </div>
       </div>
 
-      {/* Text Container (Subtle downward parallax to create visual separation) */}
-      <div className={`flex-1 w-full relative z-10 flex flex-col items-start`} data-parallax="-0.4">
+      {/* Text Container */}
+      <div className={`flex-1 w-full relative z-10 flex flex-col items-start text-left justify-center`} data-parallax="-0.4">
         {/* Super Premium Module Tag */}
-        <div className="inline-flex items-center gap-3 mb-4 md:mb-6">
-          {!isCenter && <span className={`w-6 h-[1px] transition-colors duration-0 ${active ? 'bg-white/40' : 'bg-slate-300'}`}></span>}
-          <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] transition-colors duration-0 ${active ? 'text-white' : 'text-slate-300'}`}>
+        <div className="inline-flex items-center gap-2 lg:gap-3 mb-1 lg:mb-6">
+          <span className={`text-[9px] lg:text-[11px] font-bold uppercase tracking-[0.25em] transition-colors duration-0 ${active ? 'text-white' : 'text-slate-300'}`}>
             System {String(index + 1).padStart(2, '0')}
           </span>
-          {isCenter && <span className={`w-6 h-[1px] transition-colors duration-0 ${active ? 'bg-white/40' : 'bg-slate-300'}`}></span>}
         </div>
         
-        <h3 className={`text-3xl md:text-4xl lg:text-5xl font-black mb-6 tracking-tighter leading-[1.1] transition-colors duration-0 text-white`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+        <h3 className={`text-lg sm:text-3xl lg:text-5xl font-black mb-1 lg:mb-6 tracking-tighter leading-tight transition-colors duration-0 text-white`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
           {feature.title}
         </h3>
-        <p className={`font-medium leading-relaxed text-lg md:text-xl transition-colors duration-0 max-w-md ${active ? 'text-white/90' : 'text-slate-300'}`}>
+        
+        {/* Description completely hidden on smallest mobile screens to force extreme landscape ratio */}
+        <p className={`hidden sm:block font-medium leading-relaxed text-sm lg:text-xl transition-colors duration-0 max-w-md ${active ? 'text-white/90' : 'text-slate-300'}`}>
           {feature.description}
         </p>
 
         {/* Interactive Pseudo-Action */}
-        <div className={`mt-8 flex items-center gap-2 text-sm font-semibold cursor-pointer group/link ${active ? 'text-white hover:text-white/80' : 'text-slate-400 hover:text-slate-100'}`}>
+        <div className={`mt-2 lg:mt-8 flex items-center gap-1 lg:gap-2 text-[10px] sm:text-xs lg:text-sm font-semibold cursor-pointer group/link ${active ? 'text-white hover:text-white/80' : 'text-slate-400 hover:text-slate-100'}`}>
           Explore Module 
-          <svg className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-3 h-3 lg:w-4 lg:h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </div>
@@ -137,7 +136,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   );
 
   return (
-    <div ref={cardRef} className={`group/card relative overflow-clip transition-transform duration-700 hover:-translate-y-2 border border-slate-700/60 rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full ${isCenter ? "max-w-4xl" : "max-w-3xl"} bg-slate-800`}>
+    <div ref={cardRef} className={`group/card relative overflow-clip transition-transform duration-700 hover:-translate-y-2 border border-slate-700/60 lg:border-slate-700/60 rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full ${isCenter ? "max-w-4xl" : "max-w-3xl"} bg-slate-800`}>
       
       {/* BASE LAYER (Dark Text, White BG) */}
       {renderCardContent(false)}
@@ -156,8 +155,61 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   );
 }
 
+const MobileAccordionFeature = ({ feature, index, isActive, onToggle }: { feature: FeatureType, index: number, isActive: boolean, onToggle: () => void }) => {
+  return (
+    <div className="border-b border-slate-700/50 overflow-hidden">
+      <button 
+        onClick={onToggle}
+        className="w-full py-8 flex items-center justify-between text-left group"
+      >
+        <div className="flex flex-col pr-6">
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-vibrant mb-2">
+            System {String(index + 1).padStart(2, '0')}
+          </span>
+          <h3 className={`text-3xl sm:text-4xl font-black tracking-tighter leading-[0.95] transition-colors duration-500 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+            {feature.title}
+          </h3>
+        </div>
+        <div className={`w-10 h-10 flex-shrink-0 rounded-full border flex items-center justify-center transition-all duration-500 ${isActive ? 'border-rust bg-rust text-white' : 'border-slate-700 text-slate-500 group-hover:border-slate-500'}`}>
+          <svg className={`w-4 h-4 transition-transform duration-500 ${isActive ? 'rotate-45' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+      </button>
+      
+      <div 
+        className="grid transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        style={{ gridTemplateRows: isActive ? '1fr' : '0fr' }}
+      >
+        <div className="overflow-hidden">
+          <div className="pb-10 pt-2 flex flex-col gap-6">
+            <div className="w-full rounded-[2rem] bg-slate-800/50 border border-slate-700/50 flex flex-col sm:flex-row items-center gap-6 p-6 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-vibrant/10 to-rust/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-32 h-32 flex-shrink-0 relative z-10 flex items-center justify-center">
+                {feature.graphic}
+              </div>
+              <div className="flex-1 relative z-10 text-center sm:text-left">
+                <p className="text-slate-300 font-medium leading-relaxed text-sm sm:text-base">
+                  {feature.description}
+                </p>
+                <div className="mt-5 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold cursor-pointer text-vibrant group/link">
+                  Explore Module 
+                  <svg className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FeaturesRopeSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLElement>(null);
+  const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
 
   useEffect(() => {
     // Parallax has been removed to ensure absolute scrolling stability.
@@ -166,8 +218,10 @@ export function FeaturesRopeSection() {
   return (
     <section ref={containerRef} className="py-24 md:py-32 relative bg-transparent features-rope-container overflow-hidden">
       
-      {/* Decorative Background Elements */}
-      <GlobalRope />
+      {/* Decorative Background Elements (Visible on all devices to connect the zig-zag) */}
+      <div className="block">
+        <GlobalRope />
+      </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
@@ -188,8 +242,8 @@ export function FeaturesRopeSection() {
         <div className="flex justify-center mb-48 relative z-20 w-full max-w-2xl mx-auto h-1" data-rope-anchor>
         </div>
 
-        {/* Features Timeline - Unified Cards */}
-        <div className="flex flex-col relative">
+        {/* Features Timeline - Desktop Cards */}
+        <div className="hidden lg:flex flex-col relative">
           
           {features.map((feature, index) => {
             return (
@@ -199,17 +253,30 @@ export function FeaturesRopeSection() {
                 whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 viewport={{ once: true, margin: "-15%" }}
                 transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
-                className={`flex w-full mx-auto
-                  ${feature.layout === "center-stack" ? "justify-center" : 
-                    feature.layout === "left-card" ? "justify-start" : "justify-end"}
+                className={`flex w-full mx-auto justify-center
+                  ${feature.layout === "center-stack" ? "" : 
+                    feature.layout === "left-card" ? "lg:justify-start" : "lg:justify-end"}
                   ${index === features.length - 1 ? "" : 
-                    (index === 2 || index === 3) ? "mb-[8rem] md:mb-[15rem]" : "mb-[15rem] md:mb-[34rem]"}
+                    (index === 2 || index === 3) ? "lg:mb-[15rem]" : "lg:mb-[34rem]"}
                 `}
               >
                 <FeatureCard feature={feature} layout={feature.layout} index={index} />
               </motion.div>
             )
           })}
+        </div>
+
+        {/* Features Accordion - Mobile/Tablet */}
+        <div className="block lg:hidden flex-col mt-4 w-full max-w-2xl mx-auto">
+          {features.map((feature, index) => (
+            <MobileAccordionFeature 
+              key={index}
+              feature={feature} 
+              index={index} 
+              isActive={activeAccordion === index}
+              onToggle={() => setActiveAccordion(activeAccordion === index ? null : index)}
+            />
+          ))}
         </div>
         
         {/* Footer - Haptic Island Button */}

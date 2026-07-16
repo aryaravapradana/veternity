@@ -1,49 +1,50 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { FloatingDock } from "@/components/ui/floating-dock";
-import { LayoutDashboard, Bird, Package, Settings, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Bird, Package, Settings, Users, LogOut, LineChart, Sparkles, Store } from "lucide-react";
 
 export default function Navigation() {
   const links = [
     {
-      title: "Dashboard",
+      title: "Agri-LLM",
       icon: (
-        <LayoutDashboard className="h-full w-full text-slate-500" />
+        <Sparkles className="h-full w-full text-[#3A6B49]" /> // Darker green for contrast
       ),
-      href: "/dashboard",
+      href: "/dashboard/ai-vet",
     },
     {
       title: "Flocks",
       icon: (
-        <Bird className="h-full w-full text-sky-500" />
+        <Bird className="h-full w-full text-[#A34B30]" /> // Darker rust/vibrant
       ),
       href: "/dashboard/flocks",
     },
     {
-      title: "Inventory",
+      title: "My Store",
       icon: (
-        <Package className="h-full w-full text-slate-500" />
+        <Store className="h-full w-full text-[#F5990D]" />
       ),
-      href: "/dashboard/inventory",
+      href: "/dashboard/store",
     },
     {
       title: "Team",
       icon: (
-        <Users className="h-full w-full text-slate-500" />
+        <Users className="h-full w-full text-[#5B6010]" /> // Dark olive
       ),
       href: "/dashboard/staff",
     },
     {
       title: "Settings",
       icon: (
-        <Settings className="h-full w-full text-slate-500" />
+        <Settings className="h-full w-full text-[#3F4841]" /> // Darker warm gray
       ),
       href: "/dashboard/settings",
     },
     {
       title: "Logout",
       icon: (
-        <LogOut className="h-full w-full text-rose-500" />
+        <LogOut className="h-full w-full text-rose-700" /> // Standard visible red
       ),
       href: "/",
     },
