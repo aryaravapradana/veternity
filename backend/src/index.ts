@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
-import { startBapanasCronJob } from './cron/bapanasFetcher';
 
 dotenv.config();
 
@@ -12,10 +11,6 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
-
-// Start background cron jobs
-startBapanasCronJob();
-
 // Basic health check
 app.get('/api/status', (req: Request, res: Response) => {
   res.json({ status: 'OK', service: 'Pranata API', version: '1.0.0' });
@@ -24,28 +19,13 @@ app.get('/api/status', (req: Request, res: Response) => {
 // Get overview stats for Dashboard
 app.get('/api/dashboard/overview', async (req: Request, res: Response) => {
   try {
-    // 1. Get total active flock count and sum of target weight
-    const activeFlocks = await prisma.flock.findMany({ where: { status: 'ACTIVE' } });
-    const totalBirds = activeFlocks.length * 1000; // Mock 1000 birds per flock entry for MVP
-    
-    // 2. Get pending tasks for today
-    const pendingTasks = await prisma.task.count({ 
-      where: { 
-        isCompleted: false, 
-        dueDate: { lte: new Date() } 
-      } 
-    });
-
     // 3. Get latest commodity prices
     const cornPrice = await prisma.commodityPrice.findFirst({
-      where: { commodity: 'CORN' },
+      where: { commodity: 'JAGUNG_PETERNAK' },
       orderBy: { recordedAt: 'desc' }
     });
 
     res.json({
-      totalBirds,
-      activeFlocksCount: activeFlocks.length,
-      pendingTasks,
       cornPrice: cornPrice?.pricePerKg || 0,
       healthIndex: 98.8 // Mock for now
     });
@@ -71,6 +51,64 @@ app.get('/api/prices', async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Seller Events API
+app.get('/api/events/:sellerId', async (req: Request, res: Response) => {
+  try {
+    const { sellerId } = req.params;
+    let events = await prisma.sellerEvent.findMany({
+      where: { sellerId },
+      orderBy: { eventDate: 'asc' }
+    });
+
+    res.json(events);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
+});
+
+// Create Event
+app.post('/api/events', async (req: Request, res: Response) => {
+  try {
+    const { title, description, eventDate, type, sellerId } = req.body;
+    const event = await prisma.sellerEvent.create({
+      data: { title, description, eventDate: new Date(eventDate), type, sellerId }
+    });
+    res.json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
+});
+
+// Update Event
+app.put('/api/events/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, description, eventDate, type } = req.body;
+    const event = await prisma.sellerEvent.update({
+      where: { id },
+      data: { title, description, eventDate: new Date(eventDate), type }
+    });
+    res.json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update event' });
+  }
+});
+
+// Delete Event
+app.delete('/api/events/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.sellerEvent.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete event' });
   }
 });
 
@@ -195,6 +233,29 @@ app.post('/api/profile/login', async (req: Request, res: Response) => {
   }
 });
 
+// Marketplace: Update Order Status (for sellers)
+app.put('/api/orders/:id/status', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // PENDING, PAID, SHIPPED, COMPLETED, CANCELLED
+    
+    const validStatuses = ['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: id as string },
+      data: { status }
+    });
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+});
+
+
 // Marketplace: Get all products (Catalog)
 app.get('/api/products', async (req: Request, res: Response) => {
   try {
@@ -224,7 +285,7 @@ app.get('/api/products/seller/:id', async (req: Request, res: Response) => {
 // Marketplace: Add a new product
 app.post('/api/products', async (req: Request, res: Response) => {
   try {
-    const { sellerId, title, description, category, price, stock, minOrder, unit, imageUrl } = req.body;
+    const { sellerId, title, description, category, price, stock, minOrder, unit, imageUrls } = req.body;
     const product = await prisma.product.create({
       data: { 
         sellerId, 
@@ -235,12 +296,56 @@ app.post('/api/products', async (req: Request, res: Response) => {
         stock, 
         minOrder: minOrder || 1,
         unit, 
-        imageUrl 
+        imageUrls: imageUrls || []
       }
     });
     res.json(product);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+// Marketplace: Update a product (Edit)
+app.put('/api/products/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, description, category, price, stock, minOrder, unit, imageUrls } = req.body;
+    
+    // Check if product exists
+    const existing = await prisma.product.findUnique({ where: { id: id as string } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: id as string },
+      data: {
+        title: title !== undefined ? title : existing.title,
+        description: description !== undefined ? description : existing.description,
+        category: category !== undefined ? category : existing.category,
+        price: price !== undefined ? price : existing.price,
+        stock: stock !== undefined ? stock : existing.stock,
+        minOrder: minOrder !== undefined ? minOrder : existing.minOrder,
+        unit: unit !== undefined ? unit : existing.unit,
+        imageUrls: imageUrls !== undefined ? imageUrls : existing.imageUrls,
+      }
+    });
+    res.json(updatedProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+// Marketplace: Delete a product
+app.delete('/api/products/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({ where: { id: id as string } });
+    res.json({ success: true, message: 'Product deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 

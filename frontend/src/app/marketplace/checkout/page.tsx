@@ -5,6 +5,7 @@ import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2,
 import { motion } from "framer-motion";
 import { usePageLoading } from "@/components/loading-context";
 import { useRouter } from "next/navigation";
+import MarketplaceNavbar from "@/components/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -72,25 +73,68 @@ export default function CheckoutPage() {
 
   const subtotal = cart.reduce((s, i) => s + (i.product?.price || i.price || 0) * (i.quantity || i.orderQuantity || 1), 0);
 
-  if (loading || cart.length === 0) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
+      <div className="sticky top-0 z-40 px-4 pt-4">
+        <div className="max-w-4xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
+          <div className="w-40 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="w-32 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="w-24" />
+        </div>
+      </div>
+      <main className="max-w-4xl mx-auto px-4 pt-6 pb-24 flex flex-col md:flex-row gap-6">
+        <div className="flex-1 space-y-6">
+          {[1, 2, 3].map(i => (
+            <section key={i} className="bg-white border border-[#E8E3D2] rounded-[1.5rem] p-6">
+              <div className="w-48 h-5 rounded-md skeleton-shimmer bg-[#E8E3D2] mb-4" />
+              <div className="w-full h-32 rounded-2xl skeleton-shimmer bg-[#E8E3D2]" />
+            </section>
+          ))}
+        </div>
+        <div className="md:w-80">
+          <div className="bg-white border border-[#E8E3D2] rounded-2xl p-6">
+            <div className="w-3/4 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2] mb-5" />
+            <div className="space-y-4 mb-6">
+              {[1, 2].map(i => (
+                <div key={i} className="flex gap-3">
+                  <div className="w-12 h-12 rounded-xl skeleton-shimmer shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="w-full h-4 rounded-md skeleton-shimmer" />
+                    <div className="w-2/3 h-3 rounded-md skeleton-shimmer" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-[#E8E3D2] pt-4 space-y-3">
+              <div className="w-full h-4 rounded-md skeleton-shimmer" />
+              <div className="w-full h-4 rounded-md skeleton-shimmer" />
+              <div className="w-full h-4 rounded-md skeleton-shimmer" />
+              <div className="w-full h-8 rounded-md skeleton-shimmer mt-4" />
+              <div className="w-full h-14 rounded-2xl skeleton-shimmer mt-4" />
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+
+  if (cart.length === 0) return null;
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-      {/* ── Navbar ── */}
-      <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-4xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
-          <button
-            onClick={() => router.push("/marketplace/cart")}
-            className="flex items-center gap-2 text-[#5A635B] hover:text-[#2B4C3B] font-bold text-sm transition-colors"
-          >
-            <ChevronLeft size={20} /> Kembali ke Keranjang
+      <MarketplaceNavbar 
+        leftContent={
+          <button onClick={() => router.push("/marketplace/cart")} className="flex items-center gap-2 text-[#EEF2E6] hover:text-white font-bold text-sm transition-colors">
+            <ChevronLeft size={20} /> Kembali
           </button>
-          <span className="font-black text-sm text-[#1C241E] flex items-center gap-2">
-            <ShieldCheck size={16} className="text-[#2B4C3B]" /> Checkout Aman
+        }
+        centerContent={
+          <span className="font-black text-sm text-white flex items-center gap-2">
+            <ShieldCheck size={16} className="text-[#A4C4A8]" /> Checkout Aman
           </span>
-          <div className="w-24" /> {/* Spacer */}
-        </div>
-      </div>
+        }
+      />
+      {/* ── Breadcrumb ── */}
 
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-24 flex flex-col md:flex-row gap-6">
         {/* Left: Forms */}
@@ -180,8 +224,8 @@ export default function CheckoutPage() {
               {cart.map((item, i) => (
                 <div key={i} className="flex gap-3">
                   <div className="w-12 h-12 rounded-xl bg-[#F1EBE1] overflow-hidden shrink-0">
-                    {item.product?.imageUrl || item.imageUrl
-                      ? <img src={item.product?.imageUrl || item.imageUrl} className="w-full h-full object-cover" loading="lazy" />
+                    {item.product?.imageUrls && item.product.imageUrls.length > 0
+                      ? <img src={item.product.imageUrls[0]} className="w-full h-full object-cover" loading="lazy" />
                       : <div className="w-full h-full flex items-center justify-center"><Store size={18} className="text-[#A4B0A7]" /></div>
                     }
                   </div>
@@ -213,7 +257,7 @@ export default function CheckoutPage() {
               <motion.button
                 whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                 onClick={handleCheckout}
-                className="w-full mt-4 py-4 font-black text-white bg-[#2B4C3B] hover:bg-[#1E362A] rounded-2xl shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 py-4 font-black text-white bg-pranala hover:bg-[#1E362A] rounded-2xl shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
               >
                 <CheckCircle size={19} /> Bayar Sekarang
               </motion.button>

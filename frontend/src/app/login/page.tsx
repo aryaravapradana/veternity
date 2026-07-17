@@ -60,7 +60,7 @@ export default function LoginPage() {
             <Bird size={28} strokeWidth={2.5} />
           </div>
           <h1 className="text-3xl font-black text-[#2B4C3B] mb-2 tracking-tight">Welcome Back</h1>
-          <p className="text-[#5A635B] text-sm font-medium">Log in with your FarmPro username.</p>
+          <p className="text-[#5A635B] text-sm font-medium">Log in with your PRANALA username.</p>
         </div>
         
         {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-6 text-sm font-bold text-center">{error}</div>}
@@ -92,7 +92,7 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-[#2B4C3B] hover:bg-[#1E362A] text-[#F8F6F0] rounded-xl font-bold text-lg py-4 shadow-lg transition-all disabled:opacity-50 mt-4"
+            className="w-full bg-pranala hover:bg-[#1E362A] text-[#F8F6F0] rounded-xl font-bold text-lg py-4 shadow-lg transition-all disabled:opacity-50 mt-4"
           >
             {loading ? "Authenticating..." : "Log In"}
           </button>

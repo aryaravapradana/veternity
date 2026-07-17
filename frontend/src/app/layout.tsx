@@ -6,7 +6,7 @@ const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "700", "800",
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: "FarmPro",
+  title: "PRANALA",
   description: "Friendly farm tracking and inventory management",
 };
 

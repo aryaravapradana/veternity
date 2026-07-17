@@ -120,7 +120,7 @@ export function EditorialGallery() {
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-center p-8 md:p-24">
           <div className="max-w-3xl">
             <h2 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-              "FarmPro changed our yield entirely. The <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">predictive analytics</span> gave us absolute clarity."
+              "PRANALA changed our yield entirely. The <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">predictive analytics</span> gave us absolute clarity."
             </h2>
             <div className="mt-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-clip border-2 border-white shadow-md">

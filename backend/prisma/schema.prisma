@@ -8,27 +8,15 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Flock {
-  id          String   @id @default(uuid())
-  name        String
-  hatchDate   DateTime
-  targetWeight Float
-  status      String   @default("ACTIVE") // ACTIVE, HARVESTED
-  userId      String   // Map to Supabase Auth User ID
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  tasks       Task[]
-}
-
-model Task {
+model SellerEvent {
   id          String   @id @default(uuid())
   title       String
   description String?
-  dueDate     DateTime
-  isCompleted Boolean  @default(false)
-  flockId     String
-  flock       Flock    @relation(fields: [flockId], references: [id])
+  eventDate   DateTime
+  type        String   @default("ROUTINE") // ROUTINE, HARVEST, TASK
+  sellerId    String
+  
+  seller      Profile  @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -77,6 +65,7 @@ model Profile {
   products       Product[]
   ordersAsBuyer  Order[] @relation("BuyerOrders")
   ordersAsSeller Order[] @relation("SellerOrders")
+  sellerEvents   SellerEvent[]
 }
 
 model Product {
@@ -89,7 +78,7 @@ model Product {
   stock       Int      @default(0)
   minOrder    Int      @default(1)
   unit        String   @default("kg") // kg, ekor, liter
-  imageUrl    String?
+  imageUrls   String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

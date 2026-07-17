@@ -1,11 +1,82 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'ClearfaceStd';
+  src: url('./fonts/clearface/ClearfaceStd-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ClearfaceStd';
+  src: url('./fonts/clearface/ClearfaceStd-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ClearfaceStd';
+  src: url('./fonts/clearface/ClearfaceStd-Heavy.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ClearfaceStd';
+  src: url('./fonts/clearface/ClearfaceStd-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-light-58646b33e0551.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-medium-58646be638f96.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-semibold-58646eddcae92.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-bold-58646a511e3d9.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-heavy-586470160b9e5.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SFUIDisplay';
+  src: url('./fonts/SF UI/sf-ui-display-black-58646a6b80d5a.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 @theme {
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* FarmPro Exact Background Colors */
+  /* PRANALA Exact Background Colors */
   --color-rust: #C25939;
   --color-vibrant: #F5990D;
   --color-olive: #767C15;
@@ -43,6 +114,22 @@
     font-family: 'Stack Sans Notch', var(--font-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  h1 {
+    font-family: 'ClearfaceStd', serif !important;
+  }
+
+  h2, h3 {
+    font-family: 'Stack Sans Notch', var(--font-sans) !important;
+  }
+
+  h4, h5, h6 {
+    font-family: 'SFUIDisplay', system-ui, sans-serif !important;
+  }
+}
+
+@utility bg-pranala {
+  @apply bg-gradient-to-br from-[#4A7C59] to-[#2B4C3B];
 }
 
 /* Custom Utilities for the friendly aesthetic */
@@ -66,4 +153,35 @@ body::-webkit-scrollbar,
 html, body, * {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Skeleton Loader (Shimmer Effect) */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #E8E3D2; /* Abu-abu muda default */
+}
+
+.skeleton-shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 1.5s infinite;
+  content: '';
 }

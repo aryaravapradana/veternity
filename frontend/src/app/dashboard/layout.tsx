@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+import DashboardNavbar from "@/components/DashboardNavbar";
 
 export default function DashboardLayout({
   children,
@@ -6,9 +6,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-transparent relative pb-24 md:pb-0">
-      <Navigation />
-      <main className="w-full relative z-0">
+    <div className="min-h-screen bg-[#F8F6F0] relative">
+      <DashboardNavbar />
+      <main className="w-full">
         {children}
       </main>
     </div>

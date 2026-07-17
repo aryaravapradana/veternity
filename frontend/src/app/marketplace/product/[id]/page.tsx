@@ -4,10 +4,13 @@ import { useState, useEffect, use, useCallback } from "react";
 import {
   Store, ShoppingCart, ArrowLeft, ShieldCheck, MapPin,
   Truck, CheckCircle, Package, Star, ChevronLeft, X,
+  ChevronDown, ChevronUp, Heart
 } from "lucide-react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/loading-context";
 import { useRouter } from "next/navigation";
+import MarketplaceNavbar from "@/components/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -21,6 +24,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   usePageLoading(loading);
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isDescOpen, setIsDescOpen] = useState(true);
 
   useEffect(() => { loadProduct(); }, [productId]);
 
@@ -39,17 +44,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const handleAddToCart = () => {
-    const item = { ...product, orderQuantity: quantity };
     const savedCart = localStorage.getItem("farmpro_cart");
     let cartArr = savedCart ? JSON.parse(savedCart) : [];
     
-    // Always clear the cart first if we assume only buying from 1 seller for now, or just append it.
-    // For now, let's append. If they already have this item, update qty.
-    const existingIdx = cartArr.findIndex((i: any) => i.id === item.id);
+    const existingIdx = cartArr.findIndex((i: any) => i.productId === product.id);
     if (existingIdx >= 0) {
-      cartArr[existingIdx].orderQuantity += quantity;
+      cartArr[existingIdx].quantity += quantity;
     } else {
-      cartArr.push(item);
+      const sessionStr = localStorage.getItem("farmpro_session");
+      const session = sessionStr ? JSON.parse(sessionStr) : { id: "guest" };
+      
+      cartArr.push({
+        id: "cart_" + Date.now(),
+        productId: product.id,
+        quantity: quantity,
+        buyerId: session.id,
+        product: product
+      });
     }
     localStorage.setItem("farmpro_cart", JSON.stringify(cartArr));
     router.push("/marketplace/cart");
@@ -59,7 +70,47 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   // If out of stock, quantity should be 0. If minOrder is greater than stock, use stock.
   const minQ = maxQ === 0 ? 0 : Math.min(product?.minOrder || 1, maxQ);
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
+      <div className="sticky top-0 z-40 px-4 pt-4">
+        <div className="max-w-5xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
+          <div className="w-24 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="w-48 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2] hidden sm:block" />
+          <div className="w-20" />
+        </div>
+      </div>
+      <main className="relative z-10 max-w-5xl mx-auto px-4 pt-6 pb-32 space-y-6">
+        <div className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-12px_rgba(43,76,59,0.12)]">
+          <div className="flex flex-col md:flex-row">
+            <div className="md:w-1/2 aspect-square skeleton-shimmer" />
+            <div className="md:w-1/2 p-7 sm:p-10 flex flex-col justify-between space-y-6">
+              <div>
+                <div className="w-3/4 h-10 rounded-xl skeleton-shimmer mb-4" />
+                <div className="w-1/2 h-8 rounded-lg skeleton-shimmer mb-6" />
+                <div className="w-full h-24 rounded-2xl skeleton-shimmer mb-6" />
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                  <div className="h-24 rounded-2xl skeleton-shimmer" />
+                  <div className="h-24 rounded-2xl skeleton-shimmer" />
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="w-full sm:w-32 h-14 rounded-2xl skeleton-shimmer" />
+                <div className="flex-1 h-14 rounded-2xl skeleton-shimmer" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white border border-[#E8E3D2] rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.08)] flex flex-col sm:flex-row items-center gap-6">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl skeleton-shimmer shrink-0" />
+          <div className="flex-1 w-full space-y-3">
+            <div className="w-1/2 h-6 rounded-md skeleton-shimmer mx-auto sm:mx-0" />
+            <div className="w-1/3 h-4 rounded-md skeleton-shimmer mx-auto sm:mx-0" />
+          </div>
+          <div className="w-full sm:w-32 h-12 rounded-2xl skeleton-shimmer shrink-0" />
+        </div>
+      </main>
+    </div>
+  );
   if (!product) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F6F0]">
       <div className="text-center">
@@ -73,152 +124,202 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-
-      {/* Ambient blobs */}
-      <div aria-hidden className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#E8E3D2]/40 rounded-full blur-[120px] -translate-y-1/4 translate-x-1/4" />
-      </div>
-
-      {/* ── Back Bar ── */}
-      <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-5xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
-          <button
-            onClick={() => router.push("/marketplace")}
-            className="flex items-center gap-2 text-[#5A635B] hover:text-[#2B4C3B] font-bold text-sm transition-colors"
-          >
-            <ChevronLeft size={20} /> Pasar Tani
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-24 lg:pb-12" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+      <MarketplaceNavbar 
+        leftContent={
+          <button onClick={() => router.push("/marketplace")} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-[#EEF2E6] hover:text-white font-bold text-sm px-4 py-2 rounded-full transition-colors">
+            <ChevronLeft size={18} /> PRANALA
           </button>
-          <span className="font-black text-sm text-[#1C241E] truncate max-w-[60%] text-center hidden sm:block">
-            {product.title}
-          </span>
-          <div className="w-20" />
-        </div>
-      </div>
+        }
+      />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-4 pt-6 pb-32 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-8 relative z-10">
+        
+        {/* Back bar removed */}
 
-        {/* ── Product Card ── */}
-        <div className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-12px_rgba(43,76,59,0.12)]">
-          <div className="flex flex-col md:flex-row">
-            {/* Image */}
-            <div className="md:w-1/2 aspect-square bg-[#F1EBE1] relative overflow-hidden">
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
+          
+          {/* Left Column: Images */}
+          <div className="w-full lg:w-1/2 flex flex-col">
+            <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-[4/5] bg-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-sm">
+              
+              {/* Main Image */}
+              {product.imageUrls && product.imageUrls.length > 0 ? (
+                <motion.img 
+                  key={currentImageIdx}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  src={product.imageUrls[currentImageIdx]} 
                   alt={product.title}
-                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center bg-[#F1EBE1]">
                   <Package size={80} className="text-[#C4BAA8] opacity-50" />
                 </div>
               )}
-              {product.category && (
-                <div className="absolute top-4 left-4 bg-white text-[#2B4C3B] text-xs font-black px-4 py-1.5 rounded-full border border-[#E8E3D2] shadow-sm">
-                  {product.category}
+
+              {/* Progress Bars Overlay */}
+              {product.imageUrls && product.imageUrls.length > 1 && (
+                <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
+                  {product.imageUrls.map((_: any, idx: number) => (
+                    <div key={idx} className="h-1.5 flex-1 bg-black/20 rounded-full overflow-hidden backdrop-blur-sm">
+                      <div className={`h-full ${idx === currentImageIdx ? 'bg-white' : 'bg-transparent'}`} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Thumbnails Overlay */}
+              {product.imageUrls && product.imageUrls.length > 1 && (
+                <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 px-4">
+                  <div className="flex sm:justify-center gap-3 sm:gap-4 overflow-x-auto hide-scrollbar snap-x pb-2 -mb-2">
+                    {product.imageUrls.map((img: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIdx(idx)}
+                        className={`shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-[3px] transition-all shadow-lg bg-white snap-center ${currentImageIdx === idx ? 'border-white scale-105 z-10' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-100'}`}
+                      >
+                        <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-
-            {/* Details */}
-            <div className="md:w-1/2 p-7 sm:p-10 flex flex-col justify-between">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-[#1C241E] leading-tight mb-3">{product.title}</h1>
-                <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-4xl font-black text-[#C25939]">Rp {product.price?.toLocaleString()}</span>
-                  <span className="text-lg font-bold text-[#7A8678]">/{product.unit}</span>
-                </div>
-
-                {product.description && (
-                  <div className="bg-[#F8F6F0] rounded-2xl p-4 border border-[#E8E3D2] mb-6">
-                    <p className="text-sm text-[#5A635B] leading-relaxed">{product.description}</p>
-                  </div>
-                )}
-
-                {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-3 mb-8">
-                  <div className="bg-[#EEF2E6] rounded-2xl p-4 text-center">
-                    <p className="text-xs text-[#5A635B] font-bold uppercase tracking-wide mb-1">Stok Tersedia</p>
-                    <p className="text-2xl font-black text-[#2B4C3B]">{product.stock}</p>
-                    <p className="text-xs text-[#7A8678] font-semibold">{product.unit}</p>
-                  </div>
-                  <div className="bg-[#FFF3E0] rounded-2xl p-4 text-center">
-                    <p className="text-xs text-[#5A635B] font-bold uppercase tracking-wide mb-1">Min. Order</p>
-                    <p className="text-2xl font-black text-[#C25939]">{product.minOrder || 1}</p>
-                    <p className="text-xs text-[#7A8678] font-semibold">{product.unit}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quantity + CTA */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className={`flex items-center rounded-2xl border overflow-hidden shrink-0 ${maxQ === 0 ? 'bg-gray-100 border-gray-200' : 'bg-[#F1EBE1] border-[#E8E3D2]'}`}>
-                  <button
-                    onClick={() => setQuantity(q => Math.max(minQ, q - 1))}
-                    disabled={maxQ === 0}
-                    className="w-12 h-12 text-2xl font-black text-[#5A635B] hover:bg-[#E8E3D2] disabled:hover:bg-transparent disabled:opacity-50 transition-colors flex items-center justify-center"
-                  >-</button>
-                  <span className={`w-14 text-center font-black text-lg ${maxQ === 0 ? 'text-gray-400' : 'text-[#1C241E]'}`}>{maxQ === 0 ? 0 : quantity}</span>
-                  <button
-                    onClick={() => setQuantity(q => Math.min(maxQ, q + 1))}
-                    disabled={maxQ === 0}
-                    className="w-12 h-12 text-2xl font-black text-[#5A635B] hover:bg-[#E8E3D2] disabled:hover:bg-transparent disabled:opacity-50 transition-colors flex items-center justify-center"
-                  >+</button>
-                </div>
-                <motion.button
-                  whileHover={maxQ > 0 ? { scale: 1.01 } : {}} 
-                  whileTap={maxQ > 0 ? { scale: 0.97 } : {}}
-                  onClick={handleAddToCart}
-                  disabled={maxQ === 0}
-                  className={`flex-1 py-3.5 font-black text-white rounded-2xl transition-colors flex items-center justify-center gap-2 ${
-                    maxQ === 0 
-                      ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                      : 'bg-[#2B4C3B] hover:bg-[#1E362A] shadow-[0_8px_20px_-6px_rgba(43,76,59,0.4)]'
-                  }`}
-                >
-                  <ShoppingCart size={20} /> {maxQ === 0 ? 'Stok Habis' : 'Beli Sekarang'}
-                </motion.button>
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* ── Seller Card ── */}
-        {seller && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="bg-white border border-[#E8E3D2] rounded-[2rem] p-6 sm:p-8 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.08)] flex flex-col sm:flex-row items-center gap-6"
-          >
-            {/* Avatar */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#2B4C3B] text-white flex items-center justify-center font-black text-3xl shrink-0 shadow-inner">
-              {(seller.farmName || seller.fullName || seller.username || "?").charAt(0).toUpperCase()}
-            </div>
-
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-xl font-black text-[#1C241E] flex items-center justify-center sm:justify-start gap-2 mb-1">
-                {seller.farmName || seller.fullName}
-                <ShieldCheck size={18} className="text-emerald-500 shrink-0" />
-              </h3>
-              <p className="text-sm text-[#7A8678] font-semibold flex items-center justify-center sm:justify-start gap-1.5">
-                <MapPin size={13} className="text-[#C25939]" />
-                {seller.location || "Lokasi tidak ditentukan"}
+          {/* Right Column: Details */}
+          <div className="w-full lg:w-1/2 flex flex-col pt-2 lg:pt-0">
+            
+            <div className="mb-6">
+              {product.category && (
+                <span className="inline-block px-4 py-1.5 rounded-full border border-[#DDE2D6] text-xs font-black text-[#2B4C3B] uppercase tracking-wider mb-4 bg-white shadow-sm">
+                  {product.category}
+                </span>
+              )}
+              
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1C241E] leading-tight mb-4">
+                {product.title}
+              </h1>
+              
+              <p className="text-2xl sm:text-3xl font-black text-[#1C241E]">
+                Rp {product.price?.toLocaleString()} <span className="text-lg text-[#5A635B] font-bold">/ {product.unit}</span>
               </p>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              onClick={() => router.push(`/marketplace/seller/${seller.id}`)}
-              className="px-6 py-3 border-2 border-[#2B4C3B] text-[#2B4C3B] font-black rounded-2xl hover:bg-[#2B4C3B] hover:text-white transition-all text-sm flex items-center gap-2 shrink-0"
-            >
-              <Store size={16} /> Lihat Toko
-            </motion.button>
-          </motion.div>
-        )}
-      </main>
+            {/* Seller Info Box */}
+            {seller && (
+              <Link href={`/marketplace/seller/${seller.id}`} className="flex items-center gap-4 bg-white hover:bg-[#F8F6F0] border border-[#E8E3D2] p-4 rounded-2xl mb-8 shadow-sm transition-colors group">
+                <div className="w-12 h-12 rounded-full bg-pranala text-white flex items-center justify-center font-black text-xl shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                  {(seller.farmName || seller.fullName || seller.username || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-black text-[#1C241E] flex items-center gap-1.5 mb-0.5">
+                    {seller.farmName || seller.fullName}
+                    <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
+                  </h3>
+                  <p className="text-xs font-bold text-[#7A8678] flex items-center gap-1">
+                    <MapPin size={12} className="text-[#C25939]" />
+                    {seller.location || "Lokasi tidak ditentukan"}
+                  </p>
+                </div>
+              </Link>
+            )}
 
+            {/* Quantity Selector */}
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-4">
+                <h3 className="font-bold text-[#5A635B] uppercase text-xs tracking-wider">Kuantitas Pembelian</h3>
+                <span className="text-xs font-bold text-[#C25939]">Sisa Stok: {product.stock} {product.unit}</span>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className={`flex items-center bg-white border border-[#E8E3D2] rounded-2xl overflow-hidden shadow-sm h-14 ${maxQ === 0 ? 'opacity-50' : ''}`}>
+                  <button 
+                    onClick={() => setQuantity(Math.max(minQ, quantity - 1))}
+                    disabled={maxQ === 0}
+                    className="w-14 h-full flex items-center justify-center text-2xl font-black text-[#2B4C3B] hover:bg-[#F8F6F0] transition-colors z-10 bg-white disabled:hover:bg-white"
+                  >-</button>
+                  <div className="w-16 h-full flex items-center justify-center font-black text-lg border-x border-[#E8E3D2] relative overflow-hidden">
+                    <AnimatePresence mode="popLayout">
+                      <motion.div
+                        key={quantity}
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 20, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute"
+                      >
+                        {maxQ === 0 ? 0 : quantity}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                  <button 
+                    onClick={() => setQuantity(Math.min(maxQ, quantity + 1))}
+                    disabled={maxQ === 0}
+                    className="w-14 h-full flex items-center justify-center text-2xl font-black text-[#2B4C3B] hover:bg-[#F8F6F0] transition-colors z-10 bg-white disabled:hover:bg-white"
+                  >+</button>
+                </div>
+                <div className="flex flex-col justify-center text-xs text-[#5A635B] font-medium">
+                  <p>Min. Order: <span className="font-bold text-[#1C241E]">{product.minOrder || 1} {product.unit}</span></p>
+                </div>
+              </div>
+            </div>
 
+            {/* Action Buttons */}
+            <div className="flex gap-3 mb-10">
+              <motion.button 
+                whileHover={maxQ > 0 ? { scale: 1.01 } : {}} 
+                whileTap={maxQ > 0 ? { scale: 0.97 } : {}}
+                onClick={handleAddToCart}
+                disabled={maxQ === 0}
+                className={`flex-1 h-14 rounded-2xl font-black text-lg shadow-[0_8px_20px_-6px_rgba(43,76,59,0.4)] flex items-center justify-center gap-2 transition-all text-white ${
+                  maxQ === 0 
+                    ? 'bg-gray-300 cursor-not-allowed shadow-none' 
+                    : 'bg-pranala hover:bg-[#1E362A]'
+                }`}
+              >
+                <ShoppingCart size={20} /> {maxQ === 0 ? 'Stok Habis' : 'Add to Cart'}
+              </motion.button>
+              <button className="w-14 h-14 flex items-center justify-center border-2 border-[#DDE2D6] rounded-2xl text-[#1C241E] hover:bg-white hover:border-[#1C241E] transition-all bg-transparent shrink-0">
+                <Heart size={24} />
+              </button>
+            </div>
+
+            {/* Accordions */}
+            {product.description && (
+              <div className="space-y-4">
+                <div className="bg-white border border-[#E8E3D2] rounded-3xl overflow-hidden shadow-sm">
+                  <button 
+                    onClick={() => setIsDescOpen(!isDescOpen)}
+                    className="w-full flex items-center justify-between p-6 bg-white hover:bg-[#F8F6F0]/50 transition-colors"
+                  >
+                    <h3 className="font-black text-lg text-[#1C241E]">Description & Details</h3>
+                    {isDescOpen ? <ChevronUp className="text-[#5A635B]" /> : <ChevronDown className="text-[#5A635B]" />}
+                  </button>
+                  <AnimatePresence>
+                    {isDescOpen && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="px-6 pb-6"
+                      >
+                        <p className="text-sm text-[#5A635B] leading-relaxed pt-2 border-t border-[#F8F6F0]">
+                          {product.description}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

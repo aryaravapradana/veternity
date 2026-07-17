@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, memo } from "react";
-import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Menu, Zap, ChevronRight } from "lucide-react";
+import { useState, useEffect, useCallback, memo, useRef } from "react";
+import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Menu, Zap, ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
 import { usePageLoading } from "@/components/loading-context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import MarketplaceNavbar from "@/components/MarketplaceNavbar";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -43,9 +44,9 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, onAddToCart }
     >
       {/* Product Image */}
       <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
-        {p.imageUrl ? (
+        {p.imageUrls && p.imageUrls.length > 0 ? (
           <img
-            src={p.imageUrl}
+            src={p.imageUrls[0]}
             alt={p.title}
             loading="lazy"
             decoding="async"
@@ -111,6 +112,36 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [cartCount, setCartCount] = useState(0);
+  const [viewAll, setViewAll] = useState(false);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  
+  const [canScroll, setCanScroll] = useState(false);
+  const [isAtStart, setIsAtStart] = useState(true);
+  const [isAtEnd, setIsAtEnd] = useState(false);
+
+  const handleScroll = () => {
+    if (!categoryScrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = categoryScrollRef.current;
+    setCanScroll(scrollWidth > clientWidth + 2);
+    setIsAtStart(scrollLeft <= 40);
+    setIsAtEnd(Math.ceil(scrollLeft) >= scrollWidth - clientWidth - 40);
+  };
+
+  useEffect(() => {
+    handleScroll();
+    window.addEventListener("resize", handleScroll);
+    return () => window.removeEventListener("resize", handleScroll);
+  }, [products]); // Re-check when products load
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoryScrollRef.current) {
+      const { scrollWidth, clientWidth } = categoryScrollRef.current;
+      categoryScrollRef.current.scrollTo({ 
+        left: direction === 'left' ? 0 : scrollWidth - clientWidth, 
+        behavior: "smooth" 
+      });
+    }
+  };
 
   const addToCart = (e: React.MouseEvent, p: any) => {
     e.stopPropagation();
@@ -175,65 +206,62 @@ export default function MarketplacePage() {
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
+      <div className="px-4 pt-4 md:px-8">
+        <div className="bg-pranala rounded-[2rem] p-4 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-full skeleton-shimmer bg-[#3A6B49]" />
+            <div className="w-24 h-6 rounded-md skeleton-shimmer bg-[#3A6B49] hidden sm:block" />
+          </div>
+          <div className="flex-1 max-w-xl mx-4 hidden md:block">
+            <div className="w-full h-11 rounded-full skeleton-shimmer bg-[#3A6B49]" />
+          </div>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-10 h-10 rounded-full skeleton-shimmer bg-[#3A6B49]" />
+            <div className="w-10 h-10 rounded-full skeleton-shimmer bg-[#3A6B49]" />
+          </div>
+        </div>
+      </div>
+      <div className="px-4 md:px-8 mt-4 relative z-10">
+        <div className="bg-pranala rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 h-[400px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-lg">
+          <div className="w-full max-w-xl space-y-4">
+            <div className="w-3/4 h-12 rounded-xl skeleton-shimmer bg-[#3A6B49]" />
+            <div className="w-1/2 h-12 rounded-xl skeleton-shimmer bg-[#3A6B49]" />
+            <div className="w-2/3 h-4 rounded-md skeleton-shimmer bg-[#3A6B49] mt-6" />
+            <div className="w-1/2 h-4 rounded-md skeleton-shimmer bg-[#3A6B49]" />
+            <div className="w-40 h-12 rounded-full skeleton-shimmer bg-[#3A6B49] mt-8" />
+          </div>
+          <div className="relative z-10 mt-12 md:mt-0 md:absolute md:-bottom-12 md:right-12 lg:right-24 h-64 md:h-96 w-64 md:w-96 bg-[#3A6B49] rounded-t-[3rem] rounded-b-xl skeleton-shimmer hidden md:block" />
+        </div>
+      </div>
+      <div className="mt-6 md:-mt-8 relative z-20 w-full max-w-[1400px] mx-auto px-4 md:px-8">
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="shrink-0 w-44 h-[140px] rounded-[2rem] skeleton-shimmer" />
+          ))}
+        </div>
+      </div>
+      <div className="px-4 md:px-8 mt-12 max-w-[1400px] mx-auto">
+        <div className="w-64 h-8 rounded-lg skeleton-shimmer mb-8" />
+        <div className="flex gap-5 overflow-hidden">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="shrink-0 w-48 h-[280px] rounded-[2rem] skeleton-shimmer" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
 
       {/* ── Top Navbar ── */}
-      <div className="px-4 pt-4 md:px-8">
-        <nav className="bg-[#2B4C3B] text-white rounded-[2rem] p-4 flex items-center justify-between shadow-md">
-          {/* Left: Menu & Logo */}
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-white/10 rounded-full transition-colors hidden sm:block">
-              <Menu size={24} />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <ShoppingCart size={16} className="text-[#EEF2E6]" />
-              </div>
-              <span className="font-black text-xl tracking-tight hidden sm:block">FarmPro</span>
-            </div>
-          </div>
-
-          {/* Center: Search */}
-          <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
-            <input 
-              type="text" 
-              placeholder="Cari sayuran, buah, atau ternak..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-[#1C241E] font-semibold text-sm rounded-full py-3 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#EEF2E6]/50"
-            />
-            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A635B]" />
-          </div>
-
-          {/* Right: Info & Profile */}
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="hidden lg:flex items-center gap-2 text-[#EEF2E6] text-sm font-bold bg-white/10 px-4 py-2 rounded-full">
-              <Zap size={16} className="text-[#F5990D] fill-[#F5990D]" />
-              Pesan sekarang, dikirim dalam 15 menit!
-            </div>
-            <button onClick={() => router.push("/marketplace/cart")} className="relative transition-transform hover:scale-105">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <ShoppingCart size={20} className="text-[#2B4C3B]" />
-              </div>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B4C3B]">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-            <button onClick={() => router.push("/settings")} className="w-10 h-10 rounded-full bg-[#E8E3D2] border-2 border-[#EEF2E6] overflow-hidden transition-transform hover:scale-105">
-              <img src={profile?.avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Felix"} alt="Profile" className="w-full h-full object-cover" />
-            </button>
-          </div>
-        </nav>
-      </div>
+      <MarketplaceNavbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* ── Hero Section ── */}
       <div className="px-4 md:px-8 mt-4 relative z-10">
-        <div className="bg-[#2B4C3B] rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg min-h-[400px]">
+        <div className="bg-pranala rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg min-h-[400px]">
           {/* Subtle background decoration */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
           
@@ -277,15 +305,40 @@ export default function MarketplacePage() {
       </div>
 
       {/* ── Categories Scroll ── */}
-      <div className="mt-6 md:-mt-8 relative z-20 w-full max-w-[1400px] mx-auto">
-        <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-6 pt-2 snap-x px-4 md:px-8 xl:justify-center">
+      <div className="mt-6 md:-mt-8 relative z-20 w-full max-w-[1400px] mx-auto group">
+        
+        {/* Left Arrow */}
+        <button 
+          onClick={() => scrollCategories('left')}
+          className={`hidden md:flex absolute left-4 xl:left-8 top-[40%] -translate-y-1/2 z-30 w-12 h-12 bg-white rounded-full shadow-[0_8px_24px_-8px_rgba(43,76,59,0.3)] items-center justify-center text-[#2B4C3B] hover:scale-110 hover:bg-[#EEF2E6] transition-all border border-[#E8E3D2] ${canScroll && !isAtStart ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+          <ChevronLeft size={24} strokeWidth={3} />
+        </button>
+
+        {/* Right Arrow */}
+        <button 
+          onClick={() => scrollCategories('right')}
+          className={`hidden md:flex absolute right-4 xl:right-8 top-[40%] -translate-y-1/2 z-30 w-12 h-12 bg-white rounded-full shadow-[0_8px_24px_-8px_rgba(43,76,59,0.3)] items-center justify-center text-[#2B4C3B] hover:scale-110 hover:bg-[#EEF2E6] transition-all border border-[#E8E3D2] ${canScroll && !isAtEnd ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+          <ChevronRight size={24} strokeWidth={3} />
+        </button>
+
+        <div 
+          ref={categoryScrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto hide-scrollbar gap-4 pb-6 pt-2 snap-x px-4 md:px-8 scroll-smooth relative"
+          style={{
+            maskImage: canScroll ? `linear-gradient(to right, ${isAtStart ? 'black 0%' : 'transparent, black 60px'}, ${isAtEnd ? 'black 100%' : 'black calc(100% - 60px), transparent'})` : 'none',
+            WebkitMaskImage: canScroll ? `linear-gradient(to right, ${isAtStart ? 'black 0%' : 'transparent, black 60px'}, ${isAtEnd ? 'black 100%' : 'black calc(100% - 60px), transparent'})` : 'none'
+          }}
+        >
           {CATEGORIES.map(cat => (
             <div 
               key={cat.name}
               onClick={() => setSelectedCategory(cat.name)}
               className={`snap-start shrink-0 w-44 border rounded-[2rem] p-5 flex flex-col min-h-[140px] relative overflow-hidden group cursor-pointer hover:-translate-y-1 transition-all duration-200 ${
                 selectedCategory === cat.name 
-                  ? "bg-[#2B4C3B] border-[#2B4C3B] shadow-[0_12px_24px_-12px_rgba(43,76,59,0.3)]" 
+                  ? "bg-pranala border-[#2B4C3B] shadow-[0_12px_24px_-12px_rgba(43,76,59,0.3)]" 
                   : "bg-white border-[#E8E3D2] shadow-[0_8px_24px_-12px_rgba(43,76,59,0.12)]"
               }`}
             >
@@ -303,8 +356,11 @@ export default function MarketplacePage() {
           <h2 className="text-2xl md:text-3xl font-black text-[#1C241E] tracking-tight">
             {selectedCategory === "Semua" ? "Mungkin Anda butuhkan" : selectedCategory}
           </h2>
-          <button className="flex items-center gap-1 text-[#C25939] font-bold text-sm hover:gap-2 transition-all">
-            Lihat lainnya <ChevronRight size={16} strokeWidth={3} />
+          <button 
+            onClick={() => setViewAll(!viewAll)}
+            className="flex items-center gap-1 text-[#C25939] font-bold text-sm hover:gap-2 transition-all"
+          >
+            {viewAll ? "Kembali" : "Lihat lainnya"} <ChevronRight size={16} strokeWidth={3} className={viewAll ? "rotate-180 transition-transform" : "transition-transform"} />
           </button>
         </div>
 
@@ -314,14 +370,14 @@ export default function MarketplacePage() {
             <p className="text-[#A4B0A7] text-sm font-medium">Coba ubah kata kunci atau kategori pencarian.</p>
           </div>
         ) : (
-          <div className="flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1 xl:justify-center">
+          <div className={viewAll ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-8 px-1" : "flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1"}>
             {filteredProducts.map((p, i) => (
-              <div key={p.id} className="snap-start shrink-0 w-48 bg-white border border-[#E8E3D2] rounded-[2rem] p-4 flex flex-col shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group hover:-translate-y-1 transition-transform relative cursor-pointer" onClick={() => router.push(`/marketplace/product/${p.id}`)}>
+              <div key={p.id} className={`${viewAll ? "w-full" : "snap-start shrink-0 w-48"} bg-white border border-[#E8E3D2] rounded-[2rem] p-4 flex flex-col shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group hover:-translate-y-1 transition-transform relative cursor-pointer`} onClick={() => router.push(`/marketplace/product/${p.id}`)}>
                 
                 {/* Product Image Placeholder */}
                 <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-95 transition-transform overflow-hidden relative shrink-0">
-                  {p.imageUrl ? (
-                    <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
+                  {p.imageUrls && p.imageUrls.length > 0 ? (
+                    <img src={p.imageUrls[0]} alt={p.title} className="w-full h-full object-cover" />
                   ) : (
                     <Package size={40} className="text-[#C4BAA8] opacity-60" />
                   )}
@@ -380,10 +436,10 @@ export default function MarketplacePage() {
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#2B4C3B] rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-pranala rounded-xl flex items-center justify-center">
                 <Store size={20} className="text-[#F5990D]" />
               </div>
-              <span className="font-black text-white text-2xl">Pasar Tani</span>
+              <h2 className="font-black text-white text-2xl m-0 leading-none">PRANALA</h2>
             </div>
             <p className="text-[#A4C4A8] text-sm font-medium leading-relaxed max-w-sm">
               Platform jual beli hasil pertanian langsung dari petani lokal. Mendorong kesejahteraan petani dengan harga yang lebih adil dan transparan.
@@ -408,7 +464,7 @@ export default function MarketplacePage() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-[#A4C4A8]">
-          <p>© 2026 Pasar Tani. All rights reserved.</p>
+          <p>© 2026 PRANALA. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Dibuat dengan ❤️ di Yogyakarta</span>
           </div>

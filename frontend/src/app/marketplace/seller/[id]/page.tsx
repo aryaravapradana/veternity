@@ -5,6 +5,7 @@ import { Store, ArrowLeft, ShieldCheck, MapPin, Phone, Package, ChevronLeft } fr
 import { motion } from "framer-motion";
 import { usePageLoading } from "@/components/loading-context";
 import { useRouter } from "next/navigation";
+import MarketplaceNavbar from "@/components/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -32,7 +33,43 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
     setLoading(false);
   };
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
+      <div className="sticky top-0 z-40 px-4 pt-4">
+        <div className="max-w-6xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center">
+          <div className="w-24 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+        </div>
+      </div>
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-24 space-y-8">
+        <div className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-12px_rgba(43,76,59,0.14)]">
+          <div className="relative h-40 sm:h-52 skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="px-6 sm:px-8 pb-7">
+            <div className="flex items-end justify-between -mt-12 mb-5">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white skeleton-shimmer bg-[#E8E3D2] shrink-0" />
+              <div className="w-24 h-14 rounded-2xl skeleton-shimmer bg-[#E8E3D2] shrink-0" />
+            </div>
+            <div className="w-64 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2] mb-3" />
+            <div className="w-40 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2] mb-5" />
+            <div className="flex gap-2">
+              <div className="w-32 h-8 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
+              <div className="w-40 h-8 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div className="w-40 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2]" />
+            <div className="w-20 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="bg-white border border-[#E8E3D2] rounded-[1.75rem] overflow-hidden h-[340px] skeleton-shimmer bg-[#E8E3D2]" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   if (!seller) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F6F0]">
       <div className="text-center">
@@ -47,24 +84,14 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-
-      {/* Ambient blobs */}
-      <div aria-hidden className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#E8E3D2]/40 rounded-full blur-[120px] -translate-y-1/4 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#DDE2D6]/50 rounded-full blur-[100px] translate-y-1/4 -translate-x-1/4" />
-      </div>
-
-      {/* ── Back Bar ── */}
-      <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-6xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center">
-          <button
-            onClick={() => router.push("/marketplace")}
-            className="flex items-center gap-2 text-[#5A635B] hover:text-[#2B4C3B] font-bold text-sm transition-colors"
-          >
-            <ChevronLeft size={20} /> Pasar Tani
+      <MarketplaceNavbar 
+        leftContent={
+          <button onClick={() => router.push("/marketplace")} className="flex items-center gap-2 text-[#EEF2E6] hover:text-white font-bold text-sm transition-colors">
+            <ChevronLeft size={20} /> PRANALA
           </button>
-        </div>
-      </div>
+        }
+      />
+      {/* Ambient blobs */}
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-24 space-y-8">
 
@@ -74,7 +101,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
           className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-12px_rgba(43,76,59,0.14)]"
         >
           {/* Banner */}
-          <div className="relative h-40 sm:h-52 bg-[#2B4C3B] overflow-hidden">
+          <div className="relative h-40 sm:h-52 bg-pranala overflow-hidden">
             {seller.bannerUrl ? (
               <img src={seller.bannerUrl} alt="Banner" loading="lazy" decoding="async" className="w-full h-full object-cover" />
             ) : (
@@ -93,7 +120,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
           <div className="px-6 sm:px-8 pb-7">
             <div className="flex items-end justify-between -mt-12 mb-5">
               {/* Circular avatar overlapping banner */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white overflow-hidden bg-[#2B4C3B] shadow-xl shrink-0">
+              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white overflow-hidden bg-pranala shadow-xl shrink-0">
                 {seller.avatarUrl ? (
                   <img src={seller.avatarUrl} alt={seller.farmName || seller.fullName} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 ) : (
@@ -169,9 +196,9 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
                 >
                   {/* Image */}
                   <div className="h-52 w-full bg-[#F1EBE1] overflow-hidden relative">
-                    {p.imageUrl ? (
+                    {p.imageUrls && p.imageUrls.length > 0 ? (
                       <img
-                        src={p.imageUrl}
+                        src={p.imageUrls[0]}
                         alt={p.title}
                         loading="lazy"
                         decoding="async"

@@ -27,7 +27,7 @@ export function ShaderAnimation({ className }: { className?: string }) {
       }
     `
 
-    // Fragment shader customized for White and Blue FarmPro aesthetic
+    // Fragment shader customized for White and Blue PRANALA aesthetic
     const fragmentShader = `
       #define TWO_PI 6.2831853072
       #define PI 3.14159265359

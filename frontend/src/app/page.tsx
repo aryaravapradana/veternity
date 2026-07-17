@@ -32,10 +32,10 @@ export default function LandingPage() {
         <nav className="w-full max-w-5xl overflow-clip pointer-events-auto bg-white/60 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 rounded-full shadow-[0_20px_40px_-10px_rgba(14,165,233,0.15),0_0_20px_rgba(255,255,255,0.5)_inset]">
           <div className="px-2 sm:px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-full flex items-center justify-center text-white shadow-sm border border-white/50">
-                <Bird size={22} strokeWidth={2.5} />
+              <div className="h-8">
+                <img src="/logo-white.png" alt="PRANALA" className="h-full object-contain" />
               </div>
-              <span className="font-extrabold text-lg text-slate-50 hidden sm:block">FarmPro Org</span>
+              <span className="font-extrabold text-lg text-slate-50 hidden sm:block">PRANALA Org</span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-slate-200 font-bold text-sm">
               <Link href="#features" className="hover:text-sky-600 transition-colors">Platform</Link>
@@ -70,8 +70,8 @@ export default function LandingPage() {
             <Link href="#features" className="flex flex-col items-center gap-1 text-slate-500 hover:text-sky-600 transition-colors">
               <span className="text-[11px] font-bold">Platform</span>
             </Link>
-            <div className="w-14 h-14 bg-gradient-to-br from-[#2B4C3B] to-[#4A7C59] rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white/80 -mt-6">
-              <Bird size={24} strokeWidth={2.5} />
+            <div className="w-14 h-14 bg-gradient-to-br from-[#2B4C3B] to-[#4A7C59] rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white/80 -mt-6 p-2">
+              <img src="/logo-white.png" alt="PRANALA" className="w-full h-full object-contain" />
             </div>
             <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-500 hover:text-sky-600 transition-colors">
               <span className="text-[11px] font-bold">Log In</span>
@@ -86,7 +86,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 w-full h-full z-0">
           <img 
             src="/hero section.png" 
-            alt="FarmPro Hero Mobile Backdrop" 
+            alt="PRANALA Hero Mobile Backdrop" 
             className="w-full h-full object-cover object-top opacity-80" 
           />
           {/* Heavy Gradient Overlay to make text legible */}
@@ -121,7 +121,7 @@ export default function LandingPage() {
               <Link href="/register" className="w-full">
                 <motion.button 
                   whileTap={{ scale: 0.98 }}
-                  className="w-full bg-[#2B4C3B] text-[#F8F6F0] py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 px-6 shadow-[0_8px_20px_rgba(43,76,59,0.3)]"
+                  className="w-full bg-pranala text-[#F8F6F0] py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 px-6 shadow-[0_8px_20px_rgba(43,76,59,0.3)]"
                 >
                   Create Account 
                   <ArrowRight size={20} strokeWidth={2.5} />
@@ -177,7 +177,7 @@ export default function LandingPage() {
                 <motion.button 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full sm:w-auto bg-[#2B4C3B] hover:bg-[#1E362A] text-[#F8F6F0] px-9 py-4 rounded-full font-bold text-lg shadow-[0_12px_24px_-8px_rgba(43,76,59,0.4)] transition-all flex items-center justify-center gap-3 group"
+                  className="w-full sm:w-auto bg-pranala hover:bg-[#1E362A] text-[#F8F6F0] px-9 py-4 rounded-full font-bold text-lg shadow-[0_12px_24px_-8px_rgba(43,76,59,0.4)] transition-all flex items-center justify-center gap-3 group"
                 >
                   Register Account
                   <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
@@ -206,7 +206,7 @@ export default function LandingPage() {
       >
         <img 
           src="/hero section.png" 
-          alt="FarmPro Hero Desktop" 
+          alt="PRANALA Hero Desktop" 
           className="w-[220vw] max-w-[6000px] min-w-[2000px] h-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.2)] rounded-t-[8rem] pointer-events-none translate-x-8" 
         />
       </motion.div>
@@ -255,7 +255,7 @@ export default function LandingPage() {
       
       {/* Footer */}
       <footer className="bg-sage border-t border-olive/30 py-12 text-center text-forest font-bold">
-        <p>© 2026 FarmPro Org. A non-profit initiative.</p>
+        <p>© 2026 PRANALA Org. A non-profit initiative.</p>
       </footer>
     </div>
   );

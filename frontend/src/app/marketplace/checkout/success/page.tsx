@@ -33,8 +33,8 @@ export default function CheckoutSuccessPage() {
 
         <div className="flex flex-col gap-3">
           <button 
-            onClick={() => router.push("/marketplace/orders")}
-            className="w-full bg-[#1C241E] hover:bg-[#2B4C3B] text-white py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            onClick={() => router.push("/marketplace/cart?tab=orders")}
+            className="w-full bg-[#1C241E] hover:bg-pranala text-white py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2"
           >
             <Package size={18} /> Lacak Pesanan Saya
           </button>

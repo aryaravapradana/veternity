@@ -39,7 +39,7 @@ export default function SellerOrdersPage() {
         
         // If not a PRODUCER, they shouldn't be here
         if (parsedSession.role !== "PRODUCER") {
-          router.push("/marketplace/orders");
+          router.push("/marketplace/cart?tab=orders");
           return;
         }
 
@@ -54,7 +54,63 @@ export default function SellerOrdersPage() {
     fetchOrders();
   }, [router]);
 
-  if (loading) return null;
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
+      <div className="sticky top-0 z-40 px-4 pt-4">
+        <div className="max-w-4xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
+          <div className="w-32 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="w-32 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="w-24" />
+        </div>
+      </div>
+      <main className="max-w-4xl mx-auto px-4 pt-6 pb-24">
+        <div className="w-48 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2] mb-6" />
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white border border-[#E8E3D2] rounded-[1.5rem] p-5 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.08)]">
+              <div className="flex justify-between items-start mb-4 border-b border-[#E8E3D2] pb-4">
+                <div className="space-y-2">
+                  <div className="w-48 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+                  <div className="w-32 h-3 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+                </div>
+                <div className="w-24 h-6 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
+              </div>
+              <div className="space-y-4">
+                {[1, 2].map(j => (
+                  <div key={j} className="flex gap-4">
+                    <div className="w-16 h-16 rounded-xl skeleton-shimmer bg-[#E8E3D2] shrink-0" />
+                    <div className="flex-1 space-y-2 py-1">
+                      <div className="w-2/3 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+                      <div className="w-1/3 h-3 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-[#E8E3D2] flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div className="w-full sm:w-1/2 h-14 rounded-xl skeleton-shimmer bg-[#E8E3D2]" />
+                <div className="w-32 h-10 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
@@ -116,8 +172,8 @@ export default function SellerOrdersPage() {
                   {o.items.map((i: any, idx: number) => (
                     <div key={idx} className="flex gap-4">
                       <div className="w-16 h-16 rounded-xl bg-[#F1EBE1] overflow-hidden shrink-0">
-                        {i.product?.imageUrl ? (
-                          <img src={i.product.imageUrl} alt={i.product.title} className="w-full h-full object-cover" />
+                        {i.product?.imageUrls && i.product.imageUrls.length > 0 ? (
+                          <img src={i.product.imageUrls[0]} alt={i.product.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Package size={20} className="text-[#C4BAA8]" />
@@ -151,11 +207,27 @@ export default function SellerOrdersPage() {
                 </div>
                 
                 {/* Action Buttons for Seller */}
-                <div className="mt-4 flex gap-2 justify-end">
+                <div className="mt-4 pt-4 border-t border-[#F8F6F0] flex gap-2 justify-end">
+                  {o.status === "PENDING" && (
+                    <button onClick={() => updateOrderStatus(o.id, 'CANCELLED')} className="px-4 py-2.5 bg-[#F8F6F0] text-[#5A635B] text-xs font-bold rounded-xl hover:bg-gray-200 transition-colors">
+                      Batalkan Pesanan
+                    </button>
+                  )}
                   {o.status === "PAID" && (
-                    <button className="px-4 py-2 bg-[#2B4C3B] text-white text-xs font-black rounded-lg hover:bg-[#1E362A] transition-colors flex items-center gap-2">
+                    <button onClick={() => updateOrderStatus(o.id, 'SHIPPED')} className="px-5 py-2.5 bg-pranala text-white text-xs font-black rounded-xl hover:bg-[#1E362A] transition-all flex items-center gap-2 shadow-lg shadow-[#2B4C3B]/20">
                       <Truck size={14} /> Kirim Pesanan
                     </button>
+                  )}
+                  {o.status === "SHIPPED" && (
+                    <button onClick={() => updateOrderStatus(o.id, 'COMPLETED')} className="px-5 py-2.5 bg-[#F5990D] text-white text-xs font-black rounded-xl hover:bg-[#C25939] transition-all flex items-center gap-2 shadow-lg shadow-[#F5990D]/20">
+                      <CheckCircle size={14} /> Selesaikan
+                    </button>
+                  )}
+                  {o.status === "CANCELLED" && (
+                    <span className="text-xs font-bold text-gray-400 py-2">Pesanan Dibatalkan</span>
+                  )}
+                  {o.status === "COMPLETED" && (
+                    <span className="text-xs font-bold text-[#4A7C59] py-2">Pesanan Selesai</span>
                   )}
                 </div>
               </div>

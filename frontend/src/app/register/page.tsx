@@ -146,7 +146,7 @@ export default function RegisterPage() {
 
         <div className="mb-8 mt-2">
           <h1 className="text-3xl font-black text-[#2B4C3B] mb-2 tracking-tight">
-            {step === 1 ? "Join FarmPro" : step === 2 ? "Who are you?" : "What do you farm?"}
+            {step === 1 ? "Join PRANALA" : step === 2 ? "Who are you?" : "What do you farm?"}
           </h1>
           <p className="text-[#5A635B] text-sm font-medium">
             {step === 1 ? "Create your account locally." : step === 2 ? "Help us customize your experience." : "Select all commodities you produce."}
@@ -198,7 +198,7 @@ export default function RegisterPage() {
               <button 
                 type="submit" 
                 disabled={loading || checkingUsername || usernameAvailable === false} 
-                className="w-full bg-[#2B4C3B] hover:bg-[#1E362A] text-white rounded-xl font-bold text-lg py-4 shadow-lg transition-all flex justify-center items-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-pranala hover:bg-[#1E362A] text-white rounded-xl font-bold text-lg py-4 shadow-lg transition-all flex justify-center items-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue <ArrowRight size={20} />
               </button>
@@ -222,7 +222,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-[#DDE2D6] hover:border-[#2B4C3B] hover:bg-[#F8F6F0] transition-all text-left"
               >
-                <div className="w-12 h-12 bg-[#2B4C3B] rounded-full flex items-center justify-center text-white shrink-0"><Store size={24} /></div>
+                <div className="w-12 h-12 bg-pranala rounded-full flex items-center justify-center text-white shrink-0"><Store size={24} /></div>
                 <div>
                   <h3 className="font-bold text-lg text-[#1C241E]">Farmer / Producer</h3>
                   <p className="text-sm text-[#5A635B]">I want to manage my farm and sell products directly.</p>
@@ -259,7 +259,7 @@ export default function RegisterPage() {
                       onClick={() => toggleLivestock(item.id)}
                       className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${
                         isSelected 
-                          ? "border-[#2B4C3B] bg-[#2B4C3B] text-white shadow-md" 
+                          ? "border-[#2B4C3B] bg-pranala text-white shadow-md" 
                           : "border-[#DDE2D6] bg-[#F8F6F0] text-[#5A635B] hover:border-[#B4C179]"
                       }`}
                     >
