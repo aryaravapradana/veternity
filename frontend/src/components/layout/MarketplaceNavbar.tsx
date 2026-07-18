@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { Search, ShoppingCart, Menu, Zap, ChevronDown } from "lucide-react";
@@ -34,7 +35,7 @@ export default function MarketplaceNavbar({
       const session = JSON.parse(sessionStr);
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       try {
-        const res = await fetch(`${API_BASE}/api/cart/${session.id}`);
+        const res = await fetchApi(`${API_BASE}/api/cart/${session.id}`);
         if (res.ok) {
           const cartData = await res.json();
           if (Array.isArray(cartData)) setLocalCartCount(cartData.length);
@@ -51,7 +52,7 @@ export default function MarketplaceNavbar({
   }, []);
 
   return (
-    <header className="flex items-center justify-between gap-4 sticky top-0 z-50 bg-[#F8F6F0] py-4 px-4 md:px-8 border-b border-[#E8E3D2]/50 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.05)] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <header className="flex items-center justify-between gap-4 sticky top-0 z-50 bg-[#F8F6F0] py-4 px-4 md:px-8 border-b border-[#E8E3D2]/50 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.05)] text-[#1C241E]" >
       {/* Left */}
       {leftContent ? (
         <div className="flex items-center gap-4 shrink-0">{leftContent}</div>
@@ -59,7 +60,7 @@ export default function MarketplaceNavbar({
         <div className="flex items-center gap-4 shrink-0">
           <Link href="/marketplace" className="flex items-center gap-2 group">
             <div className="h-8 group-hover:scale-105 transition-transform">
-              <img src="/logos/marketplace/marketplace-black.png" alt="PRANALA" className="h-full object-contain" />
+              <img src="/logos/marketplace/marketplace-black.png" alt="Pranata" className="h-full object-contain" />
             </div>
           </Link>
         </div>
@@ -106,8 +107,14 @@ export default function MarketplaceNavbar({
           </AnimatePresence>
         </Link>
         <button onClick={() => router.push("/settings")} className="flex items-center gap-3 transition-transform hover:scale-105 pl-2">
-          <div className="w-10 h-10 rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm">
-            <img src={profile?.avatarUrl || profile?.avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Felix"} alt="Profile" className="w-full h-full object-cover" />
+          <div className="w-10 h-10 rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm flex items-center justify-center">
+            {(profile?.avatarUrl || profile?.avatar) ? (
+              <img src={profile.avatarUrl || profile.avatar} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-[#3A6B49] flex items-center justify-center text-white font-bold text-lg">
+                {(profile?.fullName || profile?.username || 'U').charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
         </button>
       </div>

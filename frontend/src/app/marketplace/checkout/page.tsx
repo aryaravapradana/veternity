@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2, QrCode, HandCoins } from "lucide-react";
@@ -26,7 +27,7 @@ export default function CheckoutPage() {
         const session = JSON.parse(sessionStr);
         setSession(session);
         try {
-          const res = await fetch(`${API_BASE}/api/cart/${session.id}`);
+          const res = await fetchApi(`${API_BASE}/api/cart/${session.id}`);
           if (res.ok) {
             const data = await res.json();
             if (data.length === 0) {
@@ -55,7 +56,7 @@ export default function CheckoutPage() {
     // Assuming all items belong to same seller for MVP
     const sellerId = cart[0].product?.sellerId || cart[0].sellerId;
 
-    await fetch(`${API_BASE}/api/checkout`, {
+    await fetchApi(`${API_BASE}/api/checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -76,7 +77,7 @@ export default function CheckoutPage() {
     
     // Clear DB cart
     try {
-      await fetch(`${API_BASE}/api/cart/${session.id}`, { method: 'DELETE' });
+      await fetchApi(`${API_BASE}/api/cart/${session.id}`, { method: 'DELETE' });
     } catch (e) {}
 
     router.push("/marketplace/checkout/success");
@@ -132,13 +133,8 @@ export default function CheckoutPage() {
   if (cart.length === 0) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
       <MarketplaceNavbar 
-        leftContent={
-          <button onClick={() => router.push("/marketplace/cart")} className="flex items-center gap-2 text-[#EEF2E6] hover:text-white font-bold text-sm transition-colors">
-            <ChevronLeft size={20} /> Kembali
-          </button>
-        }
         centerContent={
           <span className="font-black text-sm text-white flex items-center gap-2">
             <ShieldCheck size={16} className="text-[#A4C4A8]" /> Checkout Aman
@@ -146,10 +142,15 @@ export default function CheckoutPage() {
         }
       />
       {/* ── Breadcrumb ── */}
-
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-24 flex flex-col md:flex-row gap-6">
         {/* Left: Forms */}
         <div className="flex-1 space-y-6">
+          <div className="mb-2">
+            <button onClick={() => router.push("/marketplace/cart")} className="inline-flex items-center gap-2 bg-white border border-[#E8E3D2] hover:bg-[#F8F6F0] text-[#1C241E] hover:text-[#2B4C3B] font-bold text-sm px-4 py-2 rounded-full transition-colors shadow-sm">
+              <ChevronLeft size={18} /> Back
+            </button>
+          </div>
+
           {/* Address */}
           <section className="bg-white border border-[#E8E3D2] rounded-[1.5rem] p-6 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.08)]">
             <h3 className="text-sm font-black text-[#5A635B] uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -268,7 +269,7 @@ export default function CheckoutPage() {
               <motion.button
                 whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                 onClick={handleCheckout}
-                className="w-full mt-4 py-4 font-black text-white bg-pranala hover:bg-[#1E362A] rounded-2xl shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 py-4 font-black text-white bg-pranata hover:bg-[#1E362A] rounded-2xl shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
               >
                 <CheckCircle size={19} /> Bayar Sekarang
               </motion.button>

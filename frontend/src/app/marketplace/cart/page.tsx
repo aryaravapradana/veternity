@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, ShoppingCart, Menu, Zap, Trash2, Package, ChevronLeft, Clock, CheckCircle, Truck, Store, MapPin } from "lucide-react";
@@ -62,7 +63,7 @@ function ActivityContent() {
 
       // Load cart
       try {
-        const cartRes = await fetch(`${API_BASE}/api/cart/${session.id}`);
+        const cartRes = await fetchApi(`${API_BASE}/api/cart/${session.id}`);
         if (cartRes.ok) {
           setCart(await cartRes.json());
         }
@@ -72,7 +73,7 @@ function ActivityContent() {
 
       // Load orders for this user (acting as buyer)
       try {
-        const res = await fetch(`${API_BASE}/api/orders/BUYER/${session.id}`);
+        const res = await fetchApi(`${API_BASE}/api/orders/BUYER/${session.id}`);
         if (res.ok) {
           setOrders(await res.json());
         }
@@ -113,7 +114,7 @@ function ActivityContent() {
 
     try {
       if (profile) {
-        await fetch(`${API_BASE}/api/cart/${profile.id}`, {
+        await fetchApi(`${API_BASE}/api/cart/${profile.id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId: itemToUpdate.productId, quantity: newQ })
@@ -131,7 +132,7 @@ function ActivityContent() {
     setCart(cart.filter(item => item.id !== id));
     try {
       if (profile) {
-        await fetch(`${API_BASE}/api/cart/${profile.id}/${itemToRemove.productId}`, {
+        await fetchApi(`${API_BASE}/api/cart/${profile.id}/${itemToRemove.productId}`, {
           method: 'DELETE'
         });
       }
@@ -147,7 +148,7 @@ function ActivityContent() {
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
       <div className="px-4 pt-4 md:px-8">
-        <div className="bg-pranala rounded-[2rem] p-4 flex items-center justify-between shadow-md">
+        <div className="bg-pranata rounded-[2rem] p-4 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-full skeleton-shimmer bg-[#3A6B49]" />
           </div>
@@ -173,7 +174,7 @@ function ActivityContent() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-24 lg:pb-12" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-24 lg:pb-12" >
       
       {/* Segmented Control in Navbar Center */}
       <MarketplaceNavbar 
@@ -206,7 +207,14 @@ function ActivityContent() {
       />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-8 md:pt-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 md:pt-8">
+        
+        <div className="mb-6 hidden sm:block">
+          <button onClick={() => router.push("/marketplace")} className="inline-flex items-center gap-2 bg-white border border-[#E8E3D2] hover:bg-[#F8F6F0] text-[#1C241E] hover:text-[#2B4C3B] font-bold text-sm px-4 py-2 rounded-full transition-colors shadow-sm">
+            <ChevronLeft size={18} /> Back
+          </button>
+        </div>
+
         <AnimatePresence mode="wait">
           {activeTab === 'cart' ? (
             <motion.div
@@ -235,7 +243,7 @@ function ActivityContent() {
                   <p className="text-[#A4B0A7] text-sm font-medium mb-6">Belum ada produk yang kamu tambahkan.</p>
                   <button
                     onClick={() => router.push("/marketplace")}
-                    className="px-8 py-3.5 bg-pranala text-white font-black rounded-full hover:bg-[#1E362A] transition-colors shadow-lg"
+                    className="px-8 py-3.5 bg-pranata text-white font-black rounded-full hover:bg-[#1E362A] transition-colors shadow-lg"
                   >
                     Mulai Belanja
                   </button>
@@ -257,7 +265,7 @@ function ActivityContent() {
                           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                             <div>
                               <h3 className="text-[22px] font-bold text-[#1C241E] mb-1 leading-tight tracking-tight">{item.product?.title}</h3>
-                              <p className="text-[13px] font-semibold text-[#5A635B] mb-3 line-clamp-1">{item.product?.description || "Produk Pilihan PRANALA"}</p>
+                              <p className="text-[13px] font-semibold text-[#5A635B] mb-3 line-clamp-1">{item.product?.description || "Produk Pilihan Pranata"}</p>
                               <div className="flex items-center gap-2 text-[13px] font-bold text-[#A4B0A7]">
                                 <span>Kategori <span className="text-[#1C241E]">{item.product?.category}</span></span>
                                 <span className="text-[#DDE2D6]">/</span>
@@ -352,7 +360,7 @@ function ActivityContent() {
                     
                     <button 
                       onClick={() => router.push("/marketplace/checkout")}
-                      className="w-full bg-[#1C241E] hover:bg-pranala text-white py-4 rounded-full font-bold transition-all shadow-lg shadow-[#1C241E]/20 hover:shadow-[#2B4C3B]/30 hover:-translate-y-0.5"
+                      className="w-full bg-[#1C241E] hover:bg-pranata text-white py-4 rounded-full font-bold transition-all shadow-lg shadow-[#1C241E]/20 hover:shadow-[#2B4C3B]/30 hover:-translate-y-0.5"
                     >
                       Lanjut ke Pembayaran
                     </button>
@@ -386,7 +394,7 @@ function ActivityContent() {
                   <p className="text-[#5A635B] mb-6 font-medium">Kamu belum memiliki riwayat pesanan.</p>
                   <button
                     onClick={() => router.push("/marketplace")}
-                    className="px-6 py-3 bg-pranala text-white font-black rounded-2xl hover:bg-[#1E362A] transition-colors"
+                    className="px-6 py-3 bg-pranata text-white font-black rounded-2xl hover:bg-[#1E362A] transition-colors"
                   >
                     Mulai Belanja
                   </button>
@@ -471,7 +479,7 @@ export default function CombinedActivityPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
         <div className="px-4 pt-4 md:px-8">
-          <div className="bg-pranala rounded-[2rem] p-4 flex items-center justify-between shadow-md h-[88px]" />
+          <div className="bg-pranata rounded-[2rem] p-4 flex items-center justify-between shadow-md h-[88px]" />
         </div>
       </div>
     }>

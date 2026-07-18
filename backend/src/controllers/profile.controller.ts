@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
+import bcrypt from 'bcrypt';
 
 export const checkUsername = async (req: Request, res: Response) => {
   const { username } = req.query;
@@ -47,7 +48,10 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     if (newPassword) {
       const profile = await prisma.profile.findUnique({ where: { id } });
-      if (!profile || profile.password !== currentPassword) {
+      if (!profile) return res.status(404).json({ error: 'User not found' });
+      
+      const isMatch = await bcrypt.compare(currentPassword, profile.password);
+      if (!isMatch) {
         return res.status(401).json({ error: 'Password saat ini tidak sesuai.' });
       }
     }
@@ -60,7 +64,10 @@ export const updateProfile = async (req: Request, res: Response) => {
     if (contact  !== undefined)  updateData.contact   = contact;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
     if (bannerUrl !== undefined) updateData.bannerUrl = bannerUrl;
-    if (newPassword)             updateData.password  = newPassword;
+    
+    if (newPassword) {
+      updateData.password = await bcrypt.hash(newPassword, 12);
+    }
 
     const updated = await prisma.profile.update({ where: { id }, data: updateData });
 
@@ -72,18 +79,18 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
-// Seller Events
 export const getSellerEvents = async (req: Request, res: Response) => {
   try {
     const sellerId = req.params.sellerId as string;
-    let events = await prisma.sellerEvent.findMany({
+    const events = await prisma.sellerEvent.findMany({
       where: { sellerId },
       orderBy: { eventDate: 'asc' }
     });
     res.json(events);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch events' });
+  } catch (error: any) {
+    console.error('getSellerEvents error:', error?.code, error?.message);
+    // Return empty array so frontend does not crash
+    res.json([]);
   }
 };
 

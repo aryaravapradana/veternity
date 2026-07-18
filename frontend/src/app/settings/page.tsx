@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -114,7 +115,7 @@ export default function AccountSettingsPage() {
 
   const fetchProfile = async (id: string) => {
     setLoading(true);
-    const res = await fetch(`${API_BASE}/api/profile/${id}`);
+    const res = await fetchApi(`${API_BASE}/api/profile/${id}`);
     if (res.ok) {
       const d = await res.json();
       setProfile(d);
@@ -141,7 +142,7 @@ export default function AccountSettingsPage() {
     }
     setCheckingUsername(true);
     const t = setTimeout(async () => {
-      const res = await fetch(`${API_BASE}/api/profile/check-username?username=${encodeURIComponent(username)}`);
+      const res = await fetchApi(`${API_BASE}/api/profile/check-username?username=${encodeURIComponent(username)}`);
       setUsernameAvail((await res.json()).available);
       setCheckingUsername(false);
     }, 500);
@@ -151,7 +152,7 @@ export default function AccountSettingsPage() {
   const handleSaveProfile = async () => {
     if (usernameAvail === false) { showToast("error", "Username sudah dipakai."); return; }
     setSaving(true);
-    const res = await fetch(`${API_BASE}/api/profile/${profile.id}`, {
+    const res = await fetchApi(`${API_BASE}/api/profile/${profile.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, fullName, farmName, location, contact, avatarUrl, bannerUrl }),
@@ -171,7 +172,7 @@ export default function AccountSettingsPage() {
     if (newPw.length < 6)       { showToast("error", "Password baru minimal 6 karakter."); return; }
     if (newPw !== confirmPw)    { showToast("error", "Konfirmasi password tidak cocok."); return; }
     setSavingPw(true);
-    const res = await fetch(`${API_BASE}/api/profile/${profile.id}`, {
+    const res = await fetchApi(`${API_BASE}/api/profile/${profile.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
@@ -233,7 +234,7 @@ export default function AccountSettingsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] text-[#18181B]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F9FAFB] text-[#18181B]" >
 
       {/* ── Back Navbar ── */}
       <div className="sticky top-0 z-40 px-4 pt-4">
@@ -253,7 +254,7 @@ export default function AccountSettingsPage() {
           <motion.div
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
             className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl font-bold text-sm whitespace-nowrap ${
-              toast.type === "success" ? "bg-pranala text-white" : "bg-[#C25939] text-white"
+              toast.type === "success" ? "bg-pranata text-white" : "bg-[#C25939] text-white"
             }`}
           >
             {toast.type === "success" ? <CheckCircle size={17} /> : <AlertCircle size={17} />}
@@ -276,7 +277,7 @@ export default function AccountSettingsPage() {
         >
 
           {/* Banner */}
-          <div className="relative h-40 sm:h-52 bg-pranala group">
+          <div className="relative h-40 sm:h-52 bg-pranata group">
             {bannerUrl ? (
               <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
             ) : (
@@ -312,7 +313,7 @@ export default function AccountSettingsPage() {
             <div className="flex items-end justify-between -mt-12 mb-4">
               {/* Avatar */}
               <div className="relative group shrink-0">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-pranala border-4 border-white overflow-hidden shadow-lg">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-pranata border-4 border-white overflow-hidden shadow-lg">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -338,7 +339,7 @@ export default function AccountSettingsPage() {
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleSaveProfile}
                 disabled={saving || usernameAvail === false}
-                className="flex items-center gap-2 border-2 border-[#2B4C3B] text-[#2B4C3B] font-black text-sm px-5 py-2.5 rounded-full hover:bg-pranala hover:text-white transition-all disabled:opacity-40"
+                className="flex items-center gap-2 border-2 border-[#2B4C3B] text-[#2B4C3B] font-black text-sm px-5 py-2.5 rounded-full hover:bg-pranata hover:text-white transition-all disabled:opacity-40"
               >
                 {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                 {saving ? "Menyimpan…" : "Simpan Profil"}
@@ -458,7 +459,7 @@ export default function AccountSettingsPage() {
               whileTap={!(saving || usernameAvail === false) ? { scale: 0.97 } : {}}
               onClick={handleSaveProfile}
               disabled={saving || usernameAvail === false}
-              className="w-full py-4 bg-pranala hover:bg-[#1E362A] disabled:opacity-50 text-white font-black rounded-2xl shadow-[0_10px_20px_-10px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-4 bg-pranata hover:bg-[#1E362A] disabled:opacity-50 text-white font-black rounded-2xl shadow-[0_10px_20px_-10px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
             >
               {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               {saving ? "Menyimpan…" : "Simpan Perubahan"}
@@ -538,7 +539,11 @@ export default function AccountSettingsPage() {
           </div>
           <motion.button 
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            onClick={() => { localStorage.removeItem("farmpro_session"); router.push("/login"); }}
+            onClick={() => { 
+              import("js-cookie").then(Cookies => Cookies.default.remove("auth-token"));
+              localStorage.removeItem("farmpro_session"); 
+              window.location.href = "/"; 
+            }}
             className="px-8 py-3.5 bg-white text-[#E11D48] font-black rounded-2xl border border-[#E11D48]/20 hover:bg-[#E11D48] hover:text-white transition-colors shadow-sm"
           >
             Keluar (Logout)

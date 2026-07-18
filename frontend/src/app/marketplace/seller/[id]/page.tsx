@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect, use } from "react";
 import { Store, ArrowLeft, ShieldCheck, MapPin, Phone, Package, ChevronLeft } from "lucide-react";
@@ -24,11 +25,12 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
   const loadData = async () => {
     setLoading(true);
     const [sellerRes, prodRes] = await Promise.all([
-      fetch(`${API_BASE}/api/profile/${sellerId}`),
-      fetch(`${API_BASE}/api/products`),
+      fetchApi(`${API_BASE}/api/profile/${sellerId}`),
+      fetchApi(`${API_BASE}/api/products`),
     ]);
     if (sellerRes.ok) setSeller(await sellerRes.json());
-    const all = await prodRes.json();
+    const raw = await prodRes.json();
+    const all = Array.isArray(raw) ? raw : (raw.data ?? []);
     setProducts(all.filter((p: any) => p.sellerId === sellerId));
     setLoading(false);
   };
@@ -83,17 +85,16 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
   const initials = (seller.farmName || seller.fullName || seller.username || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-      <MarketplaceNavbar 
-        leftContent={
-          <button onClick={() => router.push("/marketplace")} className="flex items-center gap-2 text-[#EEF2E6] hover:text-white font-bold text-sm transition-colors">
-            <ChevronLeft size={20} /> PRANALA
-          </button>
-        }
-      />
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
+      <MarketplaceNavbar />
       {/* Ambient blobs */}
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-24 space-y-8">
+        <div>
+          <button onClick={() => router.push("/marketplace")} className="inline-flex items-center gap-2 bg-white border border-[#E8E3D2] hover:bg-[#F8F6F0] text-[#1C241E] hover:text-[#2B4C3B] font-bold text-sm px-4 py-2 rounded-full transition-colors shadow-sm">
+            <ChevronLeft size={18} /> Back
+          </button>
+        </div>
 
         {/* ── Store Hero (Twitter / FB style) ── */}
         <motion.div
@@ -101,7 +102,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
           className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_-12px_rgba(43,76,59,0.14)]"
         >
           {/* Banner */}
-          <div className="relative h-40 sm:h-52 bg-pranala overflow-hidden">
+          <div className="relative h-40 sm:h-52 bg-pranata overflow-hidden">
             {seller.bannerUrl ? (
               <img src={seller.bannerUrl} alt="Banner" loading="lazy" decoding="async" className="w-full h-full object-cover" />
             ) : (
@@ -120,7 +121,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
           <div className="px-6 sm:px-8 pb-7">
             <div className="flex items-end justify-between -mt-12 mb-5">
               {/* Circular avatar overlapping banner */}
-              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white overflow-hidden bg-pranala shadow-xl shrink-0">
+              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white overflow-hidden bg-pranata shadow-xl shrink-0">
                 {seller.avatarUrl ? (
                   <img src={seller.avatarUrl} alt={seller.farmName || seller.fullName} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 ) : (

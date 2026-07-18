@@ -1,6 +1,7 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
-import { useState, useEffect, useCallback, memo, useRef } from "react";
+import { useState, useEffect, useCallback, memo, useRef, useMemo } from "react";
 import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Minus, Menu, Zap, ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
@@ -12,14 +13,9 @@ import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
   { name: "Semua", icon: "🌾" },
-  { name: "Sayuran", icon: "🥬" },
-  { name: "Buah-buahan", icon: "🍎" },
-  { name: "Ternak (Hidup)", icon: "🐄" },
   { name: "Daging", icon: "🥩" },
+  { name: "Susu", icon: "🥛" },
   { name: "Telur", icon: "🥚" },
-  { name: "Susu & Olahan", icon: "🥛" },
-  { name: "Pupuk & Bibit", icon: "🌱" },
-  { name: "Alat Tani", icon: "🚜" },
 ];
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -29,6 +25,18 @@ const STATUS_COLORS: Record<string, string> = {
   SHIPPED: "bg-indigo-100 text-indigo-700",
   COMPLETED: "bg-emerald-100 text-emerald-700",
   CANCELLED: "bg-red-100 text-red-700",
+};
+
+const getCategoryFallbackImage = (category: string) => {
+  const c = (category || "").toLowerCase();
+  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
+  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
+  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
+  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
+  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
+  return "/mocks/mock_ternak_1784287398084.png";
 };
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
@@ -46,7 +54,7 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
     >
       {/* Background Gradient Animation Layer */}
       <div 
-        className={`absolute inset-0 bg-pranala -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
+        className={`absolute inset-0 bg-pranata -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
       />
       {/* Product Image */}
       <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
@@ -59,7 +67,13 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
             className="w-full h-full object-cover"
           />
         ) : (
-          <Package size={40} className="text-[#C4BAA8] opacity-60" />
+          <img 
+            src={getCategoryFallbackImage(p.category)} 
+            alt={p.title} 
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover opacity-90 mix-blend-multiply" 
+          />
         )}
         
         {p.stock === 0 && (
@@ -80,7 +94,14 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       <div className="flex flex-col items-center text-center flex-1">
         <h3 className={`font-black text-[15px] leading-tight mb-1 line-clamp-1 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
         <p className={`text-xs font-semibold ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</p>
-        <p className={`text-[11px] font-bold mt-1.5 mb-3 ${cartQty > 0 ? "text-white/60" : "text-[#A4B0A7]"}`}>Stok {p.stock} {p.unit}</p>
+        <div className="flex gap-1 items-center mt-1.5 mb-3">
+          <p className={`text-[11px] font-bold ${cartQty > 0 ? "text-white/60" : "text-[#A4B0A7]"}`}>Stok {p.stock} {p.unit}</p>
+          {p.grade && (
+            <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-sm ml-1">
+              {p.grade}
+            </span>
+          )}
+        </div>
         
         <p className={`text-xl font-black mt-auto ${cartQty > 0 ? "text-white" : "text-[#2B4C3B]"}`}>
           Rp {p.price?.toLocaleString()}
@@ -136,10 +157,10 @@ export default function MarketplacePage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [selectedGrade, setSelectedGrade] = useState("Semua Grade");
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [animations, setAnimations] = useState<any[]>([]);
-  const [viewAll, setViewAll] = useState(false);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   
   const [canScroll, setCanScroll] = useState(false);
@@ -213,9 +234,9 @@ export default function MarketplacePage() {
 
     try {
       if (newQty <= 0) {
-        await fetch(`${API_BASE}/api/cart/${session.id}/${p.id}`, { method: 'DELETE' });
+        await fetchApi(`${API_BASE}/api/cart/${session.id}/${p.id}`, { method: 'DELETE' });
       } else {
-        await fetch(`${API_BASE}/api/cart/${session.id}`, {
+        await fetchApi(`${API_BASE}/api/cart/${session.id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId: p.id, quantity: newQty })
@@ -240,14 +261,15 @@ export default function MarketplacePage() {
     setProfile(session);
     try {
       const [prodRes, ordRes, cartRes] = await Promise.all([
-        fetch(`${API_BASE}/api/products`).catch(() => null),
-        fetch(`${API_BASE}/api/orders/BUYER/${session.id}`).catch(() => null),
-        fetch(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
+        fetchApi(`${API_BASE}/api/products?limit=200`).catch(() => null),
+        fetchApi(`${API_BASE}/api/orders/BUYER/${session.id}`).catch(() => null),
+        fetchApi(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
       ]);
       
       if (prodRes && prodRes.ok) {
         const prodData = await prodRes.json();
-        if (Array.isArray(prodData)) setProducts(prodData);
+        const arr = Array.isArray(prodData) ? prodData : (prodData.data ?? []);
+        setProducts(arr);
       }
       
       if (ordRes && ordRes.ok) {
@@ -269,17 +291,29 @@ export default function MarketplacePage() {
     setLoading(false);
   };
 
+  const { displayedProducts, hasMore } = useMemo(() => {
+    let filtered = products.filter(p => {
+      const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
+      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      let matchGrade = true;
+      if (selectedCategory === "Daging" && selectedGrade !== "Semua Grade") {
+        matchGrade = p.grade && p.grade.toLowerCase().includes(selectedGrade.toLowerCase());
+      }
+      
+      return matchCat && matchSearch && matchGrade;
+    });
 
-
-  const filteredProducts = products.filter(p =>
-    (selectedCategory === "Semua" || p.category === selectedCategory) &&
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    return {
+      displayedProducts: filtered.slice(0, 10),
+      hasMore: filtered.length > 10
+    };
+  }, [products, searchQuery, selectedCategory, selectedGrade]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
       <div className="px-4 pt-4 md:px-8">
-        <div className="bg-pranala rounded-[2rem] p-4 flex items-center justify-between shadow-md">
+        <div className="bg-pranata rounded-[2rem] p-4 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-full skeleton-shimmer bg-[#3A6B49]" />
             <div className="w-24 h-6 rounded-md skeleton-shimmer bg-[#3A6B49] hidden sm:block" />
@@ -294,7 +328,7 @@ export default function MarketplacePage() {
         </div>
       </div>
       <div className="px-4 md:px-8 mt-4 relative z-10">
-        <div className="bg-pranala rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 h-[400px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-lg">
+        <div className="bg-pranata rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 h-[400px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between shadow-lg">
           <div className="w-full max-w-xl space-y-4">
             <div className="w-3/4 h-12 rounded-xl skeleton-shimmer bg-[#3A6B49]" />
             <div className="w-1/2 h-12 rounded-xl skeleton-shimmer bg-[#3A6B49]" />
@@ -324,14 +358,14 @@ export default function MarketplacePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
 
       {/* ── Top Navbar ── */}
       <MarketplaceNavbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* ── Hero Section ── */}
       <div className="px-4 md:px-8 mt-4 relative z-10">
-        <div className="bg-pranala rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg min-h-[400px]">
+        <div className="bg-pranata rounded-t-[2.5rem] rounded-b-[4rem] sm:rounded-b-[6rem] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg min-h-[400px]">
           {/* Subtle background decoration */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
           
@@ -352,9 +386,6 @@ export default function MarketplacePage() {
 
           <div className="relative z-10 mt-12 md:mt-0 md:absolute md:-bottom-12 md:right-12 lg:right-24 h-64 md:h-96 w-64 md:w-96 flex items-end justify-center">
             {/* Image Slot Placeholder */}
-            <div className="w-full h-full bg-[#3A6B49]/50 backdrop-blur-sm rounded-t-[3rem] rounded-b-xl border-2 border-dashed border-[#A4C4A8] flex items-center justify-center relative overflow-hidden">
-              <span className="text-[#A4C4A8] font-bold tracking-widest text-sm uppercase">Image Slot</span>
-            </div>
           </div>
         </div>
       </div>
@@ -396,7 +427,7 @@ export default function MarketplacePage() {
         <div 
           ref={categoryScrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto hide-scrollbar gap-4 pb-6 pt-2 snap-x px-4 md:px-8 scroll-smooth relative"
+          className="flex md:justify-center overflow-x-auto hide-scrollbar gap-4 pb-6 pt-2 snap-x px-4 md:px-8 scroll-smooth relative"
           style={{
             maskImage: canScroll ? `linear-gradient(to right, ${isAtStart ? 'black 0%' : 'transparent, black 60px'}, ${isAtEnd ? 'black 100%' : 'black calc(100% - 60px), transparent'})` : 'none',
             WebkitMaskImage: canScroll ? `linear-gradient(to right, ${isAtStart ? 'black 0%' : 'transparent, black 60px'}, ${isAtEnd ? 'black 100%' : 'black calc(100% - 60px), transparent'})` : 'none'
@@ -406,10 +437,10 @@ export default function MarketplacePage() {
             <div 
               key={cat.name}
               onClick={() => setSelectedCategory(cat.name)}
-              className={`snap-start shrink-0 w-44 border rounded-[2rem] p-5 flex flex-col min-h-[140px] relative overflow-hidden group cursor-pointer hover:-translate-y-1 transition-all duration-200 ${
+              className={`snap-start shrink-0 w-44 rounded-[2rem] p-5 flex flex-col min-h-[140px] relative overflow-hidden group cursor-pointer hover:-translate-y-1 transition-all duration-200 ${
                 selectedCategory === cat.name 
-                  ? "bg-pranala border-[#2B4C3B] shadow-[0_12px_24px_-12px_rgba(43,76,59,0.3)]" 
-                  : "bg-white border-[#E8E3D2] shadow-[0_8px_24px_-12px_rgba(43,76,59,0.12)]"
+                  ? "bg-pranata border-4 border-white shadow-[0_16px_32px_-12px_rgba(43,76,59,0.5)]" 
+                  : "bg-white border-2 border-[#E8E3D2] shadow-[0_8px_24px_-12px_rgba(43,76,59,0.12)]"
               }`}
             >
               <h3 className={`font-black text-base ${selectedCategory === cat.name ? "text-white" : "text-[#1C241E]"}`}>{cat.name}</h3>
@@ -426,22 +457,38 @@ export default function MarketplacePage() {
           <h2 className="text-2xl md:text-3xl font-black text-[#1C241E] tracking-tight">
             {selectedCategory === "Semua" ? "Mungkin Anda butuhkan" : selectedCategory}
           </h2>
-          <button 
-            onClick={() => router.push('/marketplace/products')}
-            className="flex items-center gap-1 text-[#C25939] font-bold text-sm hover:gap-2 transition-all"
-          >
-            Lihat lainnya <ChevronRight size={16} strokeWidth={3} className="transition-transform" />
-          </button>
+          
+          <div className="flex flex-col items-end gap-2">
+            {hasMore && (
+              <button onClick={() => router.push(`/marketplace/products?category=${selectedCategory}`)} className="text-[#C25939] font-bold text-sm hover:underline flex items-center gap-1 bg-[#FFF5F2] px-4 py-2 rounded-full">
+                Lihat Semua <ArrowRight size={16} />
+              </button>
+            )}
+            
+            {selectedCategory === "Daging" && (
+              <select 
+                value={selectedGrade} 
+                onChange={(e) => setSelectedGrade(e.target.value)}
+                className="bg-white border border-[#E8E3D2] text-[#2B4C3B] font-bold text-sm rounded-full py-2 px-4 outline-none focus:ring-2 focus:ring-[#C25939] shadow-sm appearance-none"
+              >
+                <option value="Semua Grade">Semua Grade</option>
+                <option value="Premium">Grade Premium</option>
+                <option value="Grade A">Grade A</option>
+                <option value="Grade B">Grade B</option>
+                <option value="Grade C">Grade C</option>
+              </select>
+            )}
+          </div>
         </div>
 
-        {filteredProducts.length === 0 ? (
+        {displayedProducts.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed border-[#DDE2D6] rounded-[2rem] bg-white max-w-2xl mx-auto">
             <h3 className="text-xl font-black text-[#5A635B] mb-2">Produk tidak ditemukan</h3>
             <p className="text-[#A4B0A7] text-sm font-medium">Coba ubah kata kunci atau kategori pencarian.</p>
           </div>
         ) : (
           <div className="flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1">
-            {filteredProducts.map((p, i) => {
+            {displayedProducts.map((p, i) => {
               const qty = cartItems.find(item => item.productId === p.id)?.quantity || 0;
               return (
                 <div key={p.id} className="snap-start shrink-0 w-48">
@@ -483,10 +530,10 @@ export default function MarketplacePage() {
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-pranala rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-pranata rounded-xl flex items-center justify-center">
                 <Store size={20} className="text-[#F5990D]" />
               </div>
-              <h2 className="font-black text-white text-2xl m-0 leading-none">PRANALA</h2>
+              <h2 className="font-black text-white text-2xl m-0 leading-none">Pranata</h2>
             </div>
             <p className="text-[#A4C4A8] text-sm font-medium leading-relaxed max-w-sm">
               Platform jual beli hasil pertanian langsung dari petani lokal. Mendorong kesejahteraan petani dengan harga yang lebih adil dan transparan.
@@ -511,7 +558,7 @@ export default function MarketplacePage() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-[#A4C4A8]">
-          <p>© 2026 PRANALA. All rights reserved.</p>
+          <p>© 2026 Pranata. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Dibuat dengan ❤️ di Yogyakarta</span>
           </div>

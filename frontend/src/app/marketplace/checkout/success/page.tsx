@@ -9,7 +9,7 @@ export default function CheckoutSuccessPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] flex flex-col items-center justify-center p-4" >
       
       <motion.div
         initial={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -34,7 +34,7 @@ export default function CheckoutSuccessPage() {
         <div className="flex flex-col gap-3">
           <button 
             onClick={() => router.push("/marketplace/cart?tab=orders")}
-            className="w-full bg-[#1C241E] hover:bg-pranala text-white py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            className="w-full bg-[#1C241E] hover:bg-pranata text-white py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2"
           >
             <Package size={18} /> Lacak Pesanan Saya
           </button>

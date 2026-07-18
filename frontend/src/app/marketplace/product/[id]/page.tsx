@@ -1,10 +1,11 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect, use, useCallback } from "react";
 import {
   Store, ShoppingCart, ArrowLeft, ShieldCheck, MapPin,
   Truck, CheckCircle, Package, Star, ChevronLeft, X,
-  ChevronDown, ChevronUp, Heart
+  ChevronDown, ChevronUp, Heart, Crown, Info
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,14 +32,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const loadProduct = async () => {
     setLoading(true);
-    const prodRes = await fetch(`${API_BASE}/api/products`);
-    const products = await prodRes.json();
-    const found = products.find((p: any) => p.id === productId);
-    if (found) {
-      setProduct(found);
-      setQuantity(found.minOrder || 1);
-      const sellerRes = await fetch(`${API_BASE}/api/profile/${found.sellerId}`);
-      if (sellerRes.ok) setSeller(await sellerRes.json());
+    try {
+      const prodRes = await fetchApi(`${API_BASE}/api/products/${productId}`);
+      if (prodRes.ok) {
+        const found = await prodRes.json();
+        setProduct(found);
+        setQuantity(found.minOrder || 1);
+        if (found.sellerId) {
+          const sellerRes = await fetchApi(`${API_BASE}/api/profile/${found.sellerId}`);
+          if (sellerRes.ok) setSeller(await sellerRes.json());
+        }
+      } else {
+        setProduct(null);
+      }
+    } catch (e) {
+      console.error(e);
+      setProduct(null);
     }
     setLoading(false);
   };
@@ -49,7 +58,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const session = JSON.parse(sessionStr);
     
     try {
-      await fetch(`${API_BASE}/api/cart/${session.id}`, {
+      await fetchApi(`${API_BASE}/api/cart/${session.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product.id, quantity })
@@ -118,18 +127,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-24 lg:pb-12" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-      <MarketplaceNavbar 
-        leftContent={
-          <button onClick={() => router.push("/marketplace")} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-[#EEF2E6] hover:text-white font-bold text-sm px-4 py-2 rounded-full transition-colors">
-            <ChevronLeft size={18} /> PRANALA
-          </button>
-        }
-      />
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-24 lg:pb-12" >
+      <MarketplaceNavbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-8 relative z-10">
         
-        {/* Back bar removed */}
+        <div className="mb-6">
+          <button onClick={() => router.push("/marketplace")} className="inline-flex items-center gap-2 bg-white border border-[#E8E3D2] hover:bg-[#F8F6F0] text-[#1C241E] hover:text-[#2B4C3B] font-bold text-sm px-4 py-2 rounded-full transition-colors shadow-sm">
+            <ChevronLeft size={18} /> Back
+          </button>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           
@@ -206,18 +213,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Seller Info Box */}
             {seller && (
               <Link href={`/marketplace/seller/${seller.id}`} className="flex items-center gap-4 bg-white hover:bg-[#F8F6F0] border border-[#E8E3D2] p-4 rounded-2xl mb-8 shadow-sm transition-colors group">
-                <div className="w-12 h-12 rounded-full bg-pranala text-white flex items-center justify-center font-black text-xl shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                  {(seller.farmName || seller.fullName || seller.username || "?").charAt(0).toUpperCase()}
-                </div>
+                {seller.avatarUrl ? (
+                  <img src={seller.avatarUrl} alt="Seller Avatar" className="w-12 h-12 rounded-full object-cover shrink-0 shadow-inner group-hover:scale-105 transition-transform" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-pranata text-white flex items-center justify-center font-black text-xl shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                    {(seller.farmName || seller.fullName || seller.username || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="flex-1">
                   <h3 className="text-sm font-black text-[#1C241E] flex items-center gap-1.5 mb-0.5">
                     {seller.farmName || seller.fullName}
                     <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
                   </h3>
-                  <p className="text-xs font-bold text-[#7A8678] flex items-center gap-1">
-                    <MapPin size={12} className="text-[#C25939]" />
-                    {seller.location || "Lokasi tidak ditentukan"}
-                  </p>
+                  {seller.location && (
+                    <p className="text-xs font-bold text-[#7A8678] flex items-center gap-1">
+                      <MapPin size={12} className="text-[#C25939]" />
+                      {seller.location}
+                    </p>
+                  )}
                 </div>
               </Link>
             )}
@@ -272,7 +285,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 className={`flex-1 h-14 rounded-2xl font-black text-lg shadow-[0_8px_20px_-6px_rgba(43,76,59,0.4)] flex items-center justify-center gap-2 transition-all text-white ${
                   maxQ === 0 
                     ? 'bg-gray-300 cursor-not-allowed shadow-none' 
-                    : 'bg-pranala hover:bg-[#1E362A]'
+                    : 'bg-pranata hover:bg-[#1E362A]'
                 }`}
               >
                 <ShoppingCart size={20} /> {maxQ === 0 ? 'Stok Habis' : 'Add to Cart'}
@@ -282,9 +295,58 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
 
-            {/* Accordions */}
-            {product.description && (
-              <div className="space-y-4">
+            {/* Accordions and AI Grading */}
+            <div className="space-y-4">
+              {product.aiAnalysis && (
+                <div className={`rounded-3xl overflow-hidden shadow-sm border-2 ${
+                  product.grade === "Premium" ? "bg-[#FFF9E6] border-[#F5990D]" :
+                  product.grade?.includes("A") ? "bg-emerald-50 border-emerald-400" :
+                  product.grade?.includes("B") ? "bg-cyan-50 border-cyan-400" :
+                  "bg-amber-50 border-amber-400"
+                }`}>
+                  <div className="p-6">
+                    <h3 className={`font-black text-lg mb-3 ${
+                      product.grade === "Premium" ? "text-[#F5990D]" :
+                      product.grade?.includes("A") ? "text-emerald-900" :
+                      product.grade?.includes("B") ? "text-cyan-900" :
+                      "text-amber-900"
+                    }`}>
+                      Grading Result
+                    </h3>
+                    
+                    <div className="flex items-center gap-3 mb-3 pb-3 border-b border-black/5">
+                      <div className={`p-1.5 rounded-full ${
+                        product.grade === "Premium" ? "bg-[#F5990D]/20 text-[#F5990D]" :
+                        product.grade?.includes("A") ? "bg-emerald-100 text-emerald-600" :
+                        product.grade?.includes("B") ? "bg-cyan-100 text-cyan-600" :
+                        "bg-amber-100 text-amber-600"
+                      }`}>
+                        {product.grade === "Premium" && <Crown size={18} />}
+                        {product.grade?.includes("A") && <Star size={18} />}
+                        {product.grade?.includes("B") && <CheckCircle size={18} />}
+                        {product.grade?.includes("C") && <Info size={18} />}
+                      </div>
+                      <h4 className={`text-base font-black ${
+                        product.grade === "Premium" ? "text-[#F5990D]" :
+                        product.grade?.includes("A") ? "text-emerald-700" :
+                        product.grade?.includes("B") ? "text-cyan-700" :
+                        "text-amber-700"
+                      }`}>{product.grade}</h4>
+                    </div>
+
+                    <p className="text-sm font-semibold text-[#5A635B] leading-relaxed mb-1">
+                      {product.aiAnalysis}
+                    </p>
+
+                    <div className="flex items-center gap-1.5 mt-5 justify-start">
+                      <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
+                      <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-6 drop-shadow-sm" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {product.description && (
                 <div className="bg-white border border-[#E8E3D2] rounded-3xl overflow-hidden shadow-sm">
                   <button 
                     onClick={() => setIsDescOpen(!isDescOpen)}
@@ -308,8 +370,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
           </div>
         </div>

@@ -2,15 +2,44 @@
 
 import { useChat } from "ai/react";
 import { useState, useRef, useEffect } from "react";
-import { Bot, User, Send, Paperclip, Loader2, Sparkles, X } from "lucide-react";
+import { Bot, User, Send, Paperclip, Loader2, Sparkles, X, Briefcase, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import { fetchApi } from "@/lib/apiClient";
 
 export default function AiVetPage() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
+  const [contextData, setContextData] = useState<any>(null);
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, append } = useChat({
+    body: { contextData }
+  });
   const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+
+  // Auto-fetch context data in background
+  useEffect(() => {
+    const fetchContext = async () => {
+      const sessionStr = localStorage.getItem("farmpro_session");
+      if (!sessionStr) return;
+      const session = JSON.parse(sessionStr);
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      
+      try {
+        const [prodRes, ordRes] = await Promise.all([
+          fetchApi(`${API_BASE}/api/products/seller/${session.id}`).catch(() => null),
+          fetchApi(`${API_BASE}/api/orders/PRODUCER/${session.id}`).catch(() => null)
+        ]);
+        
+        const products = prodRes && prodRes.ok ? await prodRes.json() : [];
+        const orders = ordRes && ordRes.ok ? await ordRes.json() : [];
+        setContextData({ profile: session, products: Array.isArray(products) ? products : (products.data || []), orders: Array.isArray(orders) ? orders : (orders.data || []) });
+      } catch (e) {
+        console.error("Background context fetch failed", e);
+      }
+    };
+    fetchContext();
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -28,8 +57,20 @@ export default function AiVetPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleGenerateInsights = async () => {
+    if (!contextData) {
+      alert("Sedang menyinkronkan data dengan backend, mohon tunggu sebentar...");
+      return;
+    }
+    
+    append({
+      role: 'user',
+      content: 'Tolong berikan ringkasan performa bisnis saya saat ini dan berikan 1-2 rekomendasi (Actionable Insights) terpenting berdasarkan data penjualan dan produk saya di backend.'
+    });
+  };
+
   return (
-    <div className="min-h-screen pt-8 pb-8 px-4 sm:px-8 lg:px-12 bg-[#F8F6F0] flex flex-col" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen pt-8 pb-8 px-4 sm:px-8 lg:px-12 bg-[#F8F6F0] flex flex-col" >
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-[#E8E3D2] h-[calc(100vh-6rem)]">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#2B4C3B] to-[#4A7C59] p-6 flex flex-col md:flex-row items-center justify-between shadow-md z-10 shrink-0">
@@ -67,6 +108,11 @@ export default function AiVetPage() {
                   <h4 className="font-bold text-[#1C241E] mb-1 group-hover:text-[#F5990D] transition-colors">Jadwal Vaksinasi</h4>
                   <p className="text-xs text-[#5A635B] font-medium">Konsultasi jadwal pencegahan penyakit.</p>
                 </button>
+                <button onClick={handleGenerateInsights} disabled={!contextData || isLoading} className="md:col-span-2 bg-[#1C241E] p-6 rounded-3xl border border-[#E8E3D2] hover:bg-[#2B4C3B] hover:shadow-xl transition-all text-center group flex flex-col items-center justify-center disabled:opacity-70">
+                  {(!contextData || isLoading) ? <Loader2 size={28} className="text-[#F5990D] mb-2 animate-spin" /> : <TrendingUp size={28} className="text-[#F5990D] mb-2 group-hover:scale-110 transition-transform" />}
+                  <h4 className="font-black text-white text-lg mb-1">Generate Business Insights</h4>
+                  <p className="text-sm text-white/70 font-medium max-w-md mx-auto">AI akan membaca seluruh data produk dan pesanan Anda secara real-time dari backend untuk memberikan saran strategis.</p>
+                </button>
               </div>
             </div>
           ) : (
@@ -86,7 +132,7 @@ export default function AiVetPage() {
                   
                   <div className={`max-w-[85%] rounded-[2rem] p-5 shadow-sm ${
                     m.role === 'user' 
-                      ? 'bg-pranala text-[#F8F6F0] rounded-tr-none' 
+                      ? 'bg-pranata text-[#F8F6F0] rounded-tr-none' 
                       : 'bg-white border border-[#E8E3D2] text-[#1C241E] rounded-tl-none'
                   }`}>
                     {/* Render Images if any */}

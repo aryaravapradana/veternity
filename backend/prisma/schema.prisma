@@ -80,8 +80,13 @@ model Product {
   minOrder    Int      @default(1)
   unit        String   @default("kg") // kg, ekor, liter
   imageUrls   String[] @default([])
+  grade       String?
+  aiAnalysis  String?
+  deletedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([sellerId])
 
   seller      Profile  @relation(fields: [sellerId], references: [id])
   orderItems  OrderItem[]
@@ -109,6 +114,9 @@ model Order {
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([buyerId])
+  @@index([sellerId])
 
   buyer       Profile     @relation("BuyerOrders", fields: [buyerId], references: [id])
   seller      Profile     @relation("SellerOrders", fields: [sellerId], references: [id])
@@ -139,4 +147,5 @@ model CartItem {
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([buyerId, productId])
+  @@index([buyerId])
 }

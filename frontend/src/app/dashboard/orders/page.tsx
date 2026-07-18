@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, Package, Clock, CheckCircle, Truck, User, MapPin } from "lucide-react";
@@ -43,7 +44,7 @@ export default function SellerOrdersPage() {
           return;
         }
 
-        const res = await fetch(`${API_BASE}/api/orders/PRODUCER/${parsedSession.id}`);
+        const res = await fetchApi(`${API_BASE}/api/orders/PRODUCER/${parsedSession.id}`);
         if (res.ok) setOrders(await res.json());
       } catch (err) {
         console.error(err);
@@ -56,7 +57,7 @@ export default function SellerOrdersPage() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+      const res = await fetchApi(`${API_BASE}/api/orders/${orderId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -107,7 +108,7 @@ export default function SellerOrdersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
 
 
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-24">
@@ -194,7 +195,7 @@ export default function SellerOrdersPage() {
                     </button>
                   )}
                   {o.status === "PAID" && (
-                    <button onClick={() => updateOrderStatus(o.id, 'SHIPPED')} className="px-5 py-2.5 bg-pranala text-white text-xs font-black rounded-xl hover:bg-[#1E362A] transition-all flex items-center gap-2 shadow-lg shadow-[#2B4C3B]/20">
+                    <button onClick={() => updateOrderStatus(o.id, 'SHIPPED')} className="px-5 py-2.5 bg-pranata text-white text-xs font-black rounded-xl hover:bg-[#1E362A] transition-all flex items-center gap-2 shadow-lg shadow-[#2B4C3B]/20">
                       <Truck size={14} /> Kirim Pesanan
                     </button>
                   )}

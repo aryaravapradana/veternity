@@ -16,7 +16,7 @@ export function EditorialGallery() {
   console.log("Forcing Turbopack to recompile EditorialGallery!");
 
   useGSAP(() => {
-    let mm = gsap.matchMedia();
+    const mm = gsap.matchMedia();
 
     mm.add("(min-width: 768px)", () => {
       const panels = gsap.utils.toArray('.panel') as HTMLElement[]
@@ -119,8 +119,8 @@ export function EditorialGallery() {
         
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-center p-8 md:p-24">
           <div className="max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-              "PRANALA changed our yield entirely. The <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">predictive analytics</span> gave us absolute clarity."
+            <h2 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" >
+              "Pranata changed our yield entirely. The <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">predictive analytics</span> gave us absolute clarity."
             </h2>
             <div className="mt-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-clip border-2 border-white shadow-md">
@@ -144,7 +144,7 @@ export function EditorialGallery() {
         
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-center items-end p-8 md:p-24">
           <div className="max-w-3xl text-right">
-            <h3 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+            <h3 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" >
               "Since integrating the <span className="text-transparent bg-clip-text bg-gradient-to-l from-emerald-400 to-teal-400">micro-climate sensors</span>, our mortality rate dropped to near zero."
             </h3>
             <div className="mt-10 flex items-center justify-end gap-4">
@@ -169,7 +169,7 @@ export function EditorialGallery() {
         
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-center p-8 md:p-24">
           <div className="max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-50 leading-[1.2] tracking-tighter" >
               "The <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">automated supply tracking</span> means we never run out of feed mid-cycle. It's magic."
             </h2>
             <div className="mt-10 flex items-center gap-4">
@@ -194,7 +194,7 @@ export function EditorialGallery() {
         
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-end items-center p-8 md:p-24 text-center">
           <div className="max-w-4xl">
-            <h2 className="text-3xl md:text-5xl font-black text-slate-50 leading-[1.2] tracking-tighter mb-10" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-50 leading-[1.2] tracking-tighter mb-10" >
               "Having <span className="text-transparent bg-clip-text bg-gradient-to-t from-rose-400 to-pink-500">24/7 AI monitoring</span> is literally like having a senior vet inside the coop at all times."
             </h2>
             <div className="flex flex-col items-center justify-center gap-3">
@@ -219,7 +219,7 @@ export function EditorialGallery() {
         
         <div className="panel-content absolute inset-0 z-20 flex flex-col justify-start items-center p-8 md:p-24 text-center pt-24 md:pt-32">
           <div className="max-w-4xl">
-            <h2 className="text-3xl md:text-5xl font-black text-slate-50 leading-[1.2] tracking-tighter mb-10" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-50 leading-[1.2] tracking-tighter mb-10" >
               "We successfully cut our electricity and water overhead by 30% simply by following their <span className="text-transparent bg-clip-text bg-gradient-to-b from-indigo-400 to-purple-500">resource mastery</span> dashboard."
             </h2>
             <div className="flex flex-col items-center justify-center gap-3">

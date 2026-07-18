@@ -115,7 +115,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
           </span>
         </div>
         
-        <h3 className={`text-lg sm:text-3xl lg:text-5xl font-black mb-1 lg:mb-6 tracking-tighter leading-tight transition-colors duration-0 text-white`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+        <h3 className={`text-lg sm:text-3xl lg:text-5xl font-black mb-1 lg:mb-6 tracking-tighter leading-tight transition-colors duration-0 text-white`} >
           {feature.title}
         </h3>
         
@@ -166,7 +166,7 @@ const MobileAccordionFeature = ({ feature, index, isActive, onToggle }: { featur
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-vibrant mb-2">
             System {String(index + 1).padStart(2, '0')}
           </span>
-          <h3 className={`text-3xl sm:text-4xl font-black tracking-tighter leading-[0.95] transition-colors duration-500 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+          <h3 className={`text-3xl sm:text-4xl font-black tracking-tighter leading-[0.95] transition-colors duration-500 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} >
             {feature.title}
           </h3>
         </div>
@@ -216,7 +216,7 @@ export function FeaturesRopeSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="py-24 md:py-32 relative bg-transparent features-rope-container overflow-hidden">
+    <section ref={containerRef} className="py-24 md:py-32 relative bg-[#32452C] features-rope-container overflow-hidden">
       
       {/* Decorative Background Elements (Visible on all devices to connect the zig-zag) */}
       <div className="block">
@@ -230,7 +230,7 @@ export function FeaturesRopeSection() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100/10 text-slate-50 font-semibold text-sm mb-8" data-parallax="-0.2">
             <span>Core Ecosystem</span>
           </div>
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-50 tracking-tighter mb-8 leading-[0.9]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }} data-parallax="0.5">
+          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-50 tracking-tighter mb-8 leading-[0.9]"  data-parallax="0.5">
             Intelligent by design.
           </h2>
           <p className="text-xl md:text-2xl text-slate-300 max-w-xl font-medium leading-snug" data-parallax="0.8">

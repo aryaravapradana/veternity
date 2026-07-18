@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +17,7 @@ const LIVESTOCK_OPTIONS = [
   { id: "LAINNYA", label: "Lainnya", icon: MoreHorizontal },
 ];
 
-export default function RegisterPage() {
+export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => void, onSwitchToLogin: () => void }) {
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -49,7 +50,7 @@ export default function RegisterPage() {
     const timeoutId = setTimeout(async () => {
       try {
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-        const res = await fetch(`${API_BASE}/api/profile/check-username?username=${encodeURIComponent(username.trim().toLowerCase())}`);
+        const res = await fetchApi(`${API_BASE}/api/profile/check-username?username=${encodeURIComponent(username.trim().toLowerCase())}`);
         const data = await res.json();
         setUsernameAvailable(data.available);
       } catch (err) {
@@ -82,7 +83,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/profile/register`, {
+      const res = await fetchApi(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/profile/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,23 +131,13 @@ export default function RegisterPage() {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#F8F6F0] flex items-center justify-center p-6 text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-      <motion.div 
-        layout
-        className="w-full max-w-md bg-white border border-[#DDE2D6] p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_40px_-10px_rgba(43,76,59,0.1)] relative overflow-hidden"
-      >
-        <div className="absolute top-0 left-0 h-1 bg-[#E8E3D2] w-full">
-          <motion.div 
-            className="h-full bg-[#3A6B49]" 
-            initial={{ width: "33%" }}
-            animate={{ width: `${(step / 3) * 100}%` }}
-          />
-        </div>
 
+
+  return (
+    <>
         <div className="mb-8 mt-2">
           <h1 className="text-3xl font-black text-[#2B4C3B] mb-2 tracking-tight">
-            {step === 1 ? "Join PRANALA" : step === 2 ? "Who are you?" : "What do you farm?"}
+            {step === 1 ? "Join Pranata" : step === 2 ? "Who are you?" : "What do you farm?"}
           </h1>
           <p className="text-[#5A635B] text-sm font-medium">
             {step === 1 ? "Create your account locally." : step === 2 ? "Help us customize your experience." : "Select all commodities you produce."}
@@ -198,14 +189,14 @@ export default function RegisterPage() {
               <button 
                 type="submit" 
                 disabled={loading || checkingUsername || usernameAvailable === false} 
-                className="w-full bg-pranala hover:bg-[#1E362A] text-white rounded-xl font-bold text-lg py-4 shadow-lg transition-all flex justify-center items-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-pranata hover:bg-[#1E362A] text-white rounded-xl font-bold text-lg py-4 shadow-lg transition-all flex justify-center items-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue <ArrowRight size={20} />
               </button>
 
               <div className="mt-6 text-center text-sm font-semibold">
                 <p className="text-[#5A635B]">
-                  Already have an account? <Link href="/login" className="text-[#F5990D] hover:underline">Log in</Link>
+                  Already have an account? <button type="button" onClick={onSwitchToLogin} className="text-[#F5990D] hover:underline">Log in</button>
                 </p>
               </div>
             </motion.form>
@@ -222,7 +213,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-[#DDE2D6] hover:border-[#2B4C3B] hover:bg-[#F8F6F0] transition-all text-left"
               >
-                <div className="w-12 h-12 bg-pranala rounded-full flex items-center justify-center text-white shrink-0"><Store size={24} /></div>
+                <div className="w-12 h-12 bg-pranata rounded-full flex items-center justify-center text-white shrink-0"><Store size={24} /></div>
                 <div>
                   <h3 className="font-bold text-lg text-[#1C241E]">Farmer / Producer</h3>
                   <p className="text-sm text-[#5A635B]">I want to manage my farm and sell products directly.</p>
@@ -259,7 +250,7 @@ export default function RegisterPage() {
                       onClick={() => toggleLivestock(item.id)}
                       className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${
                         isSelected 
-                          ? "border-[#2B4C3B] bg-pranala text-white shadow-md" 
+                          ? "border-[#2B4C3B] bg-pranata text-white shadow-md" 
                           : "border-[#DDE2D6] bg-[#F8F6F0] text-[#5A635B] hover:border-[#B4C179]"
                       }`}
                     >
@@ -279,8 +270,7 @@ export default function RegisterPage() {
               </button>
             </motion.div>
           )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+      </AnimatePresence>
+    </>
   );
 }

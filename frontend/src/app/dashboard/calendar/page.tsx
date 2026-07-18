@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus, Trash2, Edit3, X } from "lucide-react";
@@ -30,11 +31,12 @@ export default function CalendarPage() {
   }, []);
 
   const fetchEvents = (id: string) => {
-    fetch(`${API_BASE}/api/events/${id}`)
+    fetchApi(`${API_BASE}/api/events/${id}`)
       .then(res => res.json())
       .then(data => {
+        const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
         // Transform backend events to UI events
-        const uiEvents = data.map((e: any) => {
+        const uiEvents = eventsArray.map((e: any) => {
           const d = new Date(e.eventDate);
           
           // Calculate row (starts at 6 AM = row 1)
@@ -81,10 +83,10 @@ export default function CalendarPage() {
   const weekDays = getDaysInWeek();
 
   const handleSave = async () => {
-    // combine date and time
+    // combine date and time locally to avoid UTC shifts
     const [hours, minutes] = formData.time.split(':');
-    const d = new Date(formData.eventDate);
-    d.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    const [year, month, day] = formData.eventDate.split('-');
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
 
     const payload = {
       title: formData.title,
@@ -94,36 +96,55 @@ export default function CalendarPage() {
       sellerId
     };
 
-    if (isEditing && formData.id) {
-      await fetch(`${API_BASE}/api/events/${formData.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } else {
-      await fetch(`${API_BASE}/api/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    }
+    try {
+      let res;
+      if (isEditing && formData.id) {
+        res = await fetchApi(`${API_BASE}/api/events/${formData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetchApi(`${API_BASE}/api/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
 
-    setShowModal(false);
-    fetchEvents(sellerId);
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Gagal menyimpan jadwal. Silakan coba lagi.");
+        return;
+      }
+
+      setShowModal(false);
+      fetchEvents(sellerId);
+    } catch (e) {
+      console.error(e);
+      alert("Terjadi kesalahan jaringan.");
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("Hapus jadwal ini?")) {
-      await fetch(`${API_BASE}/api/events/${id}`, { method: 'DELETE' });
+      await fetchApi(`${API_BASE}/api/events/${id}`, { method: 'DELETE' });
       setShowModal(false);
       fetchEvents(sellerId);
     }
   };
 
+  const getLocalYMD = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const openNewEvent = () => {
-    const d = new Date();
+    const d = new Date(activeDateObj);
     d.setDate(activeDay);
-    setFormData({ id: "", title: "", description: "", eventDate: d.toISOString().split('T')[0], time: "08:00", type: "ROUTINE" });
+    setFormData({ id: "", title: "", description: "", eventDate: getLocalYMD(d), time: "08:00", type: "ROUTINE" });
     setIsEditing(false);
     setShowModal(true);
   };
@@ -134,7 +155,7 @@ export default function CalendarPage() {
       id: e.id, 
       title: e.title, 
       description: e.description || "", 
-      eventDate: d.toISOString().split('T')[0], 
+      eventDate: getLocalYMD(d), 
       time: e.time, 
       type: e.type 
     });
@@ -143,7 +164,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="bg-[#F8F6F0] text-[#1C241E] font-sans pb-20" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="bg-[#F8F6F0] text-[#1C241E] font-sans pb-20" >
       
       {/* Header Area */}
       <header className="max-w-[1400px] mx-auto px-6 pt-10 pb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -197,7 +218,7 @@ export default function CalendarPage() {
                       setActiveDateObj(d.fullDate);
                     }
                   }}
-                  className={`flex flex-col items-center justify-center py-4 rounded-3xl transition-all ${activeDay === d.date ? 'bg-pranala text-white shadow-lg' : 'bg-white text-[#1C241E] border border-[#E8E3D2] hover:border-[#B4C179]'}`}
+                  className={`flex flex-col items-center justify-center py-4 rounded-3xl transition-all ${activeDay === d.date ? 'bg-pranata text-white shadow-lg' : 'bg-white text-[#1C241E] border border-[#E8E3D2] hover:border-[#B4C179]'}`}
                 >
                   <span className={`text-sm font-bold mb-1 ${activeDay === d.date ? 'text-[#A4C4A8]' : 'text-[#7A8678]'}`}>{d.day}</span>
                   <span className="text-3xl font-black">{d.date}</span>
@@ -299,7 +320,7 @@ export default function CalendarPage() {
                 <h2 className="text-3xl font-black text-[#1C241E]">{activeDay} {activeDateObj.toLocaleDateString('id-ID', { month: 'short' })}</h2>
                 <p className="text-[#5A635B] font-bold text-sm mt-1">{events.filter(e => e.day === activeDay).length} Scheduled Events</p>
               </div>
-              <button onClick={openNewEvent} className="bg-pranala text-white px-6 py-3 rounded-xl font-bold hover:bg-[#1E362A] transition-colors flex items-center gap-2">
+              <button onClick={openNewEvent} className="bg-pranata text-white px-6 py-3 rounded-xl font-bold hover:bg-[#1E362A] transition-colors flex items-center gap-2">
                 <Plus size={18} /> Tambah Jadwal
               </button>
             </div>
@@ -355,13 +376,33 @@ export default function CalendarPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="flex-1">
+                  <div className="flex-1 relative group">
                     <label className="text-xs font-bold text-[#7A8678] mb-1 block">Tanggal</label>
-                    <input type="date" value={formData.eventDate} onChange={e => setFormData({...formData, eventDate: e.target.value})} className="w-full bg-[#F8F6F0] p-4 rounded-2xl font-bold focus:outline-none focus:ring-2 focus:ring-[#4A7C59]" />
+                    <div className="relative flex items-center bg-[#F8F6F0] border-2 border-transparent group-hover:border-[#E8E3D2] focus-within:border-[#B4C179] focus-within:bg-white rounded-2xl transition-all p-1">
+                      <div className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm text-[#4A7C59] shrink-0 ml-1">
+                        <CalendarIcon size={18} />
+                      </div>
+                      <input 
+                        type="date" 
+                        value={formData.eventDate} 
+                        onChange={e => setFormData({...formData, eventDate: e.target.value})} 
+                        className="w-full bg-transparent p-3 font-bold text-[#1C241E] focus:outline-none cursor-pointer appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+                      />
+                    </div>
                   </div>
-                  <div className="w-1/3">
+                  <div className="w-1/3 relative group">
                     <label className="text-xs font-bold text-[#7A8678] mb-1 block">Jam</label>
-                    <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-[#F8F6F0] p-4 rounded-2xl font-bold focus:outline-none focus:ring-2 focus:ring-[#4A7C59]" />
+                    <div className="relative flex items-center bg-[#F8F6F0] border-2 border-transparent group-hover:border-[#E8E3D2] focus-within:border-[#B4C179] focus-within:bg-white rounded-2xl transition-all p-1">
+                      <div className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm text-[#4A7C59] shrink-0 ml-1">
+                        <Clock size={18} />
+                      </div>
+                      <input 
+                        type="time" 
+                        value={formData.time} 
+                        onChange={e => setFormData({...formData, time: e.target.value})} 
+                        className="w-full bg-transparent p-3 font-bold text-[#1C241E] focus:outline-none cursor-pointer appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -372,7 +413,7 @@ export default function CalendarPage() {
                       <button 
                         key={t}
                         onClick={() => setFormData({...formData, type: t})}
-                        className={`flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-colors ${formData.type === t ? 'border-[#2B4C3B] bg-pranala text-white' : 'border-[#E8E3D2] text-[#5A635B] hover:border-[#A4B0A7]'}`}
+                        className={`flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-colors ${formData.type === t ? 'border-[#2B4C3B] bg-pranata text-white' : 'border-[#E8E3D2] text-[#5A635B] hover:border-[#A4B0A7]'}`}
                       >
                         {t}
                       </button>
@@ -381,13 +422,13 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3 mt-4">
                 {isEditing && (
-                  <button onClick={() => handleDelete(formData.id)} className="w-14 bg-rose-100 hover:bg-rose-200 text-rose-600 flex items-center justify-center rounded-2xl transition-colors">
+                  <button onClick={() => handleDelete(formData.id)} className="w-16 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-500 flex items-center justify-center rounded-2xl transition-colors shadow-sm">
                     <Trash2 size={20} />
                   </button>
                 )}
-                <button onClick={handleSave} className="flex-1 bg-[#1C241E] hover:bg-pranala text-white py-4 rounded-2xl font-bold transition-colors">
+                <button onClick={handleSave} className="flex-1 bg-pranata text-white py-4 rounded-2xl font-black text-lg transition-transform hover:scale-[1.02] shadow-lg hover:shadow-xl active:scale-[0.98]">
                   {isEditing ? 'Simpan Perubahan' : 'Buat Jadwal'}
                 </button>
               </div>

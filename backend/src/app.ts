@@ -1,26 +1,60 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import routes from './routes';
-import { getPrices } from './controllers/dashboard.controller'; // Kept at root for backward compatibility
+import { verifyToken } from './middlewares/auth.middleware';
+import { globalErrorHandler } from './middlewares/error.middleware';
+import { getPrices } from './controllers/dashboard.controller';
+import { getSellerEvents, createEvent, updateEvent, deleteEvent } from './controllers/profile.controller';
 
 const app = express();
 
-app.use(cors());
+// ── Security Headers ──
+app.use(helmet());
+
+// ── CORS ──
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+}));
+
+// ── Body Parser ──
 app.use(express.json({ limit: '5mb' }));
 
-app.get('/api/status', (req: Request, res: Response) => {
-  res.json({ status: 'OK', service: 'Pranata API', version: '1.0.0' });
+// ── Global Rate Limiter (prevents DDoS) ──
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Terlalu banyak request, coba lagi dalam 15 menit.' },
+});
+app.use(globalLimiter);
+
+// ── Strict Rate Limiter for Auth endpoints (prevents brute-force) ──
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Terlalu banyak percobaan login, coba lagi dalam 15 menit.' },
 });
 
-// For backward compatibility since we had /api/prices and /api/events outside
-app.get('/api/prices', getPrices);
+// ── Status Endpoint (public) ──
+app.get('/api/status', (req: Request, res: Response) => {
+  res.json({ status: 'OK', service: 'Pranata API', version: '2.0.0' });
+});
 
-import { getSellerEvents, createEvent, updateEvent, deleteEvent } from './controllers/profile.controller';
-app.get('/api/events/:sellerId', getSellerEvents);
-app.post('/api/events', createEvent);
-app.put('/api/events/:id', updateEvent);
-app.delete('/api/events/:id', deleteEvent);
+// ── Protected Standalone Routes ──
+app.get('/api/prices', verifyToken, getPrices);
+app.get('/api/events/:sellerId', verifyToken, getSellerEvents);
+app.post('/api/events', verifyToken, createEvent);
+app.put('/api/events/:id', verifyToken, updateEvent);
+app.delete('/api/events/:id', verifyToken, deleteEvent);
 
+// ── Main Router (auth rate-limited at profile level) ──
 app.use('/api', routes);
+
+// ── Global Error Handler (must be last) ──
+app.use(globalErrorHandler);
 
 export default app;

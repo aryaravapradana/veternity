@@ -1,89 +1,134 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
+import { z } from 'zod';
+import { getCache, setCache } from '../utils/cache';
+import { logger } from '../utils/logger';
+
+const productSchema = z.object({
+  title: z.string().min(3, 'Judul produk minimal 3 karakter').max(100),
+  description: z.string().max(2000).optional(),
+  category: z.string().default('Lainnya'),
+  price: z.number().positive('Harga harus lebih dari 0'),
+  stock: z.number().int().min(0, 'Stok tidak boleh negatif'),
+  minOrder: z.number().int().min(1).default(1),
+  unit: z.string().default('kg'),
+  imageUrls: z.array(z.string()).default([]),
+  grade: z.string().optional(),
+  aiAnalysis: z.string().optional(),
+});
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.product.findMany({
-      include: { seller: true },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(products);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.min(50, parseInt(String(req.query.limit)) || 20);
+    
+    // Check cache
+    const cacheKey = `products_${page}_${limit}`;
+    const cached = getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: { deletedAt: null },
+        include: { seller: { select: { id: true, username: true, fullName: true, farmName: true, avatarUrl: true, location: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      prisma.product.count({ where: { deletedAt: null } }),
+    ]);
+
+    const result = { data: products, total, page, limit, totalPages: Math.ceil(total / limit) };
+    
+    // Set cache (60 seconds)
+    setCache(cacheKey, result, 60);
+
+    return res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch products' });
+    logger.error('Failed to get all products', error);
+    return res.status(500).json({ error: 'Gagal mengambil produk' });
   }
 };
 
 export const getSellerProducts = async (req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany({
-      where: { sellerId: req.params.id as string },
+      where: { sellerId: String(req.params.id), deletedAt: null },
       orderBy: { createdAt: 'desc' }
     });
-    res.json(products);
+    return res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch seller products' });
+    console.error('[getSellerProducts]', error);
+    return res.status(500).json({ error: 'Gagal mengambil produk seller' });
+  }
+};
+
+export const getProductById = async (req: Request, res: Response) => {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: String(req.params.id), deletedAt: null },
+      include: { seller: { select: { id: true, username: true, fullName: true, farmName: true, avatarUrl: true, location: true } } }
+    });
+    if (!product) return res.status(404).json({ error: 'Produk tidak ditemukan' });
+    return res.json(product);
+  } catch (error) {
+    console.error('[getProductById]', error);
+    return res.status(500).json({ error: 'Gagal mengambil detail produk' });
   }
 };
 
 export const createProduct = async (req: Request, res: Response) => {
+  const sellerId = req.user?.id;
+  if (!sellerId) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.user?.role !== 'PRODUCER') return res.status(403).json({ error: 'Hanya PRODUCER yang bisa menambah produk' });
+
+  const parse = productSchema.safeParse(req.body);
+  if (!parse.success) return res.status(400).json({ error: parse.error.issues[0].message });
+
   try {
-    const { sellerId, title, description, category, price, stock, minOrder, unit, imageUrls } = req.body;
-    const product = await prisma.product.create({
-      data: { 
-        sellerId, 
-        title, 
-        description, 
-        category: category || "Lainnya",
-        price, 
-        stock, 
-        minOrder: minOrder || 1,
-        unit, 
-        imageUrls: imageUrls || []
-      }
-    });
-    res.json(product);
+    const product = await prisma.product.create({ data: { sellerId, ...parse.data } });
+    return res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create product' });
+    console.error('[createProduct]', error);
+    return res.status(500).json({ error: 'Gagal membuat produk' });
   }
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { title, description, category, price, stock, minOrder, unit, imageUrls } = req.body;
-    
-    const existing = await prisma.product.findUnique({ where: { id: id as string } });
-    if (!existing) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+  const id = String(req.params.id);
 
-    const updatedProduct = await prisma.product.update({
-      where: { id: id as string },
-      data: {
-        title: title !== undefined ? title : existing.title,
-        description: description !== undefined ? description : existing.description,
-        category: category !== undefined ? category : existing.category,
-        price: price !== undefined ? price : existing.price,
-        stock: stock !== undefined ? stock : existing.stock,
-        minOrder: minOrder !== undefined ? minOrder : existing.minOrder,
-        unit: unit !== undefined ? unit : existing.unit,
-        imageUrls: imageUrls !== undefined ? imageUrls : existing.imageUrls,
-      }
-    });
-    res.json(updatedProduct);
+  const parse = productSchema.partial().safeParse(req.body);
+  if (!parse.success) return res.status(400).json({ error: parse.error.issues[0].message });
+
+  try {
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Produk tidak ditemukan' });
+    if (existing.sellerId !== req.user?.id) return res.status(403).json({ error: 'Forbidden: bukan produk Anda' });
+
+    const updatedProduct = await prisma.product.update({ where: { id }, data: parse.data });
+    return res.json(updatedProduct);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to update product' });
+    console.error('[updateProduct]', error);
+    return res.status(500).json({ error: 'Gagal memperbarui produk' });
   }
 };
 
 export const deleteProduct = async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+
   try {
-    const { id } = req.params;
-    await prisma.product.delete({ where: { id: id as string } });
-    res.json({ success: true, message: 'Product deleted' });
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Produk tidak ditemukan' });
+    if (existing.sellerId !== req.user?.id) return res.status(403).json({ error: 'Forbidden: bukan produk Anda' });
+
+    await prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
+    return res.json({ success: true, message: 'Produk dihapus' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete product' });
+    console.error('[deleteProduct]', error);
+    return res.status(500).json({ error: 'Gagal menghapus produk' });
   }
 };

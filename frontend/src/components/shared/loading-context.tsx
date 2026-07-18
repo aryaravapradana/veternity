@@ -4,14 +4,14 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { usePathname } from 'next/navigation';
 
 const LoadingContext = createContext({
-  isGlobalReady: true,
+  isGlobalReady: false,
   registerBlocker: (id: string) => {},
   removeBlocker: (id: string) => {}
 });
 
 export const LoadingProvider = ({ children }: { children: React.ReactNode }) => {
   const [blockers, setBlockers] = useState<Set<string>>(new Set());
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(true);
   const pathname = usePathname();
 
   const registerBlocker = useCallback((id: string) => {
@@ -33,7 +33,9 @@ export const LoadingProvider = ({ children }: { children: React.ReactNode }) => 
   // On route change, clear blockers and enter a brief transition state
   // to give the new page's useEffect time to register its blockers.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBlockers(new Set());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsTransitioning(true);
     
     // Give the new page 50ms to register blockers before we declare it "Ready"

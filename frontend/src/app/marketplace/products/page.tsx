@@ -1,4 +1,5 @@
 "use client";
+import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect, memo } from "react";
 import { Search, ChevronLeft, Package, Star, Plus, Minus, X } from "lucide-react";
@@ -9,17 +10,24 @@ import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 const CATEGORIES = [
   { name: "Semua", icon: "🌾" },
-  { name: "Sayuran", icon: "🥬" },
-  { name: "Buah-buahan", icon: "🍎" },
-  { name: "Ternak (Hidup)", icon: "🐄" },
   { name: "Daging", icon: "🥩" },
+  { name: "Susu", icon: "🥛" },
   { name: "Telur", icon: "🥚" },
-  { name: "Susu & Olahan", icon: "🥛" },
-  { name: "Pupuk & Bibit", icon: "🌱" },
-  { name: "Alat Tani", icon: "🚜" },
 ];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+const getCategoryFallbackImage = (category: string) => {
+  const c = (category || "").toLowerCase();
+  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
+  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
+  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
+  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
+  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
+  return "/mocks/mock_ternak_1784287398084.png";
+};
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUpdateQuantity }: { p: any; index: number; onClick: () => void; cartQty: number; onUpdateQuantity: (e: React.MouseEvent, delta: number) => void }) {
@@ -36,7 +44,7 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
     >
       {/* Background Gradient Animation Layer */}
       <div 
-        className={`absolute inset-0 bg-pranala -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
+        className={`absolute inset-0 bg-pranata -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
       />
       {/* Product Image */}
       <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
@@ -49,7 +57,13 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
             className="w-full h-full object-cover"
           />
         ) : (
-          <Package size={40} className="text-[#C4BAA8] opacity-60" />
+          <img 
+            src={getCategoryFallbackImage(p.category)} 
+            alt={p.title} 
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover opacity-90 mix-blend-multiply" 
+          />
         )}
         
         {p.stock === 0 && (
@@ -141,13 +155,14 @@ export default function MarketplaceProductsPage() {
     
     try {
       const [prodRes, cartRes] = await Promise.all([
-        fetch(`${API_BASE}/api/products`).catch(() => null),
-        fetch(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
+        fetchApi(`${API_BASE}/api/products?limit=200`).catch(() => null),
+        fetchApi(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
       ]);
       
       if (prodRes && prodRes.ok) {
         const prodData = await prodRes.json();
-        if (Array.isArray(prodData)) setProducts(prodData);
+        const arr = Array.isArray(prodData) ? prodData : (prodData.data ?? []);
+        setProducts(arr);
       }
       
       if (cartRes && cartRes.ok) {
@@ -207,9 +222,9 @@ export default function MarketplaceProductsPage() {
 
     try {
       if (newQty <= 0) {
-        await fetch(`${API_BASE}/api/cart/${session.id}/${p.id}`, { method: 'DELETE' });
+        await fetchApi(`${API_BASE}/api/cart/${session.id}/${p.id}`, { method: 'DELETE' });
       } else {
-        await fetch(`${API_BASE}/api/cart/${session.id}`, {
+        await fetchApi(`${API_BASE}/api/cart/${session.id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId: p.id, quantity: newQty })
@@ -234,7 +249,7 @@ export default function MarketplaceProductsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
       <MarketplaceNavbar cartCount={cartCount} />
 
       <main className="max-w-[1400px] mx-auto px-4 md:px-8 pt-8 pb-24">

@@ -34,6 +34,7 @@ export function SplashScreen() {
     // This ensures that if the mobile viewport grows (e.g. address bar hides), 
     // the circle hole remains larger than the screen, preventing the circle from "sitting on the screen".
     const requiredRadius = (maxCornerDist / ratio) + 10000; 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTargetRadius(requiredRadius);
 
     // For scale, we need the logo's bounds to clear the screen. 
