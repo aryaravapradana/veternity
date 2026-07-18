@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2, QrCode, HandCoins } from "lucide-react";
 import { motion } from "framer-motion";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
-import MarketplaceNavbar from "@/components/MarketplaceNavbar";
+import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -20,23 +20,30 @@ export default function CheckoutPage() {
   usePageLoading(loading);
 
   useEffect(() => {
-    const sessionStr = localStorage.getItem("farmpro_session");
-    if (!sessionStr) { router.push("/login"); return; }
-    
-    setSession(JSON.parse(sessionStr));
-
-    const savedCart = localStorage.getItem("farmpro_cart");
-    if (savedCart) {
-      const parsed = JSON.parse(savedCart);
-      if (parsed.length === 0) {
-        router.push("/marketplace/cart");
+    const fetchCart = async () => {
+      const sessionStr = localStorage.getItem("farmpro_session");
+      if (sessionStr) {
+        const session = JSON.parse(sessionStr);
+        setSession(session);
+        try {
+          const res = await fetch(`${API_BASE}/api/cart/${session.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.length === 0) {
+              router.push("/marketplace/cart");
+            } else {
+              setCart(data);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
       } else {
-        setCart(parsed);
+        router.push("/marketplace/cart");
       }
-    } else {
-      router.push("/marketplace/cart");
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+    fetchCart();
   }, []);
 
   const handleCheckout = async () => {
@@ -60,14 +67,18 @@ export default function CheckoutPage() {
         shippingFee,
         platformFee: 2500,
         items: cart.map(item => ({ 
-          productId: item.product?.id || item.id, 
+          productId: item.product?.id || item.productId, 
           quantity: item.quantity || item.orderQuantity || 1, 
           price: item.product?.price || item.price || 0
         })),
       }),
     });
     
-    localStorage.removeItem("farmpro_cart");
+    // Clear DB cart
+    try {
+      await fetch(`${API_BASE}/api/cart/${session.id}`, { method: 'DELETE' });
+    } catch (e) {}
+
     router.push("/marketplace/checkout/success");
   };
 

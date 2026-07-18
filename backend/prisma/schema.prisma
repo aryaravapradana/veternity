@@ -66,6 +66,7 @@ model Profile {
   ordersAsBuyer  Order[] @relation("BuyerOrders")
   ordersAsSeller Order[] @relation("SellerOrders")
   sellerEvents   SellerEvent[]
+  cartItems      CartItem[]
 }
 
 model Product {
@@ -84,6 +85,7 @@ model Product {
 
   seller      Profile  @relation(fields: [sellerId], references: [id])
   orderItems  OrderItem[]
+  cartItems   CartItem[]
 }
 
 enum OrderStatus {
@@ -123,4 +125,18 @@ model OrderItem {
 
   order       Order    @relation(fields: [orderId], references: [id])
   product     Product  @relation(fields: [productId], references: [id])
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  buyerId     String
+  productId   String
+  quantity    Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  buyer       Profile  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, productId])
 }

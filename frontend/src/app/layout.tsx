@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 };
 
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
-import { PageTransition } from "@/components/page-transition";
-import { LoadingProvider } from "@/components/loading-context";
+import { PageTransition } from "@/components/layout/page-transition";
+import { LoadingProvider } from "@/components/shared/loading-context";
 
 export default function RootLayout({
   children,

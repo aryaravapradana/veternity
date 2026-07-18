@@ -34,9 +34,7 @@ export default function AiVetPage() {
         {/* Header */}
         <div className="bg-gradient-to-r from-[#2B4C3B] to-[#4A7C59] p-6 flex flex-col md:flex-row items-center justify-between shadow-md z-10 shrink-0">
           <div className="flex items-center gap-4 text-[#F8F6F0]">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-              <Sparkles size={24} className="text-emerald-50" />
-            </div>
+            <img src="/logos/intelligence/intelligence-white.png" alt="Intelligence" className="h-12 w-auto object-contain drop-shadow-md" />
             <div>
               <h1 className="text-2xl font-black tracking-tight">Pranata Agri-LLM</h1>
               <p className="text-[#DDE2D6] text-sm font-medium">Veterinary Intelligence & Diagnosis Engine</p>

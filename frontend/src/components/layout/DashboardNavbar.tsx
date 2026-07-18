@@ -29,7 +29,7 @@ export default function DashboardNavbar() {
       {/* Brand Logo - Kiri */}
       <div className="flex items-center gap-3 shrink-0">
         <Link href="/dashboard" className="h-8 transition-transform hover:scale-105">
-          <img src="/logo black.png" alt="PRANALA" className="h-full object-contain" />
+          <img src="/logos/hub/hub-black.png" alt="PRANALA" className="h-full object-contain" />
         </Link>
       </div>
 
@@ -49,13 +49,13 @@ export default function DashboardNavbar() {
         </Link>
         <Link 
           href="/dashboard/store" 
-          className={`pb-1 ${isActive('/dashboard/store') && !isActive('/dashboard/store/orders') ? 'text-[#1C241E] border-b-2 border-[#1C241E]' : 'hover:text-[#2B4C3B]'}`}
+          className={`pb-1 ${isActive('/dashboard/store') ? 'text-[#1C241E] border-b-2 border-[#1C241E]' : 'hover:text-[#2B4C3B]'}`}
         >
           Toko Saya
         </Link>
         <Link 
-          href="/dashboard/store/orders" 
-          className={`pb-1 ${isActive('/dashboard/store/orders') ? 'text-[#1C241E] border-b-2 border-[#1C241E]' : 'hover:text-[#2B4C3B]'}`}
+          href="/dashboard/orders" 
+          className={`pb-1 ${isActive('/dashboard/orders') ? 'text-[#1C241E] border-b-2 border-[#1C241E]' : 'hover:text-[#2B4C3B]'}`}
         >
           Pesanan
         </Link>

@@ -153,20 +153,23 @@ export default function MainDashboard() {
                   <h3 className="flex items-center gap-2 text-[#2B4C3B] font-bold text-sm">
                     <Package className="text-[#C25939]" size={16} /> Pesanan Aktif
                   </h3>
-                  <Link href="/dashboard/store/orders" className="w-6 h-6 rounded-full bg-[#F8F6F0] flex items-center justify-center text-[#5A635B] hover:bg-[#E8E3D2] transition-colors">
-                    <ChevronRight size={14} />
-                  </Link>
                 </div>
                 
                 <div className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1">
                   {orders.length > 0 ? (
                     orders.map((order, i) => (
                       <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-[#F8F6F0] border border-transparent hover:border-[#E8E3D2] transition-colors shadow-sm">
-                        <div>
-                          <span className="font-black text-xs text-[#1C241E]">INV-{order.id.substring(0,6)}</span>
-                          <p className="text-[10px] font-semibold text-[#5A635B]">{order.items?.length || 1} Item(s)</p>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="font-black text-xs text-[#1C241E] truncate">{order.buyer?.fullName || order.buyer?.username || 'Pembeli'}</span>
+                            <span className="text-[9px] font-bold text-[#A4B0A7] shrink-0">INV-{order.id.substring(0,4)}</span>
+                          </div>
+                          <p className="text-[10px] font-semibold text-[#5A635B] truncate">
+                            {order.items && order.items.length > 0 ? order.items[0].product?.title : 'Produk'} 
+                            {order.items && order.items.length > 1 && ` (+${order.items.length - 1} lainnya)`}
+                          </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                           <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-pranala text-white block mb-1 w-fit ml-auto">
                             {order.status}
                           </span>
@@ -180,6 +183,11 @@ export default function MainDashboard() {
                       <p className="text-xs font-bold text-[#7A8678]">Belum ada pesanan</p>
                     </div>
                   )}
+                </div>
+                <div className="shrink-0 pt-3 flex justify-end border-t border-[#F8F6F0] mt-1">
+                  <Link href="/dashboard/orders" className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#1C241E] px-4 py-2 rounded-full hover:bg-[#2B4C3B] transition-colors shadow-md w-fit">
+                    Semua Pesanan <ChevronRight size={14} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -220,11 +228,6 @@ export default function MainDashboard() {
                   )}
                 </div>
 
-                <div className="shrink-0 pt-2">
-                  <Link href="/dashboard/calendar" className="inline-flex justify-center text-sm font-bold text-[#2B4C3B] bg-white px-5 py-3 rounded-full hover:bg-[#EEF2E6] transition-colors self-start shadow-md w-fit">
-                    Buka Kalender Penuh
-                  </Link>
-                </div>
               </div>
 
               {/* Right Side: Month Grid */}
@@ -280,6 +283,11 @@ export default function MainDashboard() {
                     return cells;
                   })()}
                 </div>
+                <div className="shrink-0 pt-4 flex justify-end mt-auto">
+                  <Link href="/dashboard/calendar" className="inline-flex justify-center items-center gap-1.5 text-xs font-bold text-[#2B4C3B] bg-white px-5 py-2.5 rounded-full hover:bg-[#EEF2E6] transition-colors shadow-md w-fit">
+                    Buka Kalender Penuh <ChevronRight size={14} />
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -303,7 +311,7 @@ export default function MainDashboard() {
               <div className="flex-1 p-6 flex flex-col gap-4 overflow-y-auto bg-white/50 relative">
                 {/* Decorative background logo */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-                  <svg viewBox="0 0 100 100" className="w-48 h-48"><path d="M50 10 L90 90 L10 90 Z" fill="currentColor"/></svg>
+                  <img src="/logos/intelligence/logo black.png" className="w-48 h-48 object-contain" />
                 </div>
                 
                 <div className="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-[#E8E3D2] relative z-10">

@@ -72,8 +72,9 @@ export default function CalendarPage() {
     const first = curr.getDate() - curr.getDay(); 
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const d = new Date(curr.setDate(first + i));
-      days.push({ day: d.toLocaleDateString('en-US', { weekday: 'short' }), date: d.getDate(), fullDate: new Date(d) });
+      const d = new Date(curr);
+      d.setDate(first + i);
+      days.push({ day: d.toLocaleDateString('en-US', { weekday: 'short' }), date: d.getDate(), fullDate: d });
     }
     return days;
   };
@@ -189,8 +190,13 @@ export default function CalendarPage() {
             <div className="flex-1 grid grid-cols-7 gap-4 min-w-[800px]">
               {weekDays.map((d) => (
                 <button 
-                  key={d.date}
-                  onClick={() => setActiveDay(d.date)}
+                  key={d.fullDate.toISOString()}
+                  onClick={() => {
+                    setActiveDay(d.date);
+                    if (d.fullDate.getMonth() !== activeDateObj.getMonth() || d.fullDate.getFullYear() !== activeDateObj.getFullYear()) {
+                      setActiveDateObj(d.fullDate);
+                    }
+                  }}
                   className={`flex flex-col items-center justify-center py-4 rounded-3xl transition-all ${activeDay === d.date ? 'bg-pranala text-white shadow-lg' : 'bg-white text-[#1C241E] border border-[#E8E3D2] hover:border-[#B4C179]'}`}
                 >
                   <span className={`text-sm font-bold mb-1 ${activeDay === d.date ? 'text-[#A4C4A8]' : 'text-[#7A8678]'}`}>{d.day}</span>
@@ -236,7 +242,7 @@ export default function CalendarPage() {
                          </div>
                       )}
 
-                      {events.filter(e => e.day === d.date && e.month === activeDateObj.getMonth()).map((ev, i) => (
+                      {events.filter(e => e.day === d.date && e.month === d.fullDate.getMonth() && e.year === d.fullDate.getFullYear()).map((ev, i) => (
                          <EventCard key={i} event={ev} onClick={() => openEditEvent(ev)} />
                       ))}
                     </div>
@@ -265,7 +271,7 @@ export default function CalendarPage() {
                 
                 {Array.from({length: new Date(activeDateObj.getFullYear(), activeDateObj.getMonth() + 1, 0).getDate()}).map((_, i) => {
                   const day = i + 1;
-                  const dayEvents = events.filter(e => e.day === day && e.month === activeDateObj.getMonth());
+                  const dayEvents = events.filter(e => e.day === day && e.month === activeDateObj.getMonth() && e.year === activeDateObj.getFullYear());
                   return (
                     <div key={i} onClick={() => { setActiveDay(day); setViewMode('Day'); }} className={`min-h-[120px] rounded-2xl p-3 border-2 ${activeDay === day ? 'border-[#2B4C3B] bg-[#F8F6F0]' : 'border-transparent hover:border-[#DDE2D6] bg-white shadow-sm'} cursor-pointer transition-colors relative overflow-hidden group`}>
                       <div className={`font-black mb-2 ${activeDay === day ? 'text-[#C25939]' : 'text-[#1C241E]'} text-lg`}>{day}</div>
@@ -316,7 +322,7 @@ export default function CalendarPage() {
                 </div>
                 
                 <div className="absolute inset-0 px-4 md:w-2/3 lg:w-1/2 pt-4">
-                  {events.filter(e => e.day === activeDay && e.month === activeDateObj.getMonth()).map((e, idx) => (
+                  {events.filter(e => e.day === activeDay && e.month === activeDateObj.getMonth() && e.year === activeDateObj.getFullYear()).map((e, idx) => (
                     <EventCard key={idx} event={e} onClick={() => openEditEvent(e)} />
                   ))}
                 </div>

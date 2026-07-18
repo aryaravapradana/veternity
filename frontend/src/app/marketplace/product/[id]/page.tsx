@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
-import MarketplaceNavbar from "@/components/MarketplaceNavbar";
+import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -43,27 +43,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setLoading(false);
   };
 
-  const handleAddToCart = () => {
-    const savedCart = localStorage.getItem("farmpro_cart");
-    let cartArr = savedCart ? JSON.parse(savedCart) : [];
+  const handleAddToCart = async () => {
+    const sessionStr = localStorage.getItem("farmpro_session");
+    if (!sessionStr) { router.push("/login"); return; }
+    const session = JSON.parse(sessionStr);
     
-    const existingIdx = cartArr.findIndex((i: any) => i.productId === product.id);
-    if (existingIdx >= 0) {
-      cartArr[existingIdx].quantity += quantity;
-    } else {
-      const sessionStr = localStorage.getItem("farmpro_session");
-      const session = sessionStr ? JSON.parse(sessionStr) : { id: "guest" };
-      
-      cartArr.push({
-        id: "cart_" + Date.now(),
-        productId: product.id,
-        quantity: quantity,
-        buyerId: session.id,
-        product: product
+    try {
+      await fetch(`${API_BASE}/api/cart/${session.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, quantity })
       });
+      router.push("/marketplace/cart");
+    } catch (e) {
+      console.error(e);
     }
-    localStorage.setItem("farmpro_cart", JSON.stringify(cartArr));
-    router.push("/marketplace/cart");
   };
 
   const maxQ = product?.stock || 0;

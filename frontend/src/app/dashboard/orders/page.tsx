@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, Package, Clock, CheckCircle, Truck, User, MapPin } from "lucide-react";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -71,13 +71,7 @@ export default function SellerOrdersPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
-      <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-4xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
-          <div className="w-32 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-          <div className="w-32 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-          <div className="w-24" />
-        </div>
-      </div>
+
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-24">
         <div className="w-48 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2] mb-6" />
         <div className="space-y-4">
@@ -114,21 +108,7 @@ export default function SellerOrdersPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" style={{ fontFamily: "'Stack Sans Notch', sans-serif" }}>
-      {/* ── Navbar ── */}
-      <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-4xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
-          <button
-            onClick={() => router.push("/dashboard/store")}
-            className="flex items-center gap-2 text-[#5A635B] hover:text-[#2B4C3B] font-bold text-sm transition-colors"
-          >
-            <ChevronLeft size={20} /> Dasbor Toko
-          </button>
-          <span className="font-black text-sm text-[#1C241E] flex items-center gap-2">
-            <Package size={16} /> Pesanan Masuk
-          </span>
-          <div className="w-24" /> {/* Spacer */}
-        </div>
-      </div>
+
 
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-24">
         <h1 className="text-2xl font-black text-[#1C241E] mb-6">Kelola Pesanan</h1>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGlobalLoading } from "@/components/loading-context";
+import { useGlobalLoading } from "@/components/shared/loading-context";
 import { Loader2 } from "lucide-react";
 
 export function SplashScreen() {
@@ -96,7 +96,7 @@ export function SplashScreen() {
           
           <svg x="calc(50vw - 200px)" y="calc(50vh - 60px)" width="400" height="120" viewBox="0 0 3343 994" overflow="visible">
             {/* The Colored Logo remains static in the center. Only the circular hole expands/shrinks. */}
-            <image href="/logo black.png" width="3343" height="994" />
+            <image href="/logos/basic/logo black.png" width="3343" height="994" />
           </svg>
         </g>
       </svg>

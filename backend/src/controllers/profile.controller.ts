@@ -1,0 +1,127 @@
+import { Request, Response } from 'express';
+import prisma from '../config/prisma';
+
+export const checkUsername = async (req: Request, res: Response) => {
+  const { username } = req.query;
+  if (!username || typeof username !== 'string') {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+  
+  try {
+    const existing = await prisma.profile.findUnique({ where: { username: username.toLowerCase() } });
+    if (existing) {
+      return res.json({ available: false });
+    }
+    res.json({ available: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to check username' });
+  }
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const profile = await prisma.profile.findUnique({
+      where: { id }
+    });
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const { username, fullName, farmName, location, contact, avatarUrl, bannerUrl, currentPassword, newPassword } = req.body;
+
+  try {
+    if (username) {
+      const existing = await prisma.profile.findFirst({
+        where: { username: username.toLowerCase(), NOT: { id } }
+      });
+      if (existing) {
+        return res.status(409).json({ error: 'Username sudah dipakai oleh akun lain.' });
+      }
+    }
+
+    if (newPassword) {
+      const profile = await prisma.profile.findUnique({ where: { id } });
+      if (!profile || profile.password !== currentPassword) {
+        return res.status(401).json({ error: 'Password saat ini tidak sesuai.' });
+      }
+    }
+
+    const updateData: Record<string, any> = {};
+    if (username !== undefined)  updateData.username  = username.toLowerCase();
+    if (fullName !== undefined)  updateData.fullName  = fullName;
+    if (farmName !== undefined)  updateData.farmName  = farmName;
+    if (location !== undefined)  updateData.location  = location;
+    if (contact  !== undefined)  updateData.contact   = contact;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+    if (bannerUrl !== undefined) updateData.bannerUrl = bannerUrl;
+    if (newPassword)             updateData.password  = newPassword;
+
+    const updated = await prisma.profile.update({ where: { id }, data: updateData });
+
+    const { password: _, ...safeProfile } = updated;
+    res.json(safeProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+};
+
+// Seller Events
+export const getSellerEvents = async (req: Request, res: Response) => {
+  try {
+    const sellerId = req.params.sellerId as string;
+    let events = await prisma.sellerEvent.findMany({
+      where: { sellerId },
+      orderBy: { eventDate: 'asc' }
+    });
+    res.json(events);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
+};
+
+export const createEvent = async (req: Request, res: Response) => {
+  try {
+    const { title, description, eventDate, type, sellerId } = req.body;
+    const event = await prisma.sellerEvent.create({
+      data: { title, description, eventDate: new Date(eventDate), type, sellerId }
+    });
+    res.json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
+};
+
+export const updateEvent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { title, description, eventDate, type } = req.body;
+    const event = await prisma.sellerEvent.update({
+      where: { id },
+      data: { title, description, eventDate: new Date(eventDate), type }
+    });
+    res.json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update event' });
+  }
+};
+
+export const deleteEvent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.sellerEvent.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete event' });
+  }
+};

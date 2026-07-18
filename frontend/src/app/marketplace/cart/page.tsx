@@ -3,9 +3,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, ShoppingCart, Menu, Zap, Trash2, Package, ChevronLeft, Clock, CheckCircle, Truck, Store, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter, useSearchParams } from "next/navigation";
-import MarketplaceNavbar from "@/components/MarketplaceNavbar";
+import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -61,8 +61,14 @@ function ActivityContent() {
       setProfile(session);
 
       // Load cart
-      const savedCart = localStorage.getItem("farmpro_cart");
-      if (savedCart) setCart(JSON.parse(savedCart));
+      try {
+        const cartRes = await fetch(`${API_BASE}/api/cart/${session.id}`);
+        if (cartRes.ok) {
+          setCart(await cartRes.json());
+        }
+      } catch (err) {
+        console.error(err);
+      }
 
       // Load orders for this user (acting as buyer)
       try {
@@ -87,28 +93,51 @@ function ActivityContent() {
   };
 
   // --- Cart Actions ---
-  const saveCart = (newCart: any[]) => {
-    setCart(newCart);
-    localStorage.setItem("farmpro_cart", JSON.stringify(newCart));
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  const updateQty = (id: string, delta: number) => {
+  const updateQty = async (id: string, delta: number) => {
+    const itemToUpdate = cart.find(item => item.id === id);
+    if (!itemToUpdate) return;
+    
+    const stock = itemToUpdate.product?.stock || 0;
+    const currentQ = itemToUpdate.quantity || 1;
+    const minQ = 1;
+    const newQ = Math.max(minQ, Math.min(stock, currentQ + delta));
+    
+    // Optimistic update
     const newCart = cart.map(item => {
       if (item.id === id) {
-        const stock = item.product?.stock || 0;
-        const currentQ = item.quantity || item.orderQuantity || 1;
-        const minQ = 1;
-        const newQ = Math.max(minQ, Math.min(stock, currentQ + delta));
-        return { ...item, quantity: newQ, orderQuantity: newQ };
+        return { ...item, quantity: newQ };
       }
       return item;
     });
-    saveCart(newCart);
+    setCart(newCart);
+
+    try {
+      if (profile) {
+        await fetch(`${API_BASE}/api/cart/${profile.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: itemToUpdate.productId, quantity: newQ })
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const removeItem = (id: string) => {
-    saveCart(cart.filter(item => item.id !== id));
+  const removeItem = async (id: string) => {
+    const itemToRemove = cart.find(item => item.id === id);
+    if (!itemToRemove) return;
+
+    setCart(cart.filter(item => item.id !== id));
+    try {
+      if (profile) {
+        await fetch(`${API_BASE}/api/cart/${profile.id}/${itemToRemove.productId}`, {
+          method: 'DELETE'
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const subtotal = cart.reduce((sum, item) => sum + ((item.product?.price || 0) * (item.quantity || item.orderQuantity || 1)), 0);

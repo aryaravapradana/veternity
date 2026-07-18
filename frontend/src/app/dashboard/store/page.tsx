@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Store, Package, Plus, CheckCircle, Image as ImageIcon, Info, X, Edit2, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
 export default function StoreDashboardPage() {
@@ -194,36 +194,20 @@ export default function StoreDashboardPage() {
           </div>
           <div className="w-40 h-12 rounded-xl skeleton-shimmer bg-[#3A6B49]" />
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-6">
-            <div className="w-48 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2]" />
-            <div className="grid sm:grid-cols-2 gap-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-white border border-[#DDE2D6] rounded-3xl p-5">
-                  <div className="h-40 w-full rounded-2xl skeleton-shimmer bg-[#E8E3D2] mb-4" />
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="w-1/2 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-                    <div className="w-16 h-6 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
-                  </div>
-                  <div className="w-full h-3 rounded-md skeleton-shimmer bg-[#E8E3D2] mb-3" />
-                  <div className="w-1/3 h-8 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+        <div className="space-y-6">
+          <div className="w-48 h-8 rounded-xl skeleton-shimmer bg-[#E8E3D2]" />
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white border border-[#DDE2D6] rounded-3xl p-5">
+                <div className="h-40 w-full rounded-2xl skeleton-shimmer bg-[#E8E3D2] mb-4" />
+                <div className="flex justify-between items-start mb-2">
+                  <div className="w-1/2 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+                  <div className="w-16 h-6 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-white border border-[#DDE2D6] rounded-3xl p-6 h-fit space-y-6">
-            <div className="w-48 h-6 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-            <div className="space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="border-b border-[#F8F6F0] pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="w-24 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-                    <div className="w-16 h-4 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-                  </div>
-                  <div className="w-32 h-3 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
-                </div>
-              ))}
-            </div>
+                <div className="w-full h-3 rounded-md skeleton-shimmer bg-[#E8E3D2] mb-3" />
+                <div className="w-1/3 h-8 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -260,14 +244,13 @@ export default function StoreDashboardPage() {
         </div>
 
         {/* Content Tabs */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="space-y-6">
           
           {/* Main List */}
-          <div className="md:col-span-2 space-y-6">
-            <h2 className="text-2xl font-black text-[#2B4C3B]">
-              My Active Listings
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-6">
+          <h2 className="text-2xl font-black text-[#2B4C3B]">
+            My Active Listings
+          </h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.length === 0 && <p className="text-[#5A635B]">No active products.</p>}
               {products.map((p) => (
                 <div key={p.id} className="bg-white border border-[#DDE2D6] rounded-3xl p-5 shadow-sm hover:shadow-md transition-all group overflow-hidden">
@@ -300,29 +283,6 @@ export default function StoreDashboardPage() {
               ))}
             </div>
           </div>
-
-          {/* Side Panel (Orders) */}
-          <div className="bg-white border border-[#DDE2D6] rounded-3xl p-6 shadow-sm h-fit">
-            <h2 className="text-xl font-black text-[#2B4C3B] mb-6 flex items-center gap-2">
-              <Package size={24} /> 
-              Incoming Orders
-            </h2>
-            <div className="space-y-4">
-              {orders.length === 0 && <p className="text-[#5A635B] text-sm">No recent activity.</p>}
-              {orders.map(o => (
-                <div key={o.id} className="border-b border-[#F8F6F0] pb-4 last:border-0">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-sm">Order #{o.id.substring(0,8)}</span>
-                    <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                      <CheckCircle size={12}/> {o.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#5A635B]">Total: Rp {o.totalAmount.toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Enhanced Add Product Modal */}
         <AnimatePresence>

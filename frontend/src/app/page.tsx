@@ -33,7 +33,7 @@ export default function LandingPage() {
           <div className="px-2 sm:px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-8">
-                <img src="/logo-white.png" alt="PRANALA" className="h-full object-contain" />
+                <img src="/logos/basic/logo-white.png" alt="PRANALA" className="h-full object-contain" />
               </div>
               <span className="font-extrabold text-lg text-slate-50 hidden sm:block">PRANALA Org</span>
             </div>
@@ -71,7 +71,7 @@ export default function LandingPage() {
               <span className="text-[11px] font-bold">Platform</span>
             </Link>
             <div className="w-14 h-14 bg-gradient-to-br from-[#2B4C3B] to-[#4A7C59] rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white/80 -mt-6 p-2">
-              <img src="/logo-white.png" alt="PRANALA" className="w-full h-full object-contain" />
+              <img src="/logos/basic/logo-white.png" alt="PRANALA" className="w-full h-full object-contain" />
             </div>
             <Link href="/dashboard" className="flex flex-col items-center gap-1 text-slate-500 hover:text-sky-600 transition-colors">
               <span className="text-[11px] font-bold">Log In</span>
@@ -85,7 +85,7 @@ export default function LandingPage() {
         {/* Full-Bleed Background Image with Blend Modes */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img 
-            src="/hero section.png" 
+            src="/images/hero section.png" 
             alt="PRANALA Hero Mobile Backdrop" 
             className="w-full h-full object-cover object-top opacity-80" 
           />
@@ -205,7 +205,7 @@ export default function LandingPage() {
         className="hidden md:flex relative w-full items-center justify-center -mt-[19rem] z-20 pointer-events-none overflow-visible"
       >
         <img 
-          src="/hero section.png" 
+          src="/images/hero section.png" 
           alt="PRANALA Hero Desktop" 
           className="w-[220vw] max-w-[6000px] min-w-[2000px] h-auto drop-shadow-[0_50px_100px_rgba(0,0,0,0.2)] rounded-t-[8rem] pointer-events-none translate-x-8" 
         />

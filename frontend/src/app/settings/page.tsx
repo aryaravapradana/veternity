@@ -6,7 +6,7 @@ import {
   Eye, EyeOff, Save, Loader2, Store, MapPin, Phone, ImageIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";

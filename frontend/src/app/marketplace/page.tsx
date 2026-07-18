@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, memo, useRef } from "react";
-import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Menu, Zap, ChevronRight, ChevronLeft } from "lucide-react";
+import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Minus, Menu, Zap, ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
-import { usePageLoading } from "@/components/loading-context";
+import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import MarketplaceNavbar from "@/components/MarketplaceNavbar";
+import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -32,16 +32,22 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
-const ProductCard = memo(function ProductCard({ p, index, onClick, onAddToCart }: { p: any; index: number; onClick: () => void; onAddToCart: (e: React.MouseEvent) => void }) {
+const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUpdateQuantity }: { p: any; index: number; onClick: () => void; cartQty: number; onUpdateQuantity: (e: React.MouseEvent, delta: number) => void }) {
   return (
     <motion.div
       onClick={p.stock > 0 ? onClick : undefined}
       whileHover={p.stock > 0 ? { y: -4, boxShadow: "0 12px 24px -12px rgba(43,76,59,0.15)" } : {}}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`bg-white border border-[#E8E3D2] rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative ${
+      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 ${
+        cartQty > 0 ? "border-transparent shadow-[0_12px_24px_-8px_rgba(43,76,59,0.3)]" : "bg-white border border-[#E8E3D2]"
+      } ${
         p.stock > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
       }`}
     >
+      {/* Background Gradient Animation Layer */}
+      <div 
+        className={`absolute inset-0 bg-pranala -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
+      />
       {/* Product Image */}
       <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
         {p.imageUrls && p.imageUrls.length > 0 ? (
@@ -72,23 +78,42 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, onAddToCart }
 
       {/* Product Info */}
       <div className="flex flex-col items-center text-center flex-1">
-        <h3 className="font-black text-[#1C241E] text-[15px] leading-tight mb-1 line-clamp-1 w-full" title={p.title}>{p.title}</h3>
-        <p className="text-[#5A635B] text-xs font-semibold">{p.category || "Produk"}</p>
-        <p className="text-[#A4B0A7] text-[11px] font-bold mt-1.5 mb-3">Stok {p.stock} {p.unit}</p>
+        <h3 className={`font-black text-[15px] leading-tight mb-1 line-clamp-1 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
+        <p className={`text-xs font-semibold ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</p>
+        <p className={`text-[11px] font-bold mt-1.5 mb-3 ${cartQty > 0 ? "text-white/60" : "text-[#A4B0A7]"}`}>Stok {p.stock} {p.unit}</p>
         
-        <p className="text-xl font-black text-[#2B4C3B] mt-auto">
+        <p className={`text-xl font-black mt-auto ${cartQty > 0 ? "text-white" : "text-[#2B4C3B]"}`}>
           Rp {p.price?.toLocaleString()}
         </p>
       </div>
 
       {/* Add Button */}
       {p.stock > 0 ? (
-        <button 
-          onClick={onAddToCart}
-          className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
-        >
-          <Plus size={20} strokeWidth={3} />
-        </button>
+        cartQty > 0 ? (
+          <div className="mt-5 w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-2 rounded-xl rounded-b-[1.25rem] flex items-center justify-between px-4 shadow-sm" onClick={(e) => e.stopPropagation()}>
+            <button onClick={(e) => onUpdateQuantity(e, -1)} className="p-1 hover:bg-white/20 rounded-md transition-colors"><Minus size={18} strokeWidth={3} /></button>
+            <AnimatePresence mode="popLayout">
+              <motion.span 
+                key={cartQty}
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="font-black"
+              >
+                {cartQty}
+              </motion.span>
+            </AnimatePresence>
+            <button onClick={(e) => onUpdateQuantity(e, 1)} disabled={cartQty >= p.stock} className={`p-1 rounded-md transition-colors ${cartQty >= p.stock ? 'opacity-50 pointer-events-none' : 'hover:bg-white/20'}`}><Plus size={18} strokeWidth={3} /></button>
+          </div>
+        ) : (
+          <button 
+            onClick={(e) => onUpdateQuantity(e, 1)}
+            className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
+          >
+            <Plus size={20} strokeWidth={3} />
+          </button>
+        )
       ) : (
         <div className="mt-5 w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center">
           <X size={20} strokeWidth={3} />
@@ -112,6 +137,8 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [animations, setAnimations] = useState<any[]>([]);
   const [viewAll, setViewAll] = useState(false);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   
@@ -143,33 +170,60 @@ export default function MarketplacePage() {
     }
   };
 
-  const addToCart = (e: React.MouseEvent, p: any) => {
+  const handleUpdateQuantity = async (e: React.MouseEvent, p: any, delta: number) => {
     e.stopPropagation();
+    
+    // Spawn animation if adding for the first time
+    const existing = cartItems.find(item => item.productId === p.id);
+    const currentQty = existing ? existing.quantity : 0;
+    if (currentQty === 0 && delta > 0) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const animId = Date.now();
+      setAnimations(prev => [...prev, { id: animId, x: rect.left + rect.width/2 - 20, y: rect.top, image: p.imageUrls?.[0] }]);
+      setTimeout(() => {
+        setAnimations(prev => prev.filter(a => a.id !== animId));
+      }, 500); // 0.5s animation
+    }
+
     const sessionStr = localStorage.getItem("farmpro_session");
     if (!sessionStr) { router.push("/login"); return; }
     const session = JSON.parse(sessionStr);
 
-    let savedCart: any[] = [];
-    try {
-      const stored = localStorage.getItem("farmpro_cart");
-      if (stored) savedCart = JSON.parse(stored);
-    } catch (e) {}
+    const newQty = currentQty + delta;
 
-    const existing = savedCart.find((item: any) => item.productId === p.id);
-    if (existing) {
-      existing.quantity += 1;
+    if (newQty > p.stock) return;
+
+    // Optimistic update
+    let newCart = [...cartItems];
+    if (newQty <= 0) {
+      newCart = newCart.filter(item => item.productId !== p.id);
     } else {
-      savedCart.push({
-        id: "cart_" + Date.now(),
-        productId: p.id,
-        quantity: 1,
-        buyerId: session.id,
-        product: p
-      });
+      if (existing) {
+        existing.quantity = newQty;
+      } else {
+        newCart.push({ productId: p.id, quantity: newQty, product: p });
+      }
+    }
+    setCartItems(newCart);
+    if (currentQty === 0 && delta > 0) {
+      setTimeout(() => setCartCount(newCart.length), 400); // Sync with animation arrival
+    } else {
+      setCartCount(newCart.length);
     }
 
-    localStorage.setItem("farmpro_cart", JSON.stringify(savedCart));
-    setCartCount(savedCart.length);
+    try {
+      if (newQty <= 0) {
+        await fetch(`${API_BASE}/api/cart/${session.id}/${p.id}`, { method: 'DELETE' });
+      } else {
+        await fetch(`${API_BASE}/api/cart/${session.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: p.id, quantity: newQty })
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const { scrollY } = useScroll();
@@ -184,16 +238,32 @@ export default function MarketplacePage() {
     if (!sessionStr) { router.push("/login"); return; }
     const session = JSON.parse(sessionStr);
     setProfile(session);
-    const [prodRes, ordRes] = await Promise.all([
-      fetch(`${API_BASE}/api/products`),
-      fetch(`${API_BASE}/api/orders/BUYER/${session.id}`),
-    ]);
-    setProducts(await prodRes.json());
-    setOrders(await ordRes.json());
-    
-    const savedCart = localStorage.getItem("farmpro_cart");
-    if (savedCart) {
-      setCartCount(JSON.parse(savedCart).length);
+    try {
+      const [prodRes, ordRes, cartRes] = await Promise.all([
+        fetch(`${API_BASE}/api/products`).catch(() => null),
+        fetch(`${API_BASE}/api/orders/BUYER/${session.id}`).catch(() => null),
+        fetch(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
+      ]);
+      
+      if (prodRes && prodRes.ok) {
+        const prodData = await prodRes.json();
+        if (Array.isArray(prodData)) setProducts(prodData);
+      }
+      
+      if (ordRes && ordRes.ok) {
+        const ordData = await ordRes.json();
+        if (Array.isArray(ordData)) setOrders(ordData);
+      }
+      
+      if (cartRes && cartRes.ok) {
+        const cartData = await cartRes.json();
+        if (Array.isArray(cartData)) {
+          setCartItems(cartData);
+          setCartCount(cartData.length);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load data:", e);
     }
     
     setLoading(false);
@@ -357,10 +427,10 @@ export default function MarketplacePage() {
             {selectedCategory === "Semua" ? "Mungkin Anda butuhkan" : selectedCategory}
           </h2>
           <button 
-            onClick={() => setViewAll(!viewAll)}
+            onClick={() => router.push('/marketplace/products')}
             className="flex items-center gap-1 text-[#C25939] font-bold text-sm hover:gap-2 transition-all"
           >
-            {viewAll ? "Kembali" : "Lihat lainnya"} <ChevronRight size={16} strokeWidth={3} className={viewAll ? "rotate-180 transition-transform" : "transition-transform"} />
+            Lihat lainnya <ChevronRight size={16} strokeWidth={3} className="transition-transform" />
           </button>
         </div>
 
@@ -370,60 +440,37 @@ export default function MarketplacePage() {
             <p className="text-[#A4B0A7] text-sm font-medium">Coba ubah kata kunci atau kategori pencarian.</p>
           </div>
         ) : (
-          <div className={viewAll ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-8 px-1" : "flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1"}>
-            {filteredProducts.map((p, i) => (
-              <div key={p.id} className={`${viewAll ? "w-full" : "snap-start shrink-0 w-48"} bg-white border border-[#E8E3D2] rounded-[2rem] p-4 flex flex-col shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group hover:-translate-y-1 transition-transform relative cursor-pointer`} onClick={() => router.push(`/marketplace/product/${p.id}`)}>
-                
-                {/* Product Image Placeholder */}
-                <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-95 transition-transform overflow-hidden relative shrink-0">
-                  {p.imageUrls && p.imageUrls.length > 0 ? (
-                    <img src={p.imageUrls[0]} alt={p.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <Package size={40} className="text-[#C4BAA8] opacity-60" />
-                  )}
-                  {p.stock === 0 && (
-                    <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[2px]">
-                      <span className="bg-[#C25939] text-white font-black px-3 py-1 rounded-xl text-xs shadow-lg rotate-[-10deg]">
-                        HABIS
-                      </span>
-                    </div>
-                  )}
-                  {i < 2 && p.stock > 0 && (
-                    <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
-                      <Star size={10} fill="currentColor" /> TERLARIS
-                    </div>
-                  )}
+          <div className="flex overflow-x-auto hide-scrollbar gap-5 pb-8 snap-x px-1">
+            {filteredProducts.map((p, i) => {
+              const qty = cartItems.find(item => item.productId === p.id)?.quantity || 0;
+              return (
+                <div key={p.id} className="snap-start shrink-0 w-48">
+                  <ProductCard 
+                    p={p} 
+                    index={i} 
+                    onClick={() => router.push(`/marketplace/product/${p.id}`)}
+                    cartQty={qty}
+                    onUpdateQuantity={(e, delta) => handleUpdateQuantity(e, p, delta)} 
+                  />
                 </div>
-
-                {/* Product Info */}
-                <div className="flex flex-col items-center text-center flex-1">
-                  <h3 className="font-black text-[#1C241E] text-[15px] leading-tight mb-1 line-clamp-1 w-full" title={p.title}>{p.title}</h3>
-                  <p className="text-[#5A635B] text-xs font-semibold">{p.category}</p>
-                  <p className="text-[#A4B0A7] text-[11px] font-bold mt-1.5 mb-3">Stok {p.stock} {p.unit}</p>
-                  
-                  <p className="text-xl font-black text-[#2B4C3B] mt-auto">
-                    Rp {p.price?.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Add Button */}
-                {p.stock > 0 ? (
-                  <button 
-                    onClick={(e) => addToCart(e, p)}
-                    className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
-                  >
-                    <Plus size={20} strokeWidth={3} />
-                  </button>
-                ) : (
-                  <div className="mt-5 w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center">
-                    <X size={20} strokeWidth={3} />
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Fly to Cart Animations */}
+      {animations.map(anim => (
+        <motion.div
+          key={anim.id}
+          initial={{ x: anim.x, y: anim.y, scale: 1, opacity: 1 }}
+          animate={{ x: window.innerWidth - 40, y: 30, scale: 0.1, opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="fixed top-0 left-0 z-[100] w-12 h-12 rounded-xl shadow-xl overflow-hidden border-2 border-[#2B4C3B] bg-white flex items-center justify-center pointer-events-none"
+        >
+          {anim.image ? <img src={anim.image} className="w-full h-full object-cover" /> : <Package size={20} className="text-[#2B4C3B]" />}
+        </motion.div>
+      ))}
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar { display: none; }

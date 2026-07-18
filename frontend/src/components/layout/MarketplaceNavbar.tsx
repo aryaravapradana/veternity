@@ -4,36 +4,49 @@ import { useState, useEffect } from "react";
 import { Search, ShoppingCart, Menu, Zap, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function MarketplaceNavbar({ 
   searchQuery, 
   setSearchQuery,
   leftContent,
-  centerContent
+  centerContent,
+  cartCount
 }: { 
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
   leftContent?: React.ReactNode;
   centerContent?: React.ReactNode;
+  cartCount?: number;
 }) {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const [cartCount, setCartCount] = useState(0);
+  const [localCartCount, setLocalCartCount] = useState(0);
+
+  const displayCartCount = cartCount !== undefined ? cartCount : localCartCount;
 
   useEffect(() => {
     const sessionStr = localStorage.getItem("farmpro_session");
     if (sessionStr) setProfile(JSON.parse(sessionStr));
 
-    const checkCart = () => {
-      const saved = localStorage.getItem("farmpro_cart");
-      if (saved) setCartCount(JSON.parse(saved).length);
-      else setCartCount(0);
+    const checkCart = async () => {
+      if (!sessionStr) return;
+      const session = JSON.parse(sessionStr);
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/${session.id}`);
+        if (res.ok) {
+          const cartData = await res.json();
+          if (Array.isArray(cartData)) setLocalCartCount(cartData.length);
+        }
+      } catch (e) {
+        // network error, ignore polling failure
+      }
     };
 
     checkCart();
     
-    // Polling is acceptable for localstorage sync across identical tabs in a demo
-    const interval = setInterval(checkCart, 1000);
+    const interval = setInterval(checkCart, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -46,7 +59,7 @@ export default function MarketplaceNavbar({
         <div className="flex items-center gap-4 shrink-0">
           <Link href="/marketplace" className="flex items-center gap-2 group">
             <div className="h-8 group-hover:scale-105 transition-transform">
-              <img src="/logo black.png" alt="PRANALA" className="h-full object-contain" />
+              <img src="/logos/marketplace/marketplace-black.png" alt="PRANALA" className="h-full object-contain" />
             </div>
           </Link>
         </div>
@@ -74,16 +87,24 @@ export default function MarketplaceNavbar({
 
       {/* Right: Info & Profile */}
       <div className="flex items-center gap-4 shrink-0">
-        <button onClick={() => router.push("/marketplace/cart")} className="relative transition-transform hover:scale-105">
-          <div className="w-10 h-10 bg-white border border-[#E8E3D2] rounded-xl flex items-center justify-center shadow-sm">
-            <ShoppingCart size={18} className="text-[#2B4C3B]" />
-          </div>
-          {cartCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-[#C25939] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
-              {cartCount}
-            </span>
-          )}
-        </button>
+        {/* Cart */}
+        <Link href="/marketplace/cart" className="relative p-2 text-[#5A635B] hover:text-[#2B4C3B] hover:bg-[#E8E3D2]/50 rounded-xl transition-all">
+          <ShoppingCart size={24} />
+          <AnimatePresence>
+            {displayCartCount > 0 && (
+              <motion.span 
+                key={displayCartCount}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-[#F8F6F0]"
+              >
+                {displayCartCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
         <button onClick={() => router.push("/settings")} className="flex items-center gap-3 transition-transform hover:scale-105 pl-2">
           <div className="w-10 h-10 rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm">
             <img src={profile?.avatarUrl || profile?.avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Felix"} alt="Profile" className="w-full h-full object-cover" />

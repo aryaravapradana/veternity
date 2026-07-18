@@ -2,28 +2,28 @@
 
 @font-face {
   font-family: 'ClearfaceStd';
-  src: url('./fonts/clearface/ClearfaceStd-Regular.woff2') format('woff2');
+  src: url('/fonts/clearface/ClearfaceStd-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ClearfaceStd';
-  src: url('./fonts/clearface/ClearfaceStd-Bold.woff2') format('woff2');
+  src: url('/fonts/clearface/ClearfaceStd-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ClearfaceStd';
-  src: url('./fonts/clearface/ClearfaceStd-Heavy.woff2') format('woff2');
+  src: url('/fonts/clearface/ClearfaceStd-Heavy.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ClearfaceStd';
-  src: url('./fonts/clearface/ClearfaceStd-Black.woff2') format('woff2');
+  src: url('/fonts/clearface/ClearfaceStd-Black.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -31,42 +31,42 @@
 
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-light-58646b33e0551.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-light-58646b33e0551.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-medium-58646be638f96.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-medium-58646be638f96.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-semibold-58646eddcae92.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-semibold-58646eddcae92.otf') format('opentype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-bold-58646a511e3d9.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-bold-58646a511e3d9.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-heavy-586470160b9e5.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-heavy-586470160b9e5.otf') format('opentype');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SFUIDisplay';
-  src: url('./fonts/SF UI/sf-ui-display-black-58646a6b80d5a.otf') format('opentype');
+  src: url('/fonts/SF%20UI/sf-ui-display-black-58646a6b80d5a.otf') format('opentype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
