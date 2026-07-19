@@ -181,9 +181,9 @@ export default function NewProductPage() {
             {stepperStep === 1 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { name: "Daging", icon: "🥩", desc: "Sapi, Kambing, Ayam, dll.", theme: "hover:border-red-400 hover:bg-red-50" },
-                  { name: "Susu", icon: "🥛", desc: "Susu sapi segar, kambing, dll.", theme: "hover:border-blue-400 hover:bg-blue-50" },
-                  { name: "Telur", icon: "🥚", desc: "Telur ayam, bebek, puyuh, dll.", theme: "hover:border-amber-400 hover:bg-amber-50" }
+                  { name: "Daging", image: "/icons/daging.png", desc: "Sapi, Kambing, Ayam, dll.", theme: "hover:border-red-400 hover:bg-red-50" },
+                  { name: "Susu", image: "/icons/susu.png", desc: "Susu sapi segar, kambing, dll.", theme: "hover:border-blue-400 hover:bg-blue-50" },
+                  { name: "Telur", image: "/icons/telor.png", desc: "Telur ayam, bebek, puyuh, dll.", theme: "hover:border-amber-400 hover:bg-amber-50" }
                 ].map(cat => (
                   <button 
                     key={cat.name}
@@ -193,7 +193,7 @@ export default function NewProductPage() {
                     }}
                     className={`flex flex-col items-center justify-center p-10 bg-[#F8F6F0] rounded-3xl border-2 border-[#E8E3D2] transition-all shadow-sm group hover:-translate-y-2 ${cat.theme}`}
                   >
-                    <span className="text-7xl mb-6 group-hover:scale-110 transition-transform">{cat.icon}</span>
+                    <img src={cat.image} alt={cat.name} className="w-20 h-20 mb-6 object-contain group-hover:scale-110 transition-transform" />
                     <h3 className="font-black text-2xl text-[#1C241E] mb-3">{cat.name}</h3>
                     <p className="text-sm font-semibold text-[#7A8678] text-center leading-tight">{cat.desc}</p>
                   </button>

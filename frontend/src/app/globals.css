@@ -218,3 +218,5 @@ html, body, * {
   animation: shimmer 1.5s infinite;
   content: '';
 }
+
+.contain-content { contain: content; }

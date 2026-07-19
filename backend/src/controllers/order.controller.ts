@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { getCache, setCache, delCache } from '../utils/cache';
 import prisma from '../config/prisma';
 import { z } from 'zod';
 import { JobQueue } from '../utils/queue';
@@ -106,6 +107,10 @@ export const getOrdersByRole = async (req: Request, res: Response) => {
   if (req.user?.id !== id) return res.status(403).json({ error: 'Forbidden' });
   if (!['PRODUCER', 'BUYER'].includes(role)) return res.status(400).json({ error: 'Role tidak valid' });
 
+  const cacheKey = `orders_${role}_${id}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   try {
     const orders = await prisma.order.findMany({
       where: role === 'PRODUCER' ? { sellerId: id } : { buyerId: id },
@@ -116,6 +121,7 @@ export const getOrdersByRole = async (req: Request, res: Response) => {
       },
       orderBy: { createdAt: 'desc' }
     });
+    setCache(cacheKey, orders, 30);
     return res.json(orders);
   } catch (error) {
     console.error('[getOrdersByRole]', error);
@@ -136,6 +142,11 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     if (req.user?.id !== order.sellerId) return res.status(403).json({ error: 'Forbidden' });
 
     const updatedOrder = await prisma.order.update({ where: { id }, data: { status } });
+    
+    // Invalidate caches
+    delCache(`orders_PRODUCER_${order.sellerId}`);
+    delCache(`orders_BUYER_${order.buyerId}`);
+
     return res.json(updatedOrder);
   } catch (error) {
     console.error('[updateOrderStatus]', error);

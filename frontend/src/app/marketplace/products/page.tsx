@@ -1,18 +1,18 @@
 "use client";
 import { fetchApi } from "@/lib/apiClient";
 
-import { useState, useEffect, memo } from "react";
-import { Search, ChevronLeft, Package, Star, Plus, Minus, X } from "lucide-react";
+import { useState, useEffect, memo, useMemo, useRef } from "react";
+import { Search, MapPin, ChevronRight, Package, ArrowRight, Minus, Plus, ShoppingBag, Store, User, Star, CheckCircle, Info, Crown, ChevronLeft, X, SlidersHorizontal, Sparkles, TrendingDown, TrendingUp, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 const CATEGORIES = [
-  { name: "Semua", icon: "🌾" },
-  { name: "Daging", icon: "🥩" },
-  { name: "Susu", icon: "🥛" },
-  { name: "Telur", icon: "🥚" },
+  { name: "Semua", icon: "🌾", image: null },
+  { name: "Daging", icon: "🥩", image: "/icons/daging.png" },
+  { name: "Susu", icon: "🥛", image: "/icons/susu.png" },
+  { name: "Telur", icon: "🥚", image: "/icons/telor.png" },
 ];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -33,10 +33,12 @@ const getCategoryFallbackImage = (category: string) => {
 const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUpdateQuantity }: { p: any; index: number; onClick: () => void; cartQty: number; onUpdateQuantity: (e: React.MouseEvent, delta: number) => void }) {
   return (
     <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "500px" }}
+      transition={{ duration: 0.3 }}
       onClick={p.stock > 0 ? onClick : undefined}
-      whileHover={p.stock > 0 ? { y: -4, boxShadow: "0 12px 24px -12px rgba(43,76,59,0.15)" } : {}}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 ${
+      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 will-change-transform will-change-opacity ${
         cartQty > 0 ? "border-transparent shadow-[0_12px_24px_-8px_rgba(43,76,59,0.3)]" : "bg-white border border-[#E8E3D2]"
       } ${
         p.stock > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
@@ -52,7 +54,6 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
           <img
             src={p.imageUrls[0]}
             alt={p.title}
-            loading="lazy"
             decoding="async"
             className="w-full h-full object-cover"
           />
@@ -60,7 +61,6 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
           <img 
             src={getCategoryFallbackImage(p.category)} 
             alt={p.title} 
-            loading="lazy"
             decoding="async"
             className="w-full h-full object-cover opacity-90 mix-blend-multiply" 
           />
@@ -73,6 +73,7 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
             </span>
           </div>
         )}
+
         {index < 2 && p.stock > 0 && (
           <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
             <Star size={10} fill="currentColor" /> TERLARIS
@@ -81,14 +82,38 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       </div>
 
       {/* Product Info */}
-      <div className="flex flex-col items-center text-center flex-1">
-        <h3 className={`font-black text-[15px] leading-tight mb-1 line-clamp-1 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
-        <p className={`text-xs font-semibold ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</p>
-        <p className={`text-[11px] font-bold mt-1.5 mb-3 ${cartQty > 0 ? "text-white/60" : "text-[#A4B0A7]"}`}>Stok {p.stock} {p.unit}</p>
+      <div className="flex flex-col items-start flex-1 w-full text-left mt-1">
+        <h3 className={`font-black text-[15px] leading-tight mb-2 line-clamp-2 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
         
-        <p className={`text-xl font-black mt-auto ${cartQty > 0 ? "text-white" : "text-[#2B4C3B]"}`}>
-          Rp {p.price?.toLocaleString()}
-        </p>
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <div className={`px-2 py-1 rounded-lg ${cartQty > 0 ? "bg-white/10" : "bg-[#F8F6F0]"}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</span>
+          </div>
+          {p.grade && (() => {
+            const g = p.grade.toLowerCase();
+            let style = { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", icon: Info };
+            if (g === "premium") style = { bg: "bg-gradient-to-r from-amber-200 to-yellow-400", text: "text-amber-900", border: "border-amber-300", icon: Crown };
+            else if (g.includes("a")) style = { bg: "bg-gradient-to-r from-emerald-100 to-emerald-300", text: "text-emerald-900", border: "border-emerald-400", icon: Star };
+            else if (g.includes("b")) style = { bg: "bg-gradient-to-r from-cyan-100 to-cyan-300", text: "text-cyan-900", border: "border-cyan-400", icon: CheckCircle };
+            else if (g.includes("c")) style = { bg: "bg-gradient-to-r from-orange-100 to-orange-300", text: "text-orange-900", border: "border-orange-400", icon: Info };
+            const GradeIcon = style.icon;
+            return (
+              <span className={`${style.bg} ${style.text} border ${style.border} px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm ${cartQty > 0 ? "opacity-90" : ""}`}>
+                <GradeIcon size={10} strokeWidth={3} />
+                {p.grade}
+              </span>
+            );
+          })()}
+        </div>
+        
+        <div className={`mt-auto w-full pt-3 border-t flex items-end justify-between ${cartQty > 0 ? "border-white/20" : "border-[#E8E3D2]/50"}`}>
+          <div>
+            <p className={`text-lg font-black leading-none mb-1 ${cartQty > 0 ? "text-white" : "text-[#C25939]"}`}>
+              Rp {p.price?.toLocaleString()}
+            </p>
+            <p className={`text-[10px] font-bold ${cartQty > 0 ? "text-white/80" : "text-[#2B4C3B]"}`}>Stok: {p.stock} {p.unit}</p>
+          </div>
+        </div>
       </div>
 
       {/* Add Button */}
@@ -126,6 +151,62 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
     </motion.div>
   );
 });
+// ─── Custom Dropdown ────────────────────────────────────────────────────────────
+const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: { value: string, options: {label: any, value: string}[], onChange: (val: string) => void, icon: any, placeholder?: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  const displayValue = options.find(o => o.value === value)?.label || placeholder || value;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between gap-3 bg-white border-2 border-[#E8E3D2] text-[#2B4C3B] font-black text-sm rounded-full py-2.5 pl-4 pr-3 hover:bg-[#F8F6F0] hover:border-[#DDE2D6] transition-all shadow-sm min-w-[160px]"
+      >
+        <div className="flex items-center gap-2">
+          <Icon size={16} className="text-[#C25939]" />
+          <span>{displayValue}</span>
+        </div>
+        <ChevronRight size={16} className={`text-[#A4B0A7] transition-transform duration-300 ${isOpen ? "rotate-90" : "rotate-0"}`} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute right-0 mt-2 w-56 bg-white border-2 border-[#E8E3D2] rounded-3xl p-2 shadow-[0_12px_24px_-8px_rgba(43,76,59,0.15)] z-50 overflow-hidden"
+          >
+            {options.map((opt, i) => (
+              <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
+                key={opt.value}
+                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors flex items-center gap-2 ${
+                  value === opt.value ? "bg-[#2B4C3B] text-white" : "text-[#5A635B] hover:bg-[#F8F6F0] hover:text-[#1C241E]"
+                }`}
+              >
+                {opt.label}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 
 export default function MarketplaceProductsPage() {
@@ -137,6 +218,8 @@ export default function MarketplaceProductsPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [sortBy, setSortBy] = useState("Terbaru");
+  const [selectedGrade, setSelectedGrade] = useState("Semua Grade");
   
   usePageLoading(loading);
 
@@ -235,10 +318,27 @@ export default function MarketplaceProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    (selectedCategory === "Semua" || p.category === selectedCategory) &&
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    let filtered = products.filter(p => {
+      const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
+      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      let matchGrade = true;
+      if (selectedCategory === "Daging" && selectedGrade !== "Semua Grade") {
+        matchGrade = p.grade && p.grade.toLowerCase().includes(selectedGrade.toLowerCase());
+      }
+      return matchCat && matchSearch && matchGrade;
+    });
+
+    filtered.sort((a, b) => {
+      if (sortBy === "Harga Terendah") return a.price - b.price;
+      if (sortBy === "Harga Tertinggi") return b.price - a.price;
+      // Terbaru
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return filtered;
+  }, [products, searchQuery, selectedCategory, selectedGrade, sortBy]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
@@ -290,10 +390,47 @@ export default function MarketplaceProductsPage() {
                       : "bg-[#F8F6F0] text-[#5A635B] hover:bg-[#E8E3D2] hover:text-[#1C241E]"
                   }`}
                 >
-                  <span className="text-lg">{cat.icon}</span> {cat.name}
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="w-5 h-5 object-contain" />
+                  ) : (
+                    <span className="text-lg">{cat.icon}</span>
+                  )}
+                  {cat.name}
                 </button>
               ))}
             </div>
+          </div>
+          
+          <div className="hidden md:block w-px h-8 bg-[#E8E3D2]" />
+          
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 relative z-20 shrink-0 px-4 md:px-0">
+            {selectedCategory === "Daging" && (
+              <CustomDropdown
+                value={selectedGrade}
+                onChange={setSelectedGrade}
+                icon={Star}
+                placeholder="Filter Grade"
+                options={[
+                  { label: <div className="flex items-center gap-2">Semua Grade</div>, value: "Semua Grade" },
+                  { label: <div className="flex items-center gap-2">Premium <Crown size={14} className="text-[#F5990D]" /></div>, value: "Premium" },
+                  { label: <div className="flex items-center gap-2">Grade A <Star size={14} className="text-emerald-600" /></div>, value: "Grade A" },
+                  { label: <div className="flex items-center gap-2">Grade B <CheckCircle size={14} className="text-cyan-600" /></div>, value: "Grade B" },
+                  { label: <div className="flex items-center gap-2">Grade C <Info size={14} className="text-amber-600" /></div>, value: "Grade C" },
+                ]}
+              />
+            )}
+            
+            <CustomDropdown
+              value={sortBy}
+              onChange={setSortBy}
+              icon={SlidersHorizontal}
+              placeholder="Urutkan"
+              options={[
+                { label: <div className="flex items-center gap-2">Terbaru</div>, value: "Terbaru" },
+                { label: <div className="flex items-center gap-2"><TrendingDown size={14} className="text-[#2B4C3B]" /> Harga Terendah</div>, value: "Harga Terendah" },
+                { label: <div className="flex items-center gap-2"><TrendingUp size={14} className="text-[#C25939]" /> Harga Tertinggi</div>, value: "Harga Tertinggi" }
+              ]}
+            />
           </div>
         </div>
 

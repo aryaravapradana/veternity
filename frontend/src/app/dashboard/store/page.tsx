@@ -37,15 +37,30 @@ export default function StoreDashboardPage() {
 
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-    const prodRes = await fetchApi(`${API_BASE}/api/products/seller/${session.id}`);
-    const pData = await prodRes.json();
-    setProducts(Array.isArray(pData) ? pData : []);
-    
-    const ordRes = await fetchApi(`${API_BASE}/api/orders/PRODUCER/${session.id}`);
-    const oData = await ordRes.json();
-    setOrders(Array.isArray(oData) ? oData : []);
-    
-    setLoading(false);
+    try {
+      const prodRes = await fetchApi(`${API_BASE}/api/products/seller/${session.id}`);
+      const pData = await prodRes.json();
+      setProducts(Array.isArray(pData) ? pData : []);
+      
+      const ordRes = await fetchApi(`${API_BASE}/api/orders/PRODUCER/${session.id}`);
+      const oData = await ordRes.json();
+      setOrders(Array.isArray(oData) ? oData : []);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to load store data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGradeStyle = (grade: string | null) => {
+    if (!grade) return null;
+    const g = grade.toLowerCase();
+    if (g === "premium") return { bg: "bg-gradient-to-r from-amber-200 to-yellow-400", text: "text-amber-900", border: "border-amber-300", icon: Crown };
+    if (g.includes("a")) return { bg: "bg-gradient-to-r from-emerald-100 to-emerald-300", text: "text-emerald-900", border: "border-emerald-400", icon: Star };
+    if (g.includes("b")) return { bg: "bg-gradient-to-r from-cyan-100 to-cyan-300", text: "text-cyan-900", border: "border-cyan-400", icon: CheckCircle };
+    if (g.includes("c")) return { bg: "bg-gradient-to-r from-orange-100 to-orange-300", text: "text-orange-900", border: "border-orange-400", icon: Info };
+    return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", icon: Info };
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -129,29 +144,41 @@ export default function StoreDashboardPage() {
                       <div className="w-full h-full flex items-center justify-center text-gray-400"><ImageIcon size={40} /></div>
                     )}
                   </div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold text-[#1C241E] truncate pr-2">{p.title}</h3>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="bg-[#E8E3D2] text-[#2B4C3B] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                        {p.stock} {p.unit}
-                      </span>
-                      {p.grade && (
-                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shadow-sm">
-                          {p.grade}
-                        </span>
-                      )}
+                  <div className="flex flex-col items-start w-full">
+                    <h3 className="text-lg font-black text-[#1C241E] line-clamp-2 leading-tight mb-2 pr-2">{p.title}</h3>
+                    
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <div className="bg-[#F8F6F0] px-2 py-1 rounded-lg">
+                        <span className="text-[10px] font-bold text-[#5A635B] uppercase tracking-wider">{p.category || "Produk"}</span>
+                      </div>
+                      {p.grade && (() => {
+                        const style = getGradeStyle(p.grade);
+                        if (!style) return null;
+                        const GradeIcon = style.icon;
+                        return (
+                          <span className={`${style.bg} ${style.text} border ${style.border} px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm`}>
+                            <GradeIcon size={10} strokeWidth={3} />
+                            {p.grade}
+                          </span>
+                        );
+                      })()}
                     </div>
-                  </div>
-                  {p.description && <p className="text-xs text-[#5A635B] line-clamp-2 mb-3">{p.description}</p>}
-                  <div className="flex justify-between items-end mt-1">
-                    <p className="text-2xl font-black text-[#C25939]">Rp {p.price.toLocaleString()}</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => router.push(`/dashboard/store/edit/${p.id}`)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-emerald-100 hover:text-emerald-700 transition-colors">
-                        <Edit2 size={16} />
-                      </button>
-                      <button onClick={() => handleDeleteProduct(p.id)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
-                        <Trash2 size={16} />
-                      </button>
+
+                    {p.description && <p className="text-xs text-[#5A635B] line-clamp-2 mb-3">{p.description}</p>}
+
+                    <div className="mt-auto w-full pt-3 border-t border-[#E8E3D2]/50 flex items-end justify-between">
+                      <div>
+                        <p className="font-black text-[#C25939] text-xl leading-none mb-1">Rp {p.price.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold text-[#2B4C3B]">Stok: {p.stock} {p.unit}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => router.push(`/dashboard/store/edit/${p.id}`)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-emerald-100 hover:text-emerald-700 transition-colors">
+                          <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

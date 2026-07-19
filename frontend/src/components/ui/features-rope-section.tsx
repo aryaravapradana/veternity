@@ -249,8 +249,8 @@ export function FeaturesRopeSection() {
             return (
               <motion.div 
                 key={index}
-                initial={{ opacity: 0, y: 80, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 80 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-15%" }}
                 transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
                 className={`flex w-full mx-auto justify-center
@@ -258,6 +258,7 @@ export function FeaturesRopeSection() {
                     feature.layout === "left-card" ? "lg:justify-start" : "lg:justify-end"}
                   ${index === features.length - 1 ? "" : 
                     (index === 2 || index === 3) ? "lg:mb-[15rem]" : "lg:mb-[34rem]"}
+                  will-change-transform will-change-opacity
                 `}
               >
                 <FeatureCard feature={feature} layout={feature.layout} index={index} />

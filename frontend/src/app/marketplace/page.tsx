@@ -2,7 +2,7 @@
 import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect, useCallback, memo, useRef, useMemo } from "react";
-import { Store, ShoppingCart, Truck, CheckCircle, Search, SlidersHorizontal, ArrowRight, Package, MapPin, Star, ShieldCheck, X, Settings, Bird, Plus, Minus, Menu, Zap, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, MapPin, ChevronRight, Package, ArrowRight, Minus, Plus, ShoppingBag, Store, User, Star, CheckCircle, Info, Crown, Truck, SlidersHorizontal, X, Settings, Bird, Menu, Zap, ChevronLeft, Sparkles, TrendingDown, TrendingUp, Layers } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
 import { usePageLoading } from "@/components/shared/loading-context";
@@ -12,10 +12,10 @@ import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { name: "Semua", icon: "🌾" },
-  { name: "Daging", icon: "🥩" },
-  { name: "Susu", icon: "🥛" },
-  { name: "Telur", icon: "🥚" },
+  { name: "Semua", icon: "🌾", image: null },
+  { name: "Daging", icon: "🥩", image: "/icons/daging.png" },
+  { name: "Susu", icon: "🥛", image: "/icons/susu.png" },
+  { name: "Telur", icon: "🥚", image: "/icons/telor.png" },
 ];
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -43,10 +43,12 @@ const getCategoryFallbackImage = (category: string) => {
 const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUpdateQuantity }: { p: any; index: number; onClick: () => void; cartQty: number; onUpdateQuantity: (e: React.MouseEvent, delta: number) => void }) {
   return (
     <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "500px" }}
+      transition={{ duration: 0.3 }}
       onClick={p.stock > 0 ? onClick : undefined}
-      whileHover={p.stock > 0 ? { y: -4, boxShadow: "0 12px 24px -12px rgba(43,76,59,0.15)" } : {}}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 ${
+      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 will-change-transform will-change-opacity ${
         cartQty > 0 ? "border-transparent shadow-[0_12px_24px_-8px_rgba(43,76,59,0.3)]" : "bg-white border border-[#E8E3D2]"
       } ${
         p.stock > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
@@ -62,7 +64,6 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
           <img
             src={p.imageUrls[0]}
             alt={p.title}
-            loading="lazy"
             decoding="async"
             className="w-full h-full object-cover"
           />
@@ -70,7 +71,6 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
           <img 
             src={getCategoryFallbackImage(p.category)} 
             alt={p.title} 
-            loading="lazy"
             decoding="async"
             className="w-full h-full object-cover opacity-90 mix-blend-multiply" 
           />
@@ -91,21 +91,38 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       </div>
 
       {/* Product Info */}
-      <div className="flex flex-col items-center text-center flex-1">
-        <h3 className={`font-black text-[15px] leading-tight mb-1 line-clamp-1 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
-        <p className={`text-xs font-semibold ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</p>
-        <div className="flex gap-1 items-center mt-1.5 mb-3">
-          <p className={`text-[11px] font-bold ${cartQty > 0 ? "text-white/60" : "text-[#A4B0A7]"}`}>Stok {p.stock} {p.unit}</p>
-          {p.grade && (
-            <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-sm ml-1">
-              {p.grade}
-            </span>
-          )}
+      <div className="flex flex-col items-start flex-1 w-full text-left mt-1">
+        <h3 className={`font-black text-[15px] leading-tight mb-2 line-clamp-2 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
+        
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <div className={`px-2 py-1 rounded-lg ${cartQty > 0 ? "bg-white/10" : "bg-[#F8F6F0]"}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</span>
+          </div>
+          {p.grade && (() => {
+            const g = p.grade.toLowerCase();
+            let style = { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", icon: Info };
+            if (g === "premium") style = { bg: "bg-gradient-to-r from-amber-200 to-yellow-400", text: "text-amber-900", border: "border-amber-300", icon: Crown };
+            else if (g.includes("a")) style = { bg: "bg-gradient-to-r from-emerald-100 to-emerald-300", text: "text-emerald-900", border: "border-emerald-400", icon: Star };
+            else if (g.includes("b")) style = { bg: "bg-gradient-to-r from-cyan-100 to-cyan-300", text: "text-cyan-900", border: "border-cyan-400", icon: CheckCircle };
+            else if (g.includes("c")) style = { bg: "bg-gradient-to-r from-orange-100 to-orange-300", text: "text-orange-900", border: "border-orange-400", icon: Info };
+            const GradeIcon = style.icon;
+            return (
+              <span className={`${style.bg} ${style.text} border ${style.border} px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm ${cartQty > 0 ? "opacity-90" : ""}`}>
+                <GradeIcon size={10} strokeWidth={3} />
+                {p.grade}
+              </span>
+            );
+          })()}
         </div>
         
-        <p className={`text-xl font-black mt-auto ${cartQty > 0 ? "text-white" : "text-[#2B4C3B]"}`}>
-          Rp {p.price?.toLocaleString()}
-        </p>
+        <div className={`mt-auto w-full pt-3 border-t flex items-end justify-between ${cartQty > 0 ? "border-white/20" : "border-[#E8E3D2]/50"}`}>
+          <div>
+            <p className={`text-lg font-black leading-none mb-1 ${cartQty > 0 ? "text-white" : "text-[#C25939]"}`}>
+              Rp {p.price?.toLocaleString()}
+            </p>
+            <p className={`text-[10px] font-bold ${cartQty > 0 ? "text-white/80" : "text-[#2B4C3B]"}`}>Stok: {p.stock} {p.unit}</p>
+          </div>
+        </div>
       </div>
 
       {/* Add Button */}
@@ -146,6 +163,63 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
 
 // Removed OrderRow as it's now in dedicated Orders page
 
+// ─── Custom Dropdown ────────────────────────────────────────────────────────────
+const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: { value: string, options: {label: any, value: string}[], onChange: (val: string) => void, icon: any, placeholder?: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  const displayValue = options.find(o => o.value === value)?.label || placeholder || value;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between gap-3 bg-white border-2 border-[#E8E3D2] text-[#2B4C3B] font-black text-sm rounded-full py-2.5 pl-4 pr-3 hover:bg-[#F8F6F0] hover:border-[#DDE2D6] transition-all shadow-sm min-w-[160px]"
+      >
+        <div className="flex items-center gap-2">
+          <Icon size={16} className="text-[#C25939]" />
+          <span>{displayValue}</span>
+        </div>
+        <ChevronRight size={16} className={`text-[#A4B0A7] transition-transform duration-300 ${isOpen ? "rotate-90" : "rotate-0"}`} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute right-0 mt-2 w-56 bg-white border-2 border-[#E8E3D2] rounded-3xl p-2 shadow-[0_12px_24px_-8px_rgba(43,76,59,0.15)] z-50 overflow-hidden"
+          >
+            {options.map((opt, i) => (
+              <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
+                key={opt.value}
+                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors flex items-center gap-2 ${
+                  value === opt.value ? "bg-[#2B4C3B] text-white" : "text-[#5A635B] hover:bg-[#F8F6F0] hover:text-[#1C241E]"
+                }`}
+              >
+                {opt.label}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function MarketplacePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -157,6 +231,7 @@ export default function MarketplacePage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [sortBy, setSortBy] = useState("Terbaru");
   const [selectedGrade, setSelectedGrade] = useState("Semua Grade");
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -304,11 +379,18 @@ export default function MarketplacePage() {
       return matchCat && matchSearch && matchGrade;
     });
 
+    filtered.sort((a, b) => {
+      if (sortBy === "Harga Terendah") return a.price - b.price;
+      if (sortBy === "Harga Tertinggi") return b.price - a.price;
+      // Terbaru
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
     return {
       displayedProducts: filtered.slice(0, 10),
       hasMore: filtered.length > 10
     };
-  }, [products, searchQuery, selectedCategory, selectedGrade]);
+  }, [products, searchQuery, selectedCategory, selectedGrade, sortBy]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
@@ -445,7 +527,11 @@ export default function MarketplacePage() {
             >
               <h3 className={`font-black text-base ${selectedCategory === cat.name ? "text-white" : "text-[#1C241E]"}`}>{cat.name}</h3>
               <p className={`text-xs font-semibold ${selectedCategory === cat.name ? "text-[#A4C4A8]" : "text-[#7A8678]"}`}>Kategori</p>
-              <span className={`text-4xl absolute bottom-3 right-3 group-hover:scale-110 transition-transform origin-bottom-right ${selectedCategory === cat.name ? "opacity-100" : "opacity-80"}`}>{cat.icon}</span>
+              {cat.image ? (
+                <img src={cat.image} alt={cat.name} className={`w-10 h-10 absolute bottom-3 right-3 object-contain group-hover:scale-110 transition-transform origin-bottom-right ${selectedCategory === cat.name ? "opacity-100" : "opacity-80"}`} />
+              ) : (
+                <span className={`text-4xl absolute bottom-3 right-3 group-hover:scale-110 transition-transform origin-bottom-right ${selectedCategory === cat.name ? "opacity-100" : "opacity-80"}`}>{cat.icon}</span>
+              )}
             </div>
           ))}
         </div>
@@ -458,25 +544,39 @@ export default function MarketplacePage() {
             {selectedCategory === "Semua" ? "Mungkin Anda butuhkan" : selectedCategory}
           </h2>
           
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 relative z-20">
+            {selectedCategory === "Daging" && (
+              <CustomDropdown
+                value={selectedGrade}
+                onChange={setSelectedGrade}
+                icon={Star}
+                placeholder="Filter Grade"
+                options={[
+                  { label: <div className="flex items-center gap-2">Semua Grade</div>, value: "Semua Grade" },
+                  { label: <div className="flex items-center gap-2">Premium <Crown size={14} className="text-[#F5990D]" /></div>, value: "Premium" },
+                  { label: <div className="flex items-center gap-2">Grade A <Star size={14} className="text-emerald-600" /></div>, value: "Grade A" },
+                  { label: <div className="flex items-center gap-2">Grade B <CheckCircle size={14} className="text-cyan-600" /></div>, value: "Grade B" },
+                  { label: <div className="flex items-center gap-2">Grade C <Info size={14} className="text-amber-600" /></div>, value: "Grade C" },
+                ]}
+              />
+            )}
+
+            <CustomDropdown
+              value={sortBy}
+              onChange={setSortBy}
+              icon={SlidersHorizontal}
+              placeholder="Urutkan"
+              options={[
+                { label: <div className="flex items-center gap-2">Terbaru</div>, value: "Terbaru" },
+                { label: <div className="flex items-center gap-2"><TrendingDown size={14} className="text-[#2B4C3B]" /> Harga Terendah</div>, value: "Harga Terendah" },
+                { label: <div className="flex items-center gap-2"><TrendingUp size={14} className="text-[#C25939]" /> Harga Tertinggi</div>, value: "Harga Tertinggi" }
+              ]}
+            />
+
             {hasMore && (
-              <button onClick={() => router.push(`/marketplace/products?category=${selectedCategory}`)} className="text-[#C25939] font-bold text-sm hover:underline flex items-center gap-1 bg-[#FFF5F2] px-4 py-2 rounded-full">
+              <button onClick={() => router.push(`/marketplace/products?category=${selectedCategory}`)} className="text-white font-bold text-sm flex items-center gap-2 bg-[#C25939] px-5 py-2.5 rounded-full hover:bg-[#A34529] hover:-translate-y-0.5 transition-all shadow-md ml-auto sm:ml-2">
                 Lihat Semua <ArrowRight size={16} />
               </button>
-            )}
-            
-            {selectedCategory === "Daging" && (
-              <select 
-                value={selectedGrade} 
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="bg-white border border-[#E8E3D2] text-[#2B4C3B] font-bold text-sm rounded-full py-2 px-4 outline-none focus:ring-2 focus:ring-[#C25939] shadow-sm appearance-none"
-              >
-                <option value="Semua Grade">Semua Grade</option>
-                <option value="Premium">Grade Premium</option>
-                <option value="Grade A">Grade A</option>
-                <option value="Grade B">Grade B</option>
-                <option value="Grade C">Grade C</option>
-              </select>
             )}
           </div>
         </div>

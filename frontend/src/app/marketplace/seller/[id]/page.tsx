@@ -104,7 +104,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
           {/* Banner */}
           <div className="relative h-40 sm:h-52 bg-pranata overflow-hidden">
             {seller.bannerUrl ? (
-              <img src={seller.bannerUrl} alt="Banner" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              <img src={seller.bannerUrl} alt="Banner" decoding="async" className="w-full h-full object-cover" />
             ) : (
               /* Fallback earthy SVG pattern */
               <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -123,7 +123,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
               {/* Circular avatar overlapping banner */}
               <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white overflow-hidden bg-pranata shadow-xl shrink-0">
                 {seller.avatarUrl ? (
-                  <img src={seller.avatarUrl} alt={seller.farmName || seller.fullName} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  <img src={seller.avatarUrl} alt={seller.farmName || seller.fullName} decoding="async" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white font-black text-4xl">
                     {initials}
@@ -201,9 +201,8 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
                       <img
                         src={p.imageUrls[0]}
                         alt={p.title}
-                        loading="lazy"
                         decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

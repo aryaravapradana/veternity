@@ -237,7 +237,7 @@ export default function CheckoutPage() {
                 <div key={i} className="flex gap-3">
                   <div className="w-12 h-12 rounded-xl bg-[#F1EBE1] overflow-hidden shrink-0">
                     {item.product?.imageUrls && item.product.imageUrls.length > 0
-                      ? <img src={item.product.imageUrls[0]} className="w-full h-full object-cover" loading="lazy" />
+                      ? <img src={item.product.imageUrls[0]} className="w-full h-full object-cover" decoding="async" />
                       : <div className="w-full h-full flex items-center justify-center"><Store size={18} className="text-[#A4B0A7]" /></div>
                     }
                   </div>

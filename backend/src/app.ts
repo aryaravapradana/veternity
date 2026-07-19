@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import routes from './routes';
 import { verifyToken } from './middlewares/auth.middleware';
 import { globalErrorHandler } from './middlewares/error.middleware';
@@ -11,7 +12,9 @@ import { getSellerEvents, createEvent, updateEvent, deleteEvent } from './contro
 const app = express();
 
 // ── Security Headers ──
+// ── Security Headers & Compression ──
 app.use(helmet());
+app.use(compression());
 
 // ── CORS ──
 app.use(cors({

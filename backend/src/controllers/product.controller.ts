@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 import { z } from 'zod';
-import { getCache, setCache } from '../utils/cache';
+import { getCache, setCache, flushCache } from '../utils/cache';
 import { logger } from '../utils/logger';
 
 const productSchema = z.object({
@@ -91,6 +91,7 @@ export const createProduct = async (req: Request, res: Response) => {
 
   try {
     const product = await prisma.product.create({ data: { sellerId, ...parse.data } });
+    flushCache();
     return res.status(201).json(product);
   } catch (error) {
     console.error('[createProduct]', error);
@@ -110,6 +111,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (existing.sellerId !== req.user?.id) return res.status(403).json({ error: 'Forbidden: bukan produk Anda' });
 
     const updatedProduct = await prisma.product.update({ where: { id }, data: parse.data });
+    flushCache();
     return res.json(updatedProduct);
   } catch (error) {
     console.error('[updateProduct]', error);
@@ -126,6 +128,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
     if (existing.sellerId !== req.user?.id) return res.status(403).json({ error: 'Forbidden: bukan produk Anda' });
 
     await prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
+    flushCache();
     return res.json({ success: true, message: 'Produk dihapus' });
   } catch (error) {
     console.error('[deleteProduct]', error);

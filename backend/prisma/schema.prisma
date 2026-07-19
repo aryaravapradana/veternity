@@ -87,6 +87,8 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   @@index([sellerId])
+  @@index([sellerId, deletedAt])
+  @@index([deletedAt])
 
   seller      Profile  @relation(fields: [sellerId], references: [id])
   orderItems  OrderItem[]
@@ -117,6 +119,8 @@ model Order {
 
   @@index([buyerId])
   @@index([sellerId])
+  @@index([buyerId, createdAt(sort: Desc)])
+  @@index([sellerId, createdAt(sort: Desc)])
 
   buyer       Profile     @relation("BuyerOrders", fields: [buyerId], references: [id])
   seller      Profile     @relation("SellerOrders", fields: [sellerId], references: [id])

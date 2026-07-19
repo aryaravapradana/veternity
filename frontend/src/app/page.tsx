@@ -33,6 +33,8 @@ export default function LandingPage() {
             src="/images/hero section.png" 
             alt="Pranata Hero Mobile Backdrop" 
             className="w-full h-full object-cover object-top opacity-80" 
+            fetchPriority="high"
+            decoding="async"
           />
           {/* Heavy Gradient Overlay to make text legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8F6F0] via-[#F8F6F0]/90 to-transparent h-full w-full" />
@@ -44,7 +46,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
-            className="w-full"
+            className="w-full will-change-transform will-change-opacity"
           >
             <h1 
               className="text-[2.2rem] sm:text-4xl font-black text-[#1C241E] tracking-tight mb-5 leading-none whitespace-nowrap flex flex-col items-center justify-center"
@@ -127,7 +129,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
-            className="relative flex flex-col items-center justify-center w-full"
+            className="relative flex flex-col items-center justify-center w-full will-change-transform will-change-opacity"
           >
             <h1 
               className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-bold text-[#1C241E] tracking-tight mb-6 md:mb-8 leading-none whitespace-nowrap flex flex-col items-center justify-center"
@@ -211,6 +213,8 @@ export default function LandingPage() {
           src="/images/hero section.png" 
           alt="Pranata Hero Desktop" 
           className="w-full h-auto rounded-t-[8rem] pointer-events-none object-cover" 
+          fetchPriority="high"
+          decoding="async"
         />
         
         {/* Smooth Gradient Fade to Rope Section */}
@@ -230,9 +234,9 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <motion.div 
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.8, type: "spring" }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="bg-rust rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-96 h-96 bg-vibrant/40 rounded-full blur-3xl" />
