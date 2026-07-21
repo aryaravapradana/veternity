@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { checkUsername, getProfile, updateProfile, getSellerEvents, createEvent, updateEvent, deleteEvent } from '../controllers/profile.controller';
+import { getProfile, updateProfile, getSellerEvents, createEvent, updateEvent, deleteEvent } from '../controllers/profile.controller';
 
 const router = Router();
 
-router.get('/check-username', checkUsername);
 router.get('/:id', getProfile);
 router.patch('/:id', updateProfile);
 
