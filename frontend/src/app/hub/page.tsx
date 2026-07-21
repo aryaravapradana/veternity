@@ -26,6 +26,7 @@ export default function MainDashboard() {
   // Products State for AI
   const [products, setProducts] = useState<any[]>([]);
   const [allMarketplaceCount, setAllMarketplaceCount] = useState<number>(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // AI Live Tile State
   const { messages, append, isLoading, setMessages } = useChat({
@@ -38,15 +39,16 @@ export default function MainDashboard() {
 
   // Cache AI messages when they finish loading
   useEffect(() => {
-    if (!isLoading && messages.length > 0) {
-      const currentHash = `${products.length}_${orders.length}_${events.length}`;
-      localStorage.setItem('pranata_ai_insight_cache', JSON.stringify({
+    if (!isLoading && messages.length > 0 && profile?.id) {
+      const prodIds = products.map(p => p.id).sort().join(',');
+      const currentHash = `${profile.id}_${prodIds}_${orders.length}_${events.length}`;
+      localStorage.setItem(`pranata_ai_insight_cache_${profile.id}`, JSON.stringify({
         timestamp: Date.now(),
         dataHash: currentHash,
         messages: messages
       }));
     }
-  }, [messages, isLoading, products.length, orders.length, events.length]);
+  }, [messages, isLoading, profile?.id, products, orders.length, events.length]);
 
   useEffect(() => {
     // 1. Session Auth
@@ -81,10 +83,12 @@ export default function MainDashboard() {
       setOrders(ordersArray.slice(0, 2));
       setProducts(productsArray);
       setAllMarketplaceCount(allProductsArray.length);
+      setIsLoaded(true);
     }).catch(() => {
       setOrders([]);
       setProducts([]);
       setAllMarketplaceCount(0);
+      setIsLoaded(true);
     });
       
     fetchApi(`${API_BASE}/api/events/${session.id}`)
@@ -132,21 +136,16 @@ export default function MainDashboard() {
 
   // Auto-trigger AI Insight once everything is ready
   useEffect(() => {
-    // Only trigger if we have profile and the data arrays have at least initialized (even if empty)
-    if (profile && !hasTriggeredInsight.current) {
-      // Don't trigger if absolutely no data exists to analyze
-      if (products.length === 0 && orders.length === 0 && events.length === 0) {
-        return;
-      }
-      
-      // Add a slight delay to ensure all async fetches (weather, events) have populated
+    if (profile?.id && isLoaded && !hasTriggeredInsight.current) {
       setTimeout(() => {
         if (!hasTriggeredInsight.current) {
           hasTriggeredInsight.current = true;
           
           let shouldFetchNew = true;
-          const currentHash = `${products.length}_${orders.length}_${events.length}`;
-          const cachedStr = localStorage.getItem('pranata_ai_insight_cache');
+          const prodIds = products.map(p => p.id).sort().join(',');
+          const currentHash = `${profile.id}_${prodIds}_${orders.length}_${events.length}`;
+          const cacheKey = `pranata_ai_insight_cache_${profile.id}`;
+          const cachedStr = localStorage.getItem(cacheKey);
           
           if (cachedStr) {
             try {
@@ -160,12 +159,15 @@ export default function MainDashboard() {
           }
 
           if (shouldFetchNew) {
-            append({ role: 'user', content: 'Berikan tepat 2 insight bisnis paling krusial untuk saya hari ini. WAJIB GUNAKAN FORMAT KAKU BERIKUT tanpa tambahan teks apapun di awal/akhir:\n\nTITLE: [Kata kunci 1-2 kata]\nVALUE: [Angka/Status menonjol]\nDESC: [1 kalimat singkat actionable]\nCTA_TEXT: [Teks tombol, misal: Edit Produk, Cek Kalender]\nCTA_URL: [URL relatif: /hub/store ATAU /hub/calendar ATAU /hub/orders]\n---\nTITLE: [Kata kunci ke-2]\nVALUE: [Angka/Status ke-2]\nDESC: [Penjelasan ke-2]\nCTA_TEXT: [Teks tombol ke-2]\nCTA_URL: [URL ke-2]' });
+            append(
+              { role: 'user', content: 'Berikan tepat 2 insight bisnis paling krusial untuk saya hari ini. WAJIB GUNAKAN FORMAT KAKU BERIKUT tanpa tambahan teks apapun di awal/akhir:\n\nTITLE: [Kata kunci 1-2 kata]\nVALUE: [Angka/Status menonjol]\nDESC: [1 kalimat singkat actionable]\nCTA_TEXT: [Teks tombol, misal: Edit Produk, Cek Kalender]\nCTA_URL: [URL relatif: /hub/store ATAU /hub/calendar ATAU /hub/orders]\n---\nTITLE: [Kata kunci ke-2]\nVALUE: [Angka/Status ke-2]\nDESC: [Penjelasan ke-2]\nCTA_TEXT: [Teks tombol ke-2]\nCTA_URL: [URL ke-2]' },
+              { body: { contextData: { profile, orders, products, allMarketplaceCount, events, weather } } }
+            );
           }
         }
-      }, 1500);
+      }, 500);
     }
-  }, [profile, products, orders, events, weather, append]);
+  }, [profile, isLoaded, products, orders, events, weather, append]);
 
   const firstName = profile?.name?.split(" ")[0] || profile?.fullName?.split(" ")[0] || "Petani";
 
