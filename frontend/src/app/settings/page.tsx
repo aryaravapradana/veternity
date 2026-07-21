@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
+import { uploadImage } from "@/lib/supabaseStorage";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 type Toast = { type: "success" | "error"; message: string };
@@ -302,7 +304,10 @@ export default function AccountSettingsPage() {
                 type="file" accept="image/*" className="sr-only"
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) setBannerUrl(await compressImage(f, 1200, 0.85));
+                  if (f) {
+                    const url = await uploadImage(f, 'banners', 1200);
+                    setBannerUrl(url);
+                  }
                 }}
               />
             </label>
@@ -328,7 +333,10 @@ export default function AccountSettingsPage() {
                     type="file" accept="image/*" className="sr-only"
                     onChange={async (e) => {
                       const f = e.target.files?.[0];
-                      if (f) setAvatarUrl(await compressImage(f, 400, 0.8));
+                      if (f) {
+                        const url = await uploadImage(f, 'avatars', 400);
+                        setAvatarUrl(url);
+                      }
                     }}
                   />
                 </label>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchApi } from "@/lib/apiClient";
+import { uploadImage } from "@/lib/supabaseStorage";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -65,51 +66,26 @@ export default function NewProductPage() {
     setIsAiProcessing(false);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const remainingSlots = 5 - newProduct.imageUrls.length;
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
 
-    filesToProcess.forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          let width = img.width;
-          let height = img.height;
+    for (let index = 0; index < filesToProcess.length; index++) {
+      const file = filesToProcess[index];
+      const imageUrl = await uploadImage(file, 'products', 800);
+      setNewProduct(prev => ({
+        ...prev,
+        imageUrls: [...prev.imageUrls, imageUrl]
+      }));
 
-          if (width > height) {
-            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-          } else {
-            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const compressedBase64 = canvas.toDataURL("image/webp", 0.7);
-          setNewProduct(prev => ({
-            ...prev,
-            imageUrls: [...prev.imageUrls, compressedBase64]
-          }));
-          
-          // HANYA proses foto pertama yang pernah diunggah untuk menghindari kecurangan
-          if (newProduct.category === "Daging" && newProduct.imageUrls.length === 0 && index === 0) {
-            setAiAnalysisResult(null); 
-            handleCheckGradeAIWithImage(compressedBase64);
-          }
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    });
+      if (newProduct.category === "Daging" && newProduct.imageUrls.length === 0 && index === 0) {
+        setAiAnalysisResult(null); 
+        handleCheckGradeAIWithImage(imageUrl);
+      }
+    }
     e.target.value = '';
   };
 
