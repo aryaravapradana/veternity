@@ -11,6 +11,7 @@ import { getPrices } from './controllers/hub.controller';
 import { getSellerEvents, createEvent, updateEvent, deleteEvent } from './controllers/profile.controller';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ── Security Headers ──
 // ── Security Headers & Compression ──
