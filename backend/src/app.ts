@@ -30,7 +30,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
-app.options('*', cors());
 
 // ── Body Parser ──
 app.use(express.json({ limit: '5mb' }));
