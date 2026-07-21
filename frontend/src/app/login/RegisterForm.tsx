@@ -1,4 +1,5 @@
 "use client";
+import Cookies from 'js-cookie';
 import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
@@ -99,6 +100,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
       if (!res.ok) throw new Error(data.error || "Failed to create account");
       
       localStorage.setItem("farmpro_session", JSON.stringify(data));
+      if (data.token) {
+        Cookies.set("auth-token", data.token, { expires: 7 });
+      }
       if (data.role === "BUYER") {
         router.push("/market");
       } else {
