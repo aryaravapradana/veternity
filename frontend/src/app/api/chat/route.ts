@@ -12,55 +12,51 @@ export async function POST(req: Request) {
   });
 
   const { messages, contextData } = await req.json();
-  console.log("INCOMING MESSAGES:", JSON.stringify(messages, null, 2));
+
+  // Token Optimization: Compact context objects to essential fields only
+  const compactProducts = contextData?.products?.slice(0, 4).map((p: any) => ({
+    title: p.title,
+    price: p.price,
+    stock: p.stock,
+    category: p.category
+  })) || [];
+
+  const compactOrders = contextData?.orders?.slice(0, 4).map((o: any) => ({
+    status: o.status,
+    totalAmount: o.totalAmount
+  })) || [];
 
   const dynamicContext = contextData ? `
-  
-INFO KONTEKS PENGGUNA SAAT INI (BACA SECARA OTOMATIS DARI BACKEND):
-- Nama/Profil: ${JSON.stringify(contextData.profile?.fullName || contextData.profile?.username || 'Peternak')}
-- Produk di Toko Milik Peternak Ini: ${JSON.stringify(contextData.products?.slice(0,10) || [])} (${contextData.products?.length || 0} produk aktif di toko ini)
-- Total Produk di Marketplace Umum: ${contextData.allMarketplaceCount || 0} produk aktif dijual oleh seluruh peternak di marketplace.
-- Riwayat/Daftar Pesanan Toko Ini: ${JSON.stringify(contextData.orders?.slice(0,10) || [])}
-- Jadwal Kalender: ${JSON.stringify(contextData.events?.slice(0,10) || [])}
-- Info Cuaca Saat Ini: ${JSON.stringify(contextData.weather || {})}
-
-PENTING UNTUK DIPERHATIKAN:
-- Jika "Produk di Toko Milik Peternak Ini" bernilai 0, artinya peternak ini baru mendaftar atau belum menambahkan produk ke tokonya sendiri (meskipun di marketplace umum sudah ada produk dari peternak lain). Berikan penjelasan ramah bahwa toko mereka sendiri masih kosong dan dorong mereka menambah produk.
+INFO KONTEKS (HEMAT TOKEN):
+- User: ${contextData.profile?.fullName || contextData.profile?.username || 'Peternak'}
+- Produk Toko (${contextData.products?.length || 0} items): ${JSON.stringify(compactProducts)}
+- Total Produk Market: ${contextData.allMarketplaceCount || 0}
+- Pesanan Toko: ${JSON.stringify(compactOrders)}
+- Cuaca: ${contextData.weather?.temperature_2m ? `${Math.round(contextData.weather.temperature_2m)}°C` : 'N/A'}
   ` : "";
+
+  // Token Optimization: Limit history to last 6 messages max
+  const recentMessages = Array.isArray(messages) ? messages.slice(-6) : [];
 
   try {
     const result = await streamText({
-      model: google('gemini-flash-lite-latest') as any, // Sangat cepat dan mendukung multi-modal (gambar/pdf)
-      system: `Anda adalah "Pranata Intelligence", sebuah sistem intelijen pusat untuk segala hal yang berhubungan dengan peternakan hewan. Anda BUKAN hanya dokter hewan, tetapi juga konsultan bisnis peternakan, manajemen kandang, logistik, dan keuangan peternak.
-      
-  Tugas Anda adalah:
-  1. Membantu peternak mendiagnosis penyakit ternak berdasarkan deskripsi atau gambar yang mereka unggah (Veterinary).
-  2. Memberikan saran manajemen operasional kandang, jadwal panen, dan efisiensi biaya (Management).
-  3. Menganalisis prospek bisnis, rasio pakan (FCR), dan memberikan solusi logistik pengadaan pakan (Business & Logistics).
-  
-  INFORMASI SANGAT PENTING - KAPABILITAS PLATFORM PRANATA:
-  Anda HARUS tahu apa yang bisa dan tidak bisa dilakukan oleh platform Pranata. Jangan PERNAH merekomendasikan fitur atau aksi yang tidak ada di Pranata.
-  FITUR YANG TERSEDIA DI PRANATA:
-  - Marketplace B2B/B2C: HANYA untuk jual beli Daging Mentah, Susu, dan Telur. (TIDAK ADA jual beli ternak hidup, sayuran, buah, atau alat tani).
-  - Manajemen Kalender/Tugas: Peternak bisa menjadwalkan tugas rutin, panen, dan pengingat di menu Calendar.
-  - AI Veterinary (Chat ini): Bisa menganalisis gambar untuk penyakit, memberi saran medis dasar.
-  - Financial ROI Ledger (Catatan Keuangan): Peternak bisa mencatat pemasukan (Revenue) dan pengeluaran (Expense) secara manual di dashboard.
-  - Pengaturan Toko (Store): Untuk PRODUCER menambah/mengedit produk (Daging, Susu, Telur) ke marketplace.
-  KETERBATASAN PRANATA (TIDAK BISA DILAKUKAN):
-  - Tidak ada integrasi perangkat IoT (Internet of Things), sensor suhu otomatis, atau smart feeder otomatis. Semuanya masih manual input.
-  - Tidak melayani jual beli ternak hidup (Live Animals) atau produk nabati (sayur/buah).
-  - Tidak ada payment gateway otomatis ke bank, sistem pembayaran masih manual/mockup.
-  - Tidak bisa melacak lokasi kurir secara real-time (GPS tracking pengiriman tidak ada).
-  
-  FORMATTING WAJIB (SANGAT PENTING): 
-  - JANGAN PERNAH membuat paragraf panjang (wall of text).
-  - GUNAKAN Markdown secara maksimal: Gunakan Heading (###) untuk setiap bagian.
-  - GUNAKAN Bullet points atau Numbered lists untuk menjabarkan poin.
-  - GUNAKAN **Bold** untuk menyoroti istilah penting atau kata kunci.
-  - GUNAKAN tabel jika Anda membandingkan harga, rasio pakan, atau jadwal.
-  Gunakan sapaan ramah dan empati, tapi langsung to the point.
-  JANGAN menjawab pertanyaan yang tidak ada hubungannya sama sekali dengan industri peternakan, hewan, atau pertanian. Jika ditanya hal di luar itu, tolak dengan sopan dan kembalikan ke topik peternakan.${dynamicContext}`,
-      messages: convertToCoreMessages(messages),
+      model: google('gemini-flash-lite-latest') as any,
+      maxTokens: 350, // Strict output token limit to prevent quota exhaustion
+      system: `Anda adalah "Pranata Intelligence", konsultan AI peternakan, manajemen kandang, logistik, dan bisnis peternak.
+
+TUGAS:
+1. Diagnosis penyakit ternak (Veterinary).
+2. Saran operasional kandang & pakan (Management & Business).
+
+INFORMASI PLATFORM PRANATA:
+- Marketplace: Jual beli Daging, Susu, Telur. (TIDAK ADA ternak hidup/sayur/buah/alat).
+- Fitur: Marketplace, Calendar, AI Veterinary, Store Manager.
+- Keterbatasan: Tidak ada IoT/sensor otomatis, tidak ada ternak hidup.
+
+FORMATTING:
+- Jawab singkat, padat, ramah, dan to the point.
+- Gunakan markdown bullet points dan **bold**. JANGAN buat paragraf panjang.${dynamicContext}`,
+      messages: convertToCoreMessages(recentMessages),
     });
 
     return result.toAIStreamResponse();

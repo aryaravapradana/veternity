@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       mimeType = imageResp.headers.get('content-type') || 'image/jpeg';
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-flash-lite-latest",
+      generationConfig: { maxOutputTokens: 150, temperature: 0.2 }
+    });
 
     const prompt = `
       Anda adalah AI khusus grading dan inspeksi daging (Meat Grader Expert).
