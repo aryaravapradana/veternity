@@ -9,14 +9,16 @@ export const checkUsername = async (req: Request, res: Response) => {
   }
   
   try {
-    const existing = await prisma.profile.findUnique({ where: { username: username.toLowerCase() } });
+    const existing = await prisma.profile.findFirst({ 
+      where: { username: { equals: username.trim(), mode: 'insensitive' } } 
+    });
     if (existing) {
       return res.json({ available: false });
     }
-    res.json({ available: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to check username' });
+    return res.json({ available: true });
+  } catch (error: any) {
+    console.error('[checkUsername Error]:', error);
+    return res.status(500).json({ error: 'Gagal mengecek username', details: error?.message || String(error) });
   }
 };
 

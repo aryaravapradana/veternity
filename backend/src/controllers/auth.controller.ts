@@ -45,9 +45,9 @@ export const register = async (req: Request, res: Response) => {
     const token = signToken(profile);
     const { password: _, ...safeProfile } = profile;
     return res.status(201).json({ ...safeProfile, token });
-  } catch (error) {
-    console.error('[register]', error);
-    return res.status(500).json({ error: 'Gagal membuat akun' });
+  } catch (error: any) {
+    console.error('[register error]:', error);
+    return res.status(500).json({ error: 'Gagal membuat akun', details: error?.message || String(error) });
   }
 };
 
