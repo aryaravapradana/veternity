@@ -74,7 +74,7 @@ export default function MainDashboard() {
       const ordersArray = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
       const productsArray = Array.isArray(productsData) ? productsData : (productsData.data || []);
       
-      setOrders(ordersArray.slice(0, 4));
+      setOrders(ordersArray.slice(0, 2));
       setProducts(productsArray);
     }).catch(() => {
       setOrders([]);
@@ -228,8 +228,8 @@ export default function MainDashboard() {
                 </div>
                 
                 <div className="flex-1 flex flex-col gap-3 mt-2 overflow-y-auto pr-1">
-                  {orders.filter(o => o.status !== 'COMPLETED').length > 0 ? (
-                    orders.filter(o => o.status !== 'COMPLETED').map((order, i) => (
+                  {orders.filter(o => o.status !== 'COMPLETED').slice(0, 2).length > 0 ? (
+                    orders.filter(o => o.status !== 'COMPLETED').slice(0, 2).map((order, i) => (
                       <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors shadow-sm backdrop-blur-md">
                         <div className="flex-1 min-w-0 pr-2">
                           <div className="flex items-center gap-1.5 mb-0.5">
