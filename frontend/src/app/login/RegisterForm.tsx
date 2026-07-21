@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Store, ShoppingCart, Beef, Bird, Tractor, Droplet, Circle, MoreHorizontal, ArrowRight, Check, X } from "lucide-react";
+import { Store, ShoppingCart, Beef, Bird, Tractor, Droplet, Circle, MoreHorizontal, ArrowRight, Check, X, Eye, EyeOff } from "lucide-react";
 
 const LIVESTOCK_OPTIONS = [
   { id: "SAPI", label: "Sapi", icon: Beef },
@@ -23,6 +23,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -187,7 +188,25 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
 
               <div>
                 <label className="block text-sm font-bold mb-1 text-[#2B4C3B]">Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-xl p-3 text-[#1C241E] focus:outline-none focus:ring-2 focus:ring-[#B4C179] transition-all" required minLength={6} placeholder="••••••••" />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-xl p-3 text-[#1C241E] focus:outline-none focus:ring-2 focus:ring-[#B4C179] transition-all pr-12" 
+                    required 
+                    minLength={6} 
+                    placeholder="••••••••" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A8678] hover:text-[#2B4C3B] transition-colors p-1"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               
               <button 

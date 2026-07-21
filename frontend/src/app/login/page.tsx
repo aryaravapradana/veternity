@@ -6,12 +6,13 @@ import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bird } from "lucide-react";
+import { Bird, Eye, EyeOff } from "lucide-react";
 import { RegisterForm } from "./RegisterForm";
 
 function AuthContent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -101,14 +102,24 @@ function AuthContent() {
               </div>
               <div>
                 <label className="block text-sm font-bold mb-2 text-[#2B4C3B]">Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-xl p-4 text-[#1C241E] focus:outline-none focus:ring-2 focus:ring-[#B4C179] transition-all"
-                  required
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-xl p-4 text-[#1C241E] focus:outline-none focus:ring-2 focus:ring-[#B4C179] transition-all pr-12"
+                    required
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A8678] hover:text-[#2B4C3B] transition-colors p-1"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
               
               <button 
