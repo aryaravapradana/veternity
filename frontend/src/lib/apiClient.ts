@@ -10,5 +10,8 @@ export const fetchApi = async (url: string, options: RequestInit = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return fetch(url, { ...options, headers });
+  // Clean any accidental double slashes (e.g. https://domain.com//api -> https://domain.com/api)
+  const cleanUrl = url.replace(/([^:]\/)\/+/g, "$1");
+
+  return fetch(cleanUrl, { ...options, headers });
 };

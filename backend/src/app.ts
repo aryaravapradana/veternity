@@ -22,9 +22,15 @@ app.use(compression({
 
 // ── CORS ──
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Reflect incoming origin to support multiple domains, Vercel previews, and local dev
+    return callback(null, true);
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+app.options('*', cors());
 
 // ── Body Parser ──
 app.use(express.json({ limit: '5mb' }));
