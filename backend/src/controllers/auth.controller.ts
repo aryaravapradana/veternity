@@ -8,7 +8,7 @@ if (!process.env.JWT_SECRET) {
   throw new Error('FATAL: JWT_SECRET environment variable is missing.');
 }
 const JWT_SECRET = process.env.JWT_SECRET;
-const SALT_ROUNDS = 12;
+const SALT_ROUNDS = 10;
 
 const registerSchema = z.object({
   username: z.string().min(3, 'Username minimal 3 karakter').max(30).regex(/^[a-z0-9_]+$/, 'Username hanya boleh huruf kecil, angka, dan underscore'),
