@@ -53,7 +53,7 @@ function AuthContent() {
       
       // Store custom session
       localStorage.setItem("farmpro_session", JSON.stringify(data));
-      Cookies.set("auth-token", data.token, { expires: 7 });
+      Cookies.set("auth-token", data.token, { expires: 7, path: '/' });
       if (data.role === "BUYER") {
         router.push("/market");
       } else {

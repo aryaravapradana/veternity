@@ -10,7 +10,7 @@ export default function proxy(request: NextRequest) {
 
   // If trying to access protected page without token, redirect to login
   if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // If already logged in and visiting login/register, redirect based on role
