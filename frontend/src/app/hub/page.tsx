@@ -25,12 +25,13 @@ export default function MainDashboard() {
 
   // Products State for AI
   const [products, setProducts] = useState<any[]>([]);
+  const [allMarketplaceCount, setAllMarketplaceCount] = useState<number>(0);
 
   // AI Live Tile State
   const { messages, append, isLoading, setMessages } = useChat({
     api: '/api/chat',
     body: { 
-      contextData: { profile, orders, products, events, weather }
+      contextData: { profile, orders, products, allMarketplaceCount, events, weather }
     }
   });
   const hasTriggeredInsight = React.useRef(false);
@@ -66,19 +67,24 @@ export default function MainDashboard() {
     
     Promise.all([
       fetchApi(`${API_BASE}/api/orders/PRODUCER/${session.id}`).catch(() => null),
-      fetchApi(`${API_BASE}/api/products/seller/${session.id}`).catch(() => null)
-    ]).then(async ([ordRes, prodRes]) => {
+      fetchApi(`${API_BASE}/api/products/seller/${session.id}`).catch(() => null),
+      fetchApi(`${API_BASE}/api/products?limit=200`).catch(() => null)
+    ]).then(async ([ordRes, prodRes, allProdRes]) => {
       const ordersData = ordRes && ordRes.ok ? await ordRes.json() : [];
       const productsData = prodRes && prodRes.ok ? await prodRes.json() : [];
+      const allProdData = allProdRes && allProdRes.ok ? await allProdRes.json() : [];
       
       const ordersArray = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
       const productsArray = Array.isArray(productsData) ? productsData : (productsData.data || []);
+      const allProductsArray = Array.isArray(allProdData) ? allProdData : (allProdData.data || []);
       
       setOrders(ordersArray.slice(0, 2));
       setProducts(productsArray);
+      setAllMarketplaceCount(allProductsArray.length);
     }).catch(() => {
       setOrders([]);
       setProducts([]);
+      setAllMarketplaceCount(0);
     });
       
     fetchApi(`${API_BASE}/api/events/${session.id}`)

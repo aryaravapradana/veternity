@@ -18,12 +18,14 @@ export async function POST(req: Request) {
   
 INFO KONTEKS PENGGUNA SAAT INI (BACA SECARA OTOMATIS DARI BACKEND):
 - Nama/Profil: ${JSON.stringify(contextData.profile?.fullName || contextData.profile?.username || 'Peternak')}
-- Daftar Produk yang Dijual: ${JSON.stringify(contextData.products?.slice(0,10) || [])}
-- Riwayat/Daftar Pesanan: ${JSON.stringify(contextData.orders?.slice(0,10) || [])}
+- Produk di Toko Milik Peternak Ini: ${JSON.stringify(contextData.products?.slice(0,10) || [])} (${contextData.products?.length || 0} produk aktif di toko ini)
+- Total Produk di Marketplace Umum: ${contextData.allMarketplaceCount || 0} produk aktif dijual oleh seluruh peternak di marketplace.
+- Riwayat/Daftar Pesanan Toko Ini: ${JSON.stringify(contextData.orders?.slice(0,10) || [])}
 - Jadwal Kalender: ${JSON.stringify(contextData.events?.slice(0,10) || [])}
 - Info Cuaca Saat Ini: ${JSON.stringify(contextData.weather || {})}
 
-Gunakan SEMUA data di atas untuk memberikan jawaban yang SANGAT personal, relevan, dan "Actionable" tanpa perlu pengguna menyebutkan datanya lagi. Jika pengguna meminta analisis bisnis, gabungkan data produk, pesanan, kalender, dan cuaca.
+PENTING UNTUK DIPERHATIKAN:
+- Jika "Produk di Toko Milik Peternak Ini" bernilai 0, artinya peternak ini baru mendaftar atau belum menambahkan produk ke tokonya sendiri (meskipun di marketplace umum sudah ada produk dari peternak lain). Berikan penjelasan ramah bahwa toko mereka sendiri masih kosong dan dorong mereka menambah produk.
   ` : "";
 
   try {
