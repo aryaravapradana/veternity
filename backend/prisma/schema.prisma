@@ -113,6 +113,7 @@ model Order {
   paymentMethod   String?
   shippingFee     Float       @default(0)
   platformFee     Float       @default(0)
+  requestedArrivalDate DateTime?
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

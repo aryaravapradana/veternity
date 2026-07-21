@@ -58,9 +58,9 @@ export default function MarketplaceNavbar({
         <div className="flex items-center gap-4 shrink-0">{leftContent}</div>
       ) : (
         <div className="flex items-center gap-4 shrink-0">
-          <Link href="/marketplace" className="flex items-center gap-2 group">
+          <Link href="/market" className="flex items-center gap-2 group">
             <div className="h-8 group-hover:scale-105 transition-transform">
-              <img src="/logos/marketplace/marketplace-black.png" alt="Pranata" className="h-full object-contain" />
+              <img src="/logos/market/market-black.png" alt="Pranata" className="h-full object-contain"  loading="lazy" decoding="async" />
             </div>
           </Link>
         </div>
@@ -89,7 +89,7 @@ export default function MarketplaceNavbar({
       {/* Right: Info & Profile */}
       <div className="flex items-center gap-4 shrink-0">
         {/* Cart */}
-        <Link href="/marketplace/cart" className="relative p-2 text-[#5A635B] hover:text-[#2B4C3B] hover:bg-[#E8E3D2]/50 rounded-xl transition-all">
+        <Link href="/market/cart" className="relative p-2 text-[#5A635B] hover:text-[#2B4C3B] hover:bg-[#E8E3D2]/50 rounded-xl transition-all">
           <ShoppingCart size={24} />
           <AnimatePresence>
             {displayCartCount > 0 && (
@@ -109,7 +109,7 @@ export default function MarketplaceNavbar({
         <button onClick={() => router.push("/settings")} className="flex items-center gap-3 transition-transform hover:scale-105 pl-2">
           <div className="w-10 h-10 rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm flex items-center justify-center">
             {(profile?.avatarUrl || profile?.avatar) ? (
-              <img src={profile.avatarUrl || profile.avatar} alt="Profile" className="w-full h-full object-cover" />
+              <img src={profile.avatarUrl || profile.avatar} alt="Profile" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
             ) : (
               <div className="w-full h-full bg-[#3A6B49] flex items-center justify-center text-white font-bold text-lg">
                 {(profile?.fullName || profile?.username || 'U').charAt(0).toUpperCase()}

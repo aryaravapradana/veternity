@@ -5,7 +5,7 @@ import cartRoutes from './cart.routes';
 import orderRoutes from './order.routes';
 import productRoutes from './product.routes';
 import profileRoutes from './profile.routes';
-import dashboardRoutes from './dashboard.routes';
+import hubRoutes from './hub.routes';
 
 const router = Router();
 
@@ -14,6 +14,6 @@ router.use('/cart', verifyToken, cartRoutes);
 router.use('/orders', verifyToken, orderRoutes);
 router.use('/products', verifyToken, productRoutes);
 router.use('/profile', verifyToken, profileRoutes); // /api/profile/:id, /api/profile/check-username
-router.use('/dashboard', verifyToken, dashboardRoutes); // /api/dashboard/overview, /api/prices
+router.use('/hub', verifyToken, hubRoutes); // /api/hub/overview, /api/prices
 
 export default router;

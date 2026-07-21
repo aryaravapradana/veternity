@@ -100,9 +100,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
       
       localStorage.setItem("farmpro_session", JSON.stringify(data));
       if (data.role === "BUYER") {
-        router.push("/marketplace");
+        router.push("/market");
       } else {
-        router.push("/dashboard");
+        router.push("/hub");
       }
     } catch (err: any) {
       setError(err.message || "Failed to finalize registration");

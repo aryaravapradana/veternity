@@ -5,7 +5,7 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('auth-token')?.value;
 
-  const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/marketplace');
+  const isProtected = pathname.startsWith('/hub') || pathname.startsWith('/market');
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
   // If trying to access protected page without token, redirect to login
@@ -21,5 +21,5 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/marketplace/:path*'],
+  matcher: ['/hub/:path*', '/market/:path*'],
 };

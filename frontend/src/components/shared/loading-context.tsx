@@ -33,9 +33,9 @@ export const LoadingProvider = ({ children }: { children: React.ReactNode }) => 
   // On route change, clear blockers and enter a brief transition state
   // to give the new page's useEffect time to register its blockers.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setBlockers(new Set());
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setIsTransitioning(true);
     
     // Give the new page 50ms to register blockers before we declare it "Ready"

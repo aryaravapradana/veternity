@@ -23,9 +23,9 @@ function AuthContent() {
     if (sessionStr) {
       const session = JSON.parse(sessionStr);
       if (session.role === 'PRODUCER') {
-        router.push('/dashboard');
+        router.push('/hub');
       } else {
-        router.push('/marketplace');
+        router.push('/market');
       }
     }
   }, [router]);
@@ -55,9 +55,9 @@ function AuthContent() {
       localStorage.setItem("farmpro_session", JSON.stringify(data));
       Cookies.set("auth-token", data.token, { expires: 7 });
       if (data.role === "BUYER") {
-        router.push("/marketplace");
+        router.push("/market");
       } else {
-        router.push("/dashboard");
+        router.push("/hub");
       }
     } catch (err: any) {
       setError(err.message);

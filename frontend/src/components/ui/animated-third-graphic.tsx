@@ -39,7 +39,7 @@ export function AnimatedThirdGraphic() {
       initial="hidden"
       whileInView="show"
       viewport={{ once: false, amount: 0.1 }}
-      className="w-full h-full max-w-sm mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-700 overflow-visible"
+      className="w-full h-full max-w-sm mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-700 overflow-visible px-4 md:px-8 lg:px-12"
     >
       <g clipPath={`url(#clip0_${id})`}>
         <motion.path variants={item} d="M60.9613 404.391H71.901C77.2319 404.391 81.5537 400.069 81.5537 394.739C81.5537 389.408 77.2319 385.086 71.901 385.086H60.9613C55.6305 385.086 51.3086 389.408 51.3086 394.739C51.3086 400.069 55.6305 404.391 60.9613 404.391Z" fill="#FFFFFF"/>

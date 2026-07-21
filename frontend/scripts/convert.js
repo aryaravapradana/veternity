@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 const fs = require('fs');
 const content = fs.readFileSync('public/dekorasi.svg', 'utf-8');
 let newContent = content.replace(/<svg\b([^>]*)>/g, '<motion.svg variants={container} initial="hidden" animate="show" $1 className={className}>');

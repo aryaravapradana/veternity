@@ -8,85 +8,29 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-export const GlobalRope = () => {
+export function GlobalRope() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null)
   const glowRef = useRef<SVGPathElement>(null)
-  
-  const [svgHeight, setSvgHeight] = useState(1000)
-  const [svgWidth, setSvgWidth] = useState(1920)
-  const [isReady, setIsReady] = useState(false)
+  const outlineRef = useRef<SVGPathElement>(null)
+  const [svgHeight, setSvgHeight] = useState(0)
+  const [svgWidth, setSvgWidth] = useState(0)
   const [strokeW, setStrokeW] = useState(120)
 
-  // Dynamic Path Builder that intersects the anchors but swings left/right between them
+  // Dynamic Path Builder that intersects the anchors in a straight line
   const buildRopePath = (anchors: {x: number, y: number}[], totalWidth: number) => {
     if (!anchors || anchors.length < 2) return "";
 
-    const isMobile = window.innerWidth < 1024;
+    const isMobile = window.innerWidth < 768;
     
     // Disable rope completely on mobile (accordion layout handles it)
     if (isMobile) return "";
 
-    let d = `M ${anchors[0].x},${anchors[0].y}`;
+    const midX = totalWidth / 2;
+    let d = `M ${midX},${anchors[0].y}`;
 
-    for (let i = 0; i < anchors.length - 1; i++) {
-        const P0 = anchors[i];
-        const P1 = anchors[i + 1];
-        const distY = P1.y - P0.y;
-
-        // Desktop wild left/right swings that still intersect the centered PNGs.
-        // To do this, endpoints remain at P0/P1, but control points are pushed extremely far left/right.
-        const swing = totalWidth * 0.35; // 35% of screen width swing
-        
-        if (anchors.length === 7) {
-            let cp1x = 0, cp1y = 0, cp2x = 0, cp2y = 0;
-            
-            if (i === 0) { // Header to Tractor (Smooth drop)
-                cp1x = P0.x; cp1y = P0.y + distY * 0.5;
-                cp2x = P1.x; cp2y = P1.y - distY * 0.5;
-            } else if (i === 1) { // Tractor to F1 (Swing Left Loop)
-                cp1x = P0.x - swing; cp1y = P0.y + distY * 1.2;
-                cp2x = P1.x - swing; cp2y = P1.y - distY * 0.5;
-            } else if (i === 2) { // F1 to F2 (Swing Right Loop)
-                cp1x = P0.x + swing; cp1y = P0.y + distY * 1.2;
-                cp2x = P1.x + swing; cp2y = P1.y - distY * 0.5;
-            } else if (i === 3) { // F2 to F3 (Swing Left Loop)
-                cp1x = P0.x - swing; cp1y = P0.y + distY * 1.2;
-                cp2x = P1.x - swing; cp2y = P1.y - distY * 0.5;
-            } else if (i === 4) { // F3 to F4 (Swing Right Deep Sag)
-                cp1x = P0.x + swing; cp1y = P0.y + distY * 0.8;
-                cp2x = P1.x + swing; cp2y = P1.y + distY * 0.8;
-            } else if (i === 5) { // F4 to F5 (The Knot - Left to Right crossover)
-                cp1x = P0.x - swing; cp1y = P0.y - distY * 0.5; // Pull up left
-                cp2x = P1.x + swing; cp2y = P1.y - distY * 0.8; // Pull up right
-            }
-            
-            d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
-        } else {
-            // Fallback for different anchor counts
-            const swingAmount = Math.min(totalWidth * 0.5, 800);
-            const dir = i % 2 === 0 ? -1 : 1; 
-
-            if (i === 0) {
-                // Go straight down the middle first
-                const cp1x = P0.x;
-                const cp1y = P0.y + distY * 0.5;
-                const cp2x = P1.x;
-                const cp2y = P1.y - distY * 0.5;
-                d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
-            } else if (i === anchors.length - 2) {
-                const cp1x = P0.x;
-                const cp1y = P0.y + distY * 0.5; 
-                const cp2x = P1.x;
-                const cp2y = P1.y - distY * 0.5; 
-                d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
-            } else {
-                const cp1x = P0.x + (swingAmount * dir);
-                const cp1y = P0.y + distY * 0.3;
-                const cp2x = P1.x + (swingAmount * dir);
-                const cp2y = P1.y - distY * 0.1;
-                d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${P1.x},${P1.y}`;
-            }
-        }
+    for (let i = 1; i < anchors.length; i++) {
+      d += ` L ${midX},${anchors[i].y}`;
     }
 
     return d;
@@ -127,6 +71,7 @@ export const GlobalRope = () => {
     const d = buildRopePath(rawAnchors, totalWidth);
     pathEl.setAttribute('d', d);
     if (glowRef.current) glowRef.current.setAttribute('d', d);
+    if (outlineRef.current) outlineRef.current.setAttribute('d', d);
 
     // Setup DrawSVG animation using strokeDashoffset natively for extreme performance
     const length = pathEl.getTotalLength();
@@ -136,11 +81,18 @@ export const GlobalRope = () => {
       glowRef.current.style.strokeDasharray = `${length}px`;
       glowRef.current.style.strokeDashoffset = `${length}px`;
     }
+    if (outlineRef.current) {
+      outlineRef.current.style.strokeDasharray = `${length}px`;
+      outlineRef.current.style.strokeDashoffset = `${length}px`;
+    }
     
     ScrollTrigger.getAll().forEach(st => {
       if (st.trigger === wrapper) st.kill()
     });
 
+    // Remove old fade trigger. We will bind opacity to progress directly!
+
+    // Drawing animation trigger
     ScrollTrigger.create({
         trigger: wrapper,
         start: () => `top+=${rawAnchors[0].y}px center`,
@@ -148,17 +100,25 @@ export const GlobalRope = () => {
         onUpdate: (self) => {
             // PERFORMANCE: Native assignment synced perfectly with the browser painting cycle
             requestAnimationFrame(() => {
+              // Fade in over the first ~16% of the scroll progress (slower fade to prevent pop-in on fast scrolls)
+              const currentOpacity = Math.min(1, self.progress * 6);
+              if (containerRef.current) {
+                containerRef.current.style.opacity = currentOpacity.toString();
+              }
+
               if (pathEl) {
                 pathEl.style.strokeDashoffset = `${length - (length * self.progress)}px`;
               }
               if (glowRef.current) {
                 glowRef.current.style.strokeDashoffset = `${length - (length * self.progress)}px`;
               }
+              if (outlineRef.current) {
+                outlineRef.current.style.strokeDashoffset = `${length - (length * self.progress)}px`;
+              }
             });
         }
     });
 
-    setIsReady(true);
   }, []);
 
   useEffect(() => {
@@ -173,29 +133,36 @@ export const GlobalRope = () => {
 
     let lastWidth = window.innerWidth;
     let resizeTimer: NodeJS.Timeout;
+    updateRopeAndAnimation();
     
-    const handleResize = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            if (Math.abs(window.innerWidth - lastWidth) > 10) {
-                lastWidth = window.innerWidth;
-                updateRopeAndAnimation();
-            }
-        }, 250);
-    };
+    // Slight delay to ensure DOM is settled
+    const timer = setTimeout(updateRopeAndAnimation, 500);
 
-    window.addEventListener('resize', handleResize);
+    // Robust observer for any layout shifts (e.g. late image loads causing container to expand)
+    const wrapper = document.querySelector('.features-rope-container') as HTMLElement;
+    let resizeObserver: ResizeObserver | null = null;
+    
+    if (wrapper) {
+      resizeObserver = new ResizeObserver(() => {
+        updateRopeAndAnimation();
+      });
+      resizeObserver.observe(wrapper);
+    }
 
+    // Fallback window resize listener
+    window.addEventListener('resize', updateRopeAndAnimation);
+    
     return () => {
-        window.removeEventListener('load', updateRopeAndAnimation);
-        window.removeEventListener('resize', handleResize);
-        clearTimeout(resizeTimer);
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateRopeAndAnimation);
+      if (resizeObserver && wrapper) resizeObserver.disconnect();
     };
   }, [updateRopeAndAnimation]);
 
   return (
     <div 
-        className={`absolute top-0 left-0 w-full pointer-events-none transition-opacity duration-1000 ease-in-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
+        ref={containerRef}
+        className="absolute top-0 left-0 w-full pointer-events-none opacity-0"
         style={{ zIndex: 10, height: `${svgHeight}px` }}
     >
         <svg 
@@ -208,8 +175,8 @@ export const GlobalRope = () => {
         >
             <defs>
                 <linearGradient id="rope-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={svgHeight}>
-                    <stop stopColor="#F5990D"/>
-                    <stop offset="1" stopColor="#C25939"/>
+                    <stop stopColor="#B4C179"/>
+                    <stop offset="1" stopColor="#2B4C3B"/>
                 </linearGradient>
             </defs>
 
@@ -218,13 +185,27 @@ export const GlobalRope = () => {
               ref={glowRef}
               d=""
               fill="none"
-              stroke="#F5990D"
+              stroke="#B4C179"
               strokeWidth={strokeW * 1.2}
               strokeLinecap="round"
               strokeLinejoin="round"
               className="opacity-20 blur-xl"
               style={{ willChange: "stroke-dashoffset" }}
             />
+            
+            {/* White outline path */}
+            <path 
+                ref={outlineRef}
+                d=""
+                fill="none" 
+                stroke="#FFFFFF" 
+                strokeWidth={strokeW + 16}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ willChange: "stroke-dashoffset" }}
+            />
+
+            {/* Main gradient rope */}
             <path 
                 ref={pathRef}
                 fill="none" 

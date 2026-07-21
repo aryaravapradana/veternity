@@ -35,7 +35,7 @@ export default function LandingPage() {
             className="w-full h-full object-cover object-top opacity-80" 
             fetchPriority="high"
             decoding="async"
-          />
+           loading="lazy" />
           {/* Heavy Gradient Overlay to make text legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8F6F0] via-[#F8F6F0]/90 to-transparent h-full w-full" />
         </div>
@@ -63,13 +63,13 @@ export default function LandingPage() {
             <div className="flex flex-col w-full gap-3 mt-4">
               {session ? (
                 <>
-                  <Link href={session.role === 'PRODUCER' ? '/dashboard' : '/marketplace'} className="w-full">
+                  <Link href={session.role === 'PRODUCER' ? '/hub' : '/market'} className="w-full">
                     <motion.button 
                       whileTap={{ scale: 0.98 }}
                       className="w-full bg-pranata text-[#F8F6F0] py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 px-6 shadow-[0_8px_20px_rgba(43,76,59,0.3)]"
                     >
                       {session.avatar ? (
-                        <img src={session.avatar} alt="PFP" className="w-6 h-6 rounded-full object-cover border-2 border-white/50" />
+                        <img src={session.avatar} alt="PFP" className="w-6 h-6 rounded-full object-cover border-2 border-white/50"  loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-6 h-6 rounded-full border-2 border-white/50 bg-[#3A6B49] flex items-center justify-center text-white text-[11px] font-bold">
                           {(session.fullName || session.username || 'U').charAt(0).toUpperCase()}
@@ -123,7 +123,7 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-1/2 w-[1000px] h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
         {/* Text Content Container */}
-        <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center text-center px-4 sm:px-6 mb-12 pb-12">
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center mb-12 pb-12 px-4 md:px-8 lg:px-12">
           
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -132,7 +132,7 @@ export default function LandingPage() {
             className="relative flex flex-col items-center justify-center w-full will-change-transform will-change-opacity"
           >
             <h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-bold text-[#1C241E] tracking-tight mb-6 md:mb-8 leading-none whitespace-nowrap flex flex-col items-center justify-center"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-bold text-[#1C241E] tracking-tight mb-6 md:mb-8 leading-tight flex flex-col items-center justify-center text-center"
               
             >
               Empowering farmers with
@@ -146,14 +146,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-4">
               {session ? (
                 <>
-                  <Link href={session.role === 'PRODUCER' ? '/dashboard' : '/marketplace'} className="w-full sm:w-auto">
+                  <Link href={session.role === 'PRODUCER' ? '/hub' : '/market'} className="w-full sm:w-auto">
                     <motion.button 
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="w-full sm:w-auto bg-pranata hover:bg-[#1E362A] text-[#F8F6F0] px-9 py-4 rounded-full font-bold text-lg shadow-[0_12px_24px_-8px_rgba(43,76,59,0.4)] transition-all flex items-center justify-center gap-3 group"
                     >
                       {session.avatar ? (
-                        <img src={session.avatar} alt="PFP" className="w-6 h-6 rounded-full object-cover border-2 border-white/50" />
+                        <img src={session.avatar} alt="PFP" className="w-6 h-6 rounded-full object-cover border-2 border-white/50"  loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-6 h-6 rounded-full border-2 border-white/50 bg-[#3A6B49] flex items-center justify-center text-white text-[11px] font-bold">
                           {(session.fullName || session.username || 'U').charAt(0).toUpperCase()}
@@ -215,7 +215,7 @@ export default function LandingPage() {
           className="w-full h-auto rounded-t-[8rem] pointer-events-none object-cover" 
           fetchPriority="high"
           decoding="async"
-        />
+         loading="lazy" />
         
         {/* Smooth Gradient Fade to Rope Section */}
         <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-b from-transparent to-[#32452C] pointer-events-none" />
@@ -231,11 +231,11 @@ export default function LandingPage() {
 
       {/* Global Network Section */}
       <section className="py-24 px-6 relative bg-transparent">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
           <motion.div 
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            viewport={{ once: true, margin: "200px" }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="bg-rust rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden"
           >
@@ -246,10 +246,10 @@ export default function LandingPage() {
               <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">
                 Ready to transform your farm?
               </h2>
-              <p className="text-slate-400 font-medium text-lg max-w-xl mx-auto mb-10">
+              <p className="text-slate-400 font-medium text-lg max-w-xl mx-auto mb-10 px-4 md:px-8 lg:px-12">
                 Join our non-profit initiative to digitalize local agriculture. Setup takes less than 5 minutes and is completely free forever.
               </p>
-              <Link href="/dashboard">
+              <Link href="/hub">
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

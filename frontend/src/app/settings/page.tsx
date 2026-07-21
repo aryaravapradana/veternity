@@ -183,19 +183,19 @@ export default function AccountSettingsPage() {
     setSavingPw(false);
   };
 
-  const backPath = profile?.role === "PRODUCER" ? "/dashboard" : "/marketplace";
+  const backPath = profile?.role === "PRODUCER" ? "/hub" : "/market";
   const initials = (profile?.fullName || profile?.username || "?").charAt(0).toUpperCase();
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
       <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-2xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] h-14 flex items-center justify-between px-4 md:px-8 lg:px-12">
           <div className="w-24 h-5 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
           <div className="w-32 h-5 rounded-md skeleton-shimmer bg-[#E8E3D2]" />
           <div className="w-24" />
         </div>
       </div>
-      <main className="max-w-2xl mx-auto px-4 pt-6 pb-28 space-y-6">
+      <main className="max-w-7xl mx-auto pt-6 pb-28 space-y-6 px-4 md:px-8 lg:px-12">
         <div className="bg-white border border-[#E8E3D2] rounded-[2rem] overflow-hidden shadow-[0_4px_24px_-8px_rgba(43,76,59,0.08)]">
           <div className="relative h-40 sm:h-52 skeleton-shimmer bg-[#E8E3D2]" />
           <div className="px-6 pb-6">
@@ -238,7 +238,7 @@ export default function AccountSettingsPage() {
 
       {/* ── Back Navbar ── */}
       <div className="sticky top-0 z-40 px-4 pt-4">
-        <div className="max-w-2xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] px-5 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto bg-white border border-[#E8E3D2] rounded-2xl shadow-[0_4px_24px_-8px_rgba(43,76,59,0.1)] h-14 flex items-center justify-between px-4 md:px-8 lg:px-12">
           <button onClick={() => router.push(backPath)} className="flex items-center gap-2 text-[#5A635B] hover:text-[#2B4C3B] font-bold text-sm transition-colors">
             <ChevronLeft size={20} />
             {profile?.role === "PRODUCER" ? "Dashboard" : "Marketplace"}
@@ -263,7 +263,7 @@ export default function AccountSettingsPage() {
         )}
       </AnimatePresence>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-28">
+      <main className="max-w-7xl mx-auto pt-6 pb-28 px-4 md:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
         {/* ══════════════════════════════════════════════════════
@@ -279,7 +279,7 @@ export default function AccountSettingsPage() {
           {/* Banner */}
           <div className="relative h-40 sm:h-52 bg-pranata group">
             {bannerUrl ? (
-              <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+              <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
             ) : (
               /* Default earthy pattern */
               <div className="w-full h-full overflow-hidden">
@@ -315,7 +315,7 @@ export default function AccountSettingsPage() {
               <div className="relative group shrink-0">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-pranata border-4 border-white overflow-hidden shadow-lg">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-white font-black text-4xl">
                       {initials}

@@ -41,7 +41,7 @@ export function AnimatedFeatureGraphic() {
       initial="hidden"
       whileInView="show"
       viewport={{ once: false, amount: 0.1 }}
-      className="w-full h-full max-w-sm mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-700 overflow-visible"
+      className="w-full h-full max-w-sm mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-700 overflow-visible px-4 md:px-8 lg:px-12"
     >
         <motion.path variants={item} d="M337.8 304.603C397.557 304.603 446 256.16 446 196.403C446 136.646 397.557 88.2031 337.8 88.2031C278.042 88.2031 229.6 136.646 229.6 196.403C229.6 256.16 278.042 304.603 337.8 304.603Z" fill={`url(#paint0_linear_${id})`}/>
         <motion.path variants={item} d="M337.8 304.603C397.557 304.603 446 256.16 446 196.403C446 136.646 397.557 88.2031 337.8 88.2031C278.042 88.2031 229.6 136.646 229.6 196.403C229.6 256.16 278.042 304.603 337.8 304.603Z" fill={`url(#paint1_linear_${id})`}/>

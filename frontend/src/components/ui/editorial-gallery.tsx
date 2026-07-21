@@ -42,6 +42,8 @@ export function EditorialGallery() {
           end: "+=400%", // 4 panels to animate in
           scrub: 1, // Smooth scrub for the mask
           pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true
         }
       })
 
@@ -104,7 +106,15 @@ export function EditorialGallery() {
       })
     });
 
-    return () => mm.revert();
+    const resizeObserver = new ResizeObserver(() => {
+      ScrollTrigger.refresh();
+    });
+    resizeObserver.observe(document.body);
+
+    return () => {
+      resizeObserver.disconnect();
+      mm.revert();
+    };
   }, { scope: containerRef })
 
   return (
@@ -113,7 +123,7 @@ export function EditorialGallery() {
       {/* PANEL 1: Review 1 */}
       <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-10 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
-          <img src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=2000&auto=format&fit=crop" alt="Farmer Portrait" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=2000&auto=format&fit=crop" alt="Farmer Portrait" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
         </div>
         <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/80 to-transparent w-full md:w-2/3" />
         
@@ -124,7 +134,7 @@ export function EditorialGallery() {
             </h2>
             <div className="mt-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-clip border-2 border-white shadow-md">
-                <img src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=200&auto=format&fit=crop" alt="Budi Santoso" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?q=80&w=200&auto=format&fit=crop" alt="Budi Santoso" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className="text-slate-50 font-bold tracking-wide uppercase text-sm">Budi Santoso</p>
@@ -138,7 +148,7 @@ export function EditorialGallery() {
       {/* PANEL 2: Review 2 */}
       <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-20 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
-          <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=2000&auto=format&fit=crop" alt="Agricultural Engineer" className="w-full h-full object-cover object-top" />
+          <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=2000&auto=format&fit=crop" alt="Agricultural Engineer" className="w-full h-full object-cover object-top"  loading="lazy" decoding="async" />
         </div>
         <div className="absolute inset-0 left-auto right-0 z-10 bg-gradient-to-l from-slate-900 via-slate-900/90 to-transparent w-full md:w-2/3" />
         
@@ -153,7 +163,7 @@ export function EditorialGallery() {
                 <p className="text-slate-300 font-medium text-sm">Lead Livestock Agronomist</p>
               </div>
               <div className="w-12 h-12 rounded-full overflow-clip border-2 border-white shadow-md">
-                <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=200&auto=format&fit=crop" alt="Sarah Wijaya" className="w-full h-full object-cover object-top" />
+                <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=200&auto=format&fit=crop" alt="Sarah Wijaya" className="w-full h-full object-cover object-top"  loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
@@ -163,7 +173,7 @@ export function EditorialGallery() {
       {/* PANEL 3: Review 3 */}
       <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-30 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
-          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2000&auto=format&fit=crop" alt="Farm Operations" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2000&auto=format&fit=crop" alt="Farm Operations" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
         </div>
         <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent w-full md:w-2/3" />
         
@@ -174,7 +184,7 @@ export function EditorialGallery() {
             </h2>
             <div className="mt-10 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-clip border-2 border-slate-700">
-                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop" alt="Ahmad" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop" alt="Ahmad" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className="text-slate-50 font-bold tracking-wide uppercase text-sm">Ahmad Riyadi</p>
@@ -188,7 +198,7 @@ export function EditorialGallery() {
       {/* PANEL 4: Review 4 */}
       <div className="panel relative md:absolute md:inset-0 w-screen md:w-full flex-none md:flex-auto h-full bg-slate-100 z-40 overflow-clip snap-center">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
-          <img src="https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=2000&auto=format&fit=crop" alt="Farmer Check" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=2000&auto=format&fit=crop" alt="Farmer Check" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
         </div>
         <div className="absolute inset-0 top-auto bottom-0 z-10 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent w-full h-3/4 md:h-1/2" />
         
@@ -199,7 +209,7 @@ export function EditorialGallery() {
             </h2>
             <div className="flex flex-col items-center justify-center gap-3">
               <div className="w-14 h-14 rounded-full overflow-clip border-2 border-slate-700">
-                <img src="https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=200&auto=format&fit=crop" alt="Maria" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=200&auto=format&fit=crop" alt="Maria" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className="text-slate-50 font-bold tracking-wide uppercase text-sm">Maria Gonzalez</p>
@@ -213,7 +223,7 @@ export function EditorialGallery() {
       {/* PANEL 5: Review 5 */}
       <div className="panel absolute inset-0 w-full h-full bg-slate-100 z-50 overflow-clip">
         <div className="absolute inset-0 z-0 parallax-img opacity-90">
-          <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=2000&auto=format&fit=crop" alt="Agriculture Business" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=2000&auto=format&fit=crop" alt="Agriculture Business" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
         </div>
         <div className="absolute inset-0 bottom-auto top-0 z-10 bg-gradient-to-b from-slate-900 via-slate-900/95 to-transparent w-full h-3/4 md:h-1/2" />
         
@@ -224,7 +234,7 @@ export function EditorialGallery() {
             </h2>
             <div className="flex flex-col items-center justify-center gap-3">
               <div className="w-14 h-14 rounded-full overflow-clip border-2 border-slate-700">
-                <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=200&auto=format&fit=crop" alt="Joko" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=200&auto=format&fit=crop" alt="Joko" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className="text-slate-50 font-bold tracking-wide uppercase text-sm">Joko Anwar</p>

@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+ 
 import React from "react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import {
@@ -11,7 +11,7 @@ import {
 
 export default function BentoGridDemo() {
   return (
-    <BentoGrid className="max-w-6xl mx-auto">
+    <BentoGrid className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
       {items.map((item, i) => (
         <BentoGridItem
           key={i}
@@ -30,7 +30,7 @@ export default function BentoGridDemo() {
 
 const ImageHeader = ({ src, icon }: { src: string, icon: React.ReactNode }) => (
   <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-[1.5rem] overflow-hidden relative group/image">
-    <img src={src} alt="Feature" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover/image:scale-110" />
+    <img src={src} alt="Feature" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover/image:scale-110"  loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-sky-900/80 via-sky-900/20 to-transparent pointer-events-none transition-opacity duration-500 opacity-60 group-hover/image:opacity-80" />
     <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl p-3 shadow-2xl transition-transform duration-500 group-hover/image:rotate-12 group-hover/image:scale-110">
       {icon}

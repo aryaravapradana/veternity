@@ -29,7 +29,7 @@ Gunakan SEMUA data di atas untuk memberikan jawaban yang SANGAT personal, releva
   try {
     const result = await streamText({
       model: google('gemini-flash-lite-latest') as any, // Sangat cepat dan mendukung multi-modal (gambar/pdf)
-      system: `Anda adalah "Pranata Agri-LLM", sebuah sistem intelijen pusat untuk segala hal yang berhubungan dengan peternakan hewan. Anda BUKAN hanya dokter hewan, tetapi juga konsultan bisnis peternakan, manajemen kandang, logistik, dan keuangan peternak.
+      system: `Anda adalah "Pranata Intelligence", sebuah sistem intelijen pusat untuk segala hal yang berhubungan dengan peternakan hewan. Anda BUKAN hanya dokter hewan, tetapi juga konsultan bisnis peternakan, manajemen kandang, logistik, dan keuangan peternak.
       
   Tugas Anda adalah:
   1. Membantu peternak mendiagnosis penyakit ternak berdasarkan deskripsi atau gambar yang mereka unggah (Veterinary).
@@ -66,7 +66,7 @@ Gunakan SEMUA data di atas untuk memberikan jawaban yang SANGAT personal, releva
     console.error("AI Insight Error:", error);
     
     // Auto fallback for 429 quota or other API errors
-    const fallbackText = "TITLE: Perhatian API\nVALUE: Limit Tercapai\nDESC: Kuota AI gratis telah habis atau API Key invalid. AI Insight sedang offline.\nCTA_TEXT: Mengerti\nCTA_URL: /dashboard\n---\nTITLE: Info Status\nVALUE: Mode Fallback\nDESC: Aplikasi tetap berfungsi normal, silakan lanjutkan pengelolaan toko Anda.\nCTA_TEXT: Lihat Etalase\nCTA_URL: /dashboard/store";
+    const fallbackText = "TITLE: Perhatian API\nVALUE: Limit Tercapai\nDESC: Kuota AI gratis telah habis atau API Key invalid. AI Insight sedang offline.\nCTA_TEXT: Mengerti\nCTA_URL: /hub\n---\nTITLE: Info Status\nVALUE: Mode Fallback\nDESC: Aplikasi tetap berfungsi normal, silakan lanjutkan pengelolaan toko Anda.\nCTA_TEXT: Lihat Etalase\nCTA_URL: /hub/store";
     
     // Vercel AI SDK v1 stream protocol format
     const stream = new ReadableStream({

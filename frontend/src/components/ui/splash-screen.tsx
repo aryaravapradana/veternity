@@ -14,13 +14,13 @@ export function SplashScreen() {
     const w = window.innerWidth;
     const h = window.innerHeight;
     
-    // ViewBox is 3343 wide, rendered at 400px wide. Ratio = 400 / 3343
-    const ratio = 400 / 3343;
+    const logoWidth = Math.min(w * 0.8, 400);
+    const ratio = logoWidth / 3343;
+    const logoHeight = logoWidth * (994 / 3343);
     
-    // The SVG is positioned at 50vw - 200px (center). The circle cx is 437 inside the viewBox.
-    // Calculate the EXACT physical pixel position of the origin on the screen:
-    const originXPhysical = (w / 2) - 200 + (437 * ratio); 
-    const originYPhysical = (h / 2) - 60 + (497 * (120 / 994)); 
+    // The SVG is centered. The circle cx is 437 inside the viewBox.
+    const originXPhysical = (w / 2) - (logoWidth / 2) + (437 * ratio); 
+    const originYPhysical = (h / 2) - (logoHeight / 2) + (497 * ratio); 
 
     // Find the max distance from this origin to any of the 4 screen corners
     const maxCornerDist = Math.max(
@@ -34,7 +34,7 @@ export function SplashScreen() {
     // This ensures that if the mobile viewport grows (e.g. address bar hides), 
     // the circle hole remains larger than the screen, preventing the circle from "sitting on the screen".
     const requiredRadius = (maxCornerDist / ratio) + 10000; 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setTargetRadius(requiredRadius);
 
     // For scale, we need the logo's bounds to clear the screen. 
@@ -78,7 +78,7 @@ export function SplashScreen() {
             {/* Keep the background everywhere initially */}
             <rect width="100%" height="100%" fill="white" />
             {/* Punch a circular hole from the center of the logo mark (cx: 437, cy: 497 in viewBox) */}
-            <svg x="calc(50vw - 200px)" y="calc(50vh - 60px)" width="400" height="120" viewBox="0 0 3343 994" overflow="visible">
+            <svg x="calc(50vw - min(40vw, 200px))" y="calc(50vh - min(11.89vw, 59.45px))" width="min(80vw, 400px)" height="min(23.78vw, 118.9px)" viewBox="0 0 3343 994" overflow="visible">
               <motion.circle
                 cx="437"
                 cy="497"
@@ -95,7 +95,7 @@ export function SplashScreen() {
         <g mask="url(#splash-mask)">
           <rect width="100%" height="100%" fill="white" />
           
-          <svg x="calc(50vw - 200px)" y="calc(50vh - 60px)" width="400" height="120" viewBox="0 0 3343 994" overflow="visible">
+          <svg x="calc(50vw - min(40vw, 200px))" y="calc(50vh - min(11.89vw, 59.45px))" width="min(80vw, 400px)" height="min(23.78vw, 118.9px)" viewBox="0 0 3343 994" overflow="visible">
             {/* The Colored Logo remains static in the center. Only the circular hole expands/shrinks. */}
             <image href="/logos/basic/logo black.png" width="3343" height="994" />
           </svg>

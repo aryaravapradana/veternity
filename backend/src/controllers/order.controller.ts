@@ -30,13 +30,14 @@ const checkoutSchema = z.object({
   paymentMethod: z.string().optional(),
   shippingFee: z.number().min(0).default(0),
   platformFee: z.number().min(0).default(0),
+  requestedArrivalDate: z.string().datetime().optional(),
 });
 
 export const checkout = async (req: Request, res: Response) => {
   const parse = checkoutSchema.safeParse(req.body);
   if (!parse.success) return res.status(400).json({ error: parse.error.issues[0].message });
 
-  const { buyerId, sellerId, items, shippingAddress, shippingMethod, paymentMethod, shippingFee, platformFee } = parse.data;
+  const { buyerId, sellerId, items, shippingAddress, shippingMethod, paymentMethod, shippingFee, platformFee, requestedArrivalDate } = parse.data;
 
   if (req.user?.id !== buyerId) return res.status(403).json({ error: 'Forbidden' });
 
@@ -61,6 +62,7 @@ export const checkout = async (req: Request, res: Response) => {
           paymentMethod,
           shippingFee,
           platformFee,
+          requestedArrivalDate: requestedArrivalDate ? new Date(requestedArrivalDate) : undefined,
           status: 'PAID',
           items: {
             create: items.map((item) => ({

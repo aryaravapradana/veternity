@@ -3,18 +3,22 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
+import zlib from 'zlib';
 import routes from './routes';
 import { verifyToken } from './middlewares/auth.middleware';
 import { globalErrorHandler } from './middlewares/error.middleware';
-import { getPrices } from './controllers/dashboard.controller';
+import { getPrices } from './controllers/hub.controller';
 import { getSellerEvents, createEvent, updateEvent, deleteEvent } from './controllers/profile.controller';
 
 const app = express();
 
 // ── Security Headers ──
 // ── Security Headers & Compression ──
-app.use(helmet());
-app.use(compression());
+app.use(helmet({ hidePoweredBy: true }));
+app.use(compression({
+  level: zlib.constants.Z_BEST_SPEED,
+  threshold: 1024,
+}));
 
 // ── CORS ──
 app.use(cors({
