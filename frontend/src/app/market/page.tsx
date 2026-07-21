@@ -331,14 +331,14 @@ export default function MarketplacePage() {
   const loadData = async () => {
     setLoading(true);
     const sessionStr = localStorage.getItem("farmpro_session");
-    if (!sessionStr) { router.push("/login"); return; }
-    const session = JSON.parse(sessionStr);
-    setProfile(session);
+    const session = sessionStr ? JSON.parse(sessionStr) : null;
+    if (session) setProfile(session);
+
     try {
       const [prodRes, ordRes, cartRes] = await Promise.all([
         fetchApi(`${API_BASE}/api/products?limit=200`).catch(() => null),
-        fetchApi(`${API_BASE}/api/orders/BUYER/${session.id}`).catch(() => null),
-        fetchApi(`${API_BASE}/api/cart/${session.id}`).catch(() => null)
+        session ? fetchApi(`${API_BASE}/api/orders/BUYER/${session.id}`).catch(() => null) : Promise.resolve(null),
+        session ? fetchApi(`${API_BASE}/api/cart/${session.id}`).catch(() => null) : Promise.resolve(null)
       ]);
       
       if (prodRes && prodRes.ok) {
