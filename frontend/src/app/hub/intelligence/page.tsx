@@ -150,7 +150,7 @@ export default function IntelligencePage() {
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md relative z-10">
             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            <span className="text-xs font-bold text-white/90 uppercase tracking-widest">Gemini 1.5 Flash</span>
+            <span className="text-xs font-bold text-white/90 uppercase tracking-widest">AI Online</span>
           </div>
         </div>
 
