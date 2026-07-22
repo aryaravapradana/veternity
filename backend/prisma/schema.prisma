@@ -20,6 +20,8 @@ model SellerEvent {
   seller      Profile  @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([sellerId])
 }
 
 model Transaction {
@@ -32,6 +34,8 @@ model Transaction {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model CommodityPrice {
@@ -40,6 +44,8 @@ model CommodityPrice {
   pricePerKg  Float
   region      String
   recordedAt  DateTime @default(now())
+
+  @@index([commodity])
 }
 
 enum Role {

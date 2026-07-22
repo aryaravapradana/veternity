@@ -56,10 +56,17 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
 export const getSellerProducts = async (req: Request, res: Response) => {
   try {
+    const sellerId = String(req.params.id);
+    const cacheKey = `seller_products_${sellerId}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json(cached);
+
     const products = await prisma.product.findMany({
-      where: { sellerId: String(req.params.id), deletedAt: null },
+      where: { sellerId, deletedAt: null },
       orderBy: { createdAt: 'desc' }
     });
+
+    setCache(cacheKey, products, 60);
     return res.json(products);
   } catch (error) {
     console.error('[getSellerProducts]', error);

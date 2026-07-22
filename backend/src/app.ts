@@ -21,24 +21,24 @@ app.use(compression({
   threshold: 1024,
 }));
 
-// ── CORS ──
+// ── CORS (Preflight Cached 24 Hours) ──
 app.use(cors({
   origin: (origin, callback) => {
-    // Reflect incoming origin to support multiple domains, Vercel previews, and local dev
     return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400, // Cache preflight OPTIONS requests in browser for 24 hours
 }));
 
 // ── Body Parser ──
 app.use(express.json({ limit: '5mb' }));
 
-// ── Global Rate Limiter (prevents DDoS) ──
+// ── Global Rate Limiter ──
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Terlalu banyak request, coba lagi dalam 15 menit.' },
