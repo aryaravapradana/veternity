@@ -144,7 +144,7 @@ export default function IntelligencePage() {
           <div className="flex items-center gap-4 text-white relative z-10">
             <img src="/logos/intelligence/intelligence-white.png" alt="Intelligence Logo" className="h-12 w-auto object-contain drop-shadow-md"  loading="lazy" decoding="async" />
             <div>
-              <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">Pranata Intelligence <Sparkles size={16} className="text-emerald-400" /></h1>
+              <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">Pranata Intelligence</h1>
               <p className="text-white/60 text-sm font-medium">Advanced agricultural analytics & veterinary AI</p>
             </div>
           </div>
