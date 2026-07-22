@@ -2,7 +2,7 @@
 import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2, QrCode, HandCoins, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2, QrCode, HandCoins, Calendar, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingFee, setShippingFee] = useState(45000);
   const [shippingMethod, setShippingMethod] = useState("kargo");
   const [paymentMethod, setPaymentMethod] = useState("bca");

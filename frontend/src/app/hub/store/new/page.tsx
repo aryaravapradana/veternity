@@ -403,7 +403,7 @@ export default function NewProductPage() {
               aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") || 
               aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
             );
-            const isDisabled = isSubmitting || isAiProcessing || (newProduct.category === "Daging" && newProduct.imageUrls.length > 0 && (!aiAnalysisResult || isUnfit));
+            const isDisabled = Boolean(isSubmitting || isAiProcessing || (newProduct.category === "Daging" && newProduct.imageUrls.length > 0 && (!aiAnalysisResult || isUnfit)));
 
             return (
               <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">

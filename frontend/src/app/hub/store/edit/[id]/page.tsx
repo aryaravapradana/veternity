@@ -398,7 +398,7 @@ export default function EditProductPage() {
               aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") || 
               aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
             );
-            const isDisabled = isSubmitting || isAiProcessing || isUnfit;
+            const isDisabled = Boolean(isSubmitting || isAiProcessing || isUnfit);
 
             return (
               <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">
