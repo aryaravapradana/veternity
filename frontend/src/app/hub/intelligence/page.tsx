@@ -84,13 +84,18 @@ export default function IntelligencePage() {
 
           ctx.drawImage(img, 0, 0, width, height);
           const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve({
-            name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
-            contentType: 'image/jpeg',
-            url: compressedDataUrl,
-          });
+          
+          if (compressedDataUrl && compressedDataUrl.startsWith('data:image/') && compressedDataUrl.includes(';base64,') && compressedDataUrl.length > 100) {
+            resolve({
+              name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+              contentType: 'image/jpeg',
+              url: compressedDataUrl,
+            });
+          } else {
+            resolve({ name: file.name, contentType: file.type, url: e.target?.result as string });
+          }
         };
-        img.onerror = reject;
+        img.onerror = () => resolve({ name: file.name, contentType: file.type, url: e.target?.result as string });
         img.src = e.target?.result as string;
       };
       reader.onerror = reject;

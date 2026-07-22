@@ -38,15 +38,23 @@ INFO KONTEKS (HEMAT TOKEN):
   // Token Optimization: Limit history to last 6 messages max
   const recentMessages = Array.isArray(messages) ? messages.slice(-6) : [];
 
-  // Ensure messages with attachments have non-empty prompt text
+  // Ensure messages with attachments have valid Base64 data URIs and non-empty prompt text
   const sanitizedMessages = recentMessages.map((msg: any) => {
-    if ((!msg.content || typeof msg.content !== 'string' || msg.content.trim() === '') && (msg.experimental_attachments?.length || msg.attachments?.length)) {
-      return {
-        ...msg,
-        content: 'Tolong analisis foto / lampiran ini.'
-      };
+    let sanitizedMsg = { ...msg };
+
+    if (Array.isArray(sanitizedMsg.experimental_attachments)) {
+      sanitizedMsg.experimental_attachments = sanitizedMsg.experimental_attachments.filter((att: any) => {
+        if (!att || !att.url || typeof att.url !== 'string') return false;
+        // Accept valid data URIs or http/https URLs with sufficient payload length
+        return (att.url.startsWith('data:image/') && att.url.includes(';base64,')) || att.url.startsWith('http://') || att.url.startsWith('https://');
+      });
     }
-    return msg;
+
+    if ((!sanitizedMsg.content || typeof sanitizedMsg.content !== 'string' || sanitizedMsg.content.trim() === '') && (sanitizedMsg.experimental_attachments?.length || sanitizedMsg.attachments?.length)) {
+      sanitizedMsg.content = 'Tolong analisis foto / lampiran ini.';
+    }
+
+    return sanitizedMsg;
   });
 
   try {
