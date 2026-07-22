@@ -46,6 +46,58 @@ export default function IntelligencePage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const compressImage = (file: File, maxWidth = 1024, maxHeight = 1024, quality = 0.75): Promise<{ name: string; contentType: string; url: string }> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ name: file.name, contentType: file.type, url: reader.result as string });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve({ name: file.name, contentType: file.type, url: e.target?.result as string });
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve({
+            name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+            contentType: 'image/jpeg',
+            url: compressedDataUrl,
+          });
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input && (!files || files.length === 0)) return;
@@ -53,19 +105,7 @@ export default function IntelligencePage() {
     let attachments: Array<{ name: string; contentType: string; url: string }> | undefined = undefined;
     if (files && files.length > 0) {
       attachments = await Promise.all(
-        Array.from(files).map((file) =>
-          new Promise<{ name: string; contentType: string; url: string }>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () =>
-              resolve({
-                name: file.name,
-                contentType: file.type,
-                url: reader.result as string,
-              });
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          })
-        )
+        Array.from(files).map((file) => compressImage(file))
       );
     }
 
