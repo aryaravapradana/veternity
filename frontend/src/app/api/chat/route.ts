@@ -38,23 +38,60 @@ INFO KONTEKS (HEMAT TOKEN):
   // Token Optimization: Limit history to last 6 messages max
   const recentMessages = Array.isArray(messages) ? messages.slice(-6) : [];
 
-  // Ensure messages with attachments have valid Base64 data URIs and non-empty prompt text
-  const sanitizedMessages = recentMessages.map((msg: any) => {
-    let sanitizedMsg = { ...msg };
+  // Transform recent messages into CoreMessages with explicit Buffer image payloads
+  const coreMessages = recentMessages.map((msg: any) => {
+    const role = msg.role === 'assistant' ? 'assistant' : 'user';
+    const textContent = typeof msg.content === 'string' ? msg.content : (Array.isArray(msg.content) ? msg.content.map((c: any) => c.text || '').join('\n') : '');
+    const attachments = msg.experimental_attachments || msg.attachments || [];
 
-    if (Array.isArray(sanitizedMsg.experimental_attachments)) {
-      sanitizedMsg.experimental_attachments = sanitizedMsg.experimental_attachments.filter((att: any) => {
-        if (!att || !att.url || typeof att.url !== 'string') return false;
-        // Accept valid data URIs or http/https URLs with sufficient payload length
-        return (att.url.startsWith('data:image/') && att.url.includes(';base64,')) || att.url.startsWith('http://') || att.url.startsWith('https://');
-      });
+    if (!Array.isArray(attachments) || attachments.length === 0) {
+      return {
+        role,
+        content: textContent || (role === 'user' ? 'Halo' : ''),
+      };
     }
 
-    if ((!sanitizedMsg.content || typeof sanitizedMsg.content !== 'string' || sanitizedMsg.content.trim() === '') && (sanitizedMsg.experimental_attachments?.length || sanitizedMsg.attachments?.length)) {
-      sanitizedMsg.content = 'Tolong analisis foto / lampiran ini.';
+    const contentParts: any[] = [];
+    const promptText = textContent && textContent.trim() !== '' ? textContent : 'Tolong analisis foto / lampiran ini.';
+    contentParts.push({ type: 'text', text: promptText });
+
+    for (const att of attachments) {
+      if (!att || !att.url || typeof att.url !== 'string') continue;
+
+      if (att.url.startsWith('data:')) {
+        const matches = att.url.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const mimeType = matches[1];
+          const base64Data = matches[2];
+          try {
+            const buffer = Buffer.from(base64Data.trim(), 'base64');
+            if (buffer.length > 0) {
+              contentParts.push({
+                type: 'image',
+                image: buffer,
+                mimeType: mimeType || 'image/jpeg',
+              });
+            }
+          } catch (e) {
+            console.error("Failed to parse attachment base64 buffer", e);
+          }
+        }
+      } else if (att.url.startsWith('http://') || att.url.startsWith('https://')) {
+        try {
+          contentParts.push({
+            type: 'image',
+            image: new URL(att.url),
+          });
+        } catch (e) {
+          console.error("Invalid attachment URL", e);
+        }
+      }
     }
 
-    return sanitizedMsg;
+    return {
+      role,
+      content: contentParts,
+    };
   });
 
   try {
@@ -75,7 +112,7 @@ INFORMASI PLATFORM PRANATA:
 FORMATTING:
 - Jawab singkat, padat, ramah, dan to the point.
 - Gunakan markdown bullet points dan **bold**. JANGAN buat paragraf panjang.${dynamicContext}`,
-      messages: convertToCoreMessages(sanitizedMessages),
+      messages: coreMessages as any,
     });
 
     return result.toAIStreamResponse();
