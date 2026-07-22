@@ -313,28 +313,24 @@ export default function EditProductPage() {
                       <div className="flex items-center bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-[#4A7C59]/20 focus-within:border-[#4A7C59]">
                         <button 
                           type="button" 
-                          onClick={() => setNewProduct(prev => ({ ...prev, stock: Math.max(0, prev.stock - 1) }))} 
+                          onClick={() => setNewProduct(prev => ({ ...prev, stock: Math.max(0, (prev.stock || 0) - 1) }))} 
                           className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-r border-[#DDE2D6] transition-colors shrink-0"
                         >
                           <Minus size={18} strokeWidth={3} />
                         </button>
-                        <div className="flex-1 relative flex items-center justify-center h-14 overflow-hidden px-2">
-                          <AnimatePresence mode="popLayout" initial={false}>
-                            <motion.span
-                              key={newProduct.stock}
-                              initial={{ y: 12, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              exit={{ y: -12, opacity: 0 }}
-                              transition={{ duration: 0.15, ease: "easeOut" }}
-                              className="font-black text-xl text-[#1C241E] text-center"
-                            >
-                              {newProduct.stock}
-                            </motion.span>
-                          </AnimatePresence>
-                        </div>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={newProduct.stock === 0 ? "0" : newProduct.stock || ""}
+                          onChange={(e) => {
+                            const rawVal = e.target.value.replace(/\D/g, "");
+                            setNewProduct(prev => ({ ...prev, stock: rawVal ? parseInt(rawVal, 10) : 0 }));
+                          }}
+                          className="flex-1 bg-transparent text-center font-black text-xl text-[#1C241E] h-14 outline-none px-2"
+                        />
                         <button 
                           type="button" 
-                          onClick={() => setNewProduct(prev => ({ ...prev, stock: prev.stock + 1 }))} 
+                          onClick={() => setNewProduct(prev => ({ ...prev, stock: (prev.stock || 0) + 1 }))} 
                           className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-l border-[#DDE2D6] transition-colors shrink-0"
                         >
                           <Plus size={18} strokeWidth={3} />
@@ -349,28 +345,24 @@ export default function EditProductPage() {
                       <div className="flex items-center bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-[#4A7C59]/20 focus-within:border-[#4A7C59]">
                         <button 
                           type="button" 
-                          onClick={() => setNewProduct(prev => ({ ...prev, minOrder: Math.max(1, prev.minOrder - 1) }))} 
+                          onClick={() => setNewProduct(prev => ({ ...prev, minOrder: Math.max(1, (prev.minOrder || 1) - 1) }))} 
                           className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-r border-[#DDE2D6] transition-colors shrink-0"
                         >
                           <Minus size={18} strokeWidth={3} />
                         </button>
-                        <div className="flex-1 relative flex items-center justify-center h-14 overflow-hidden px-2">
-                          <AnimatePresence mode="popLayout" initial={false}>
-                            <motion.span
-                              key={newProduct.minOrder}
-                              initial={{ y: 12, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              exit={{ y: -12, opacity: 0 }}
-                              transition={{ duration: 0.15, ease: "easeOut" }}
-                              className="font-black text-xl text-[#1C241E] text-center"
-                            >
-                              {newProduct.minOrder}
-                            </motion.span>
-                          </AnimatePresence>
-                        </div>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={newProduct.minOrder || ""}
+                          onChange={(e) => {
+                            const rawVal = e.target.value.replace(/\D/g, "");
+                            setNewProduct(prev => ({ ...prev, minOrder: rawVal ? parseInt(rawVal, 10) : 1 }));
+                          }}
+                          className="flex-1 bg-transparent text-center font-black text-xl text-[#1C241E] h-14 outline-none px-2"
+                        />
                         <button 
                           type="button" 
-                          onClick={() => setNewProduct(prev => ({ ...prev, minOrder: prev.minOrder + 1 }))} 
+                          onClick={() => setNewProduct(prev => ({ ...prev, minOrder: (prev.minOrder || 1) + 1 }))} 
                           className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-l border-[#DDE2D6] transition-colors shrink-0"
                         >
                           <Plus size={18} strokeWidth={3} />
