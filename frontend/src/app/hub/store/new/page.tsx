@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle } from "lucide-react";
+import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle, Minus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchApi } from "@/lib/apiClient";
 import { uploadImage } from "@/lib/supabaseStorage";
@@ -314,14 +314,72 @@ export default function NewProductPage() {
                       </div>
                       <div className="sm:col-span-1">
                         <label className="block text-sm font-black mb-2 text-[#2B4C3B] uppercase tracking-wider">Stock Quantity</label>
-                        <input required type="number" min="0" value={newProduct.stock || ""} onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl p-4 focus:ring-4 focus:ring-[#4A7C59]/20 focus:border-[#4A7C59] outline-none transition-all text-[#1C241E] font-bold text-lg" />
+                        <div className="flex items-center bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-[#4A7C59]/20 focus-within:border-[#4A7C59]">
+                          <button 
+                            type="button" 
+                            onClick={() => setNewProduct(prev => ({ ...prev, stock: Math.max(0, prev.stock - 1) }))} 
+                            className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-r border-[#DDE2D6] transition-colors shrink-0"
+                          >
+                            <Minus size={18} strokeWidth={3} />
+                          </button>
+                          <div className="flex-1 relative flex items-center justify-center h-14 overflow-hidden px-2">
+                            <AnimatePresence mode="popLayout" initial={false}>
+                              <motion.span
+                                key={newProduct.stock}
+                                initial={{ y: 12, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -12, opacity: 0 }}
+                                transition={{ duration: 0.15, ease: "easeOut" }}
+                                className="font-black text-xl text-[#1C241E] text-center"
+                              >
+                                {newProduct.stock}
+                              </motion.span>
+                            </AnimatePresence>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => setNewProduct(prev => ({ ...prev, stock: prev.stock + 1 }))} 
+                            className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-l border-[#DDE2D6] transition-colors shrink-0"
+                          >
+                            <Plus size={18} strokeWidth={3} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="sm:col-span-1">
                         <label className="block text-sm font-black mb-2 text-[#2B4C3B] uppercase tracking-wider">Minimum Order</label>
-                        <input required type="number" min="1" max={newProduct.stock} value={newProduct.minOrder || ""} onChange={e => setNewProduct({...newProduct, minOrder: Number(e.target.value)})} className="w-full bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl p-4 focus:ring-4 focus:ring-[#4A7C59]/20 focus:border-[#4A7C59] outline-none transition-all text-[#1C241E] font-bold text-lg" />
+                        <div className="flex items-center bg-[#F8F6F0] border border-[#DDE2D6] rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-[#4A7C59]/20 focus-within:border-[#4A7C59]">
+                          <button 
+                            type="button" 
+                            onClick={() => setNewProduct(prev => ({ ...prev, minOrder: Math.max(1, prev.minOrder - 1) }))} 
+                            className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-r border-[#DDE2D6] transition-colors shrink-0"
+                          >
+                            <Minus size={18} strokeWidth={3} />
+                          </button>
+                          <div className="flex-1 relative flex items-center justify-center h-14 overflow-hidden px-2">
+                            <AnimatePresence mode="popLayout" initial={false}>
+                              <motion.span
+                                key={newProduct.minOrder}
+                                initial={{ y: 12, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -12, opacity: 0 }}
+                                transition={{ duration: 0.15, ease: "easeOut" }}
+                                className="font-black text-xl text-[#1C241E] text-center"
+                              >
+                                {newProduct.minOrder}
+                              </motion.span>
+                            </AnimatePresence>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => setNewProduct(prev => ({ ...prev, minOrder: prev.minOrder + 1 }))} 
+                            className="w-12 h-14 bg-white hover:bg-[#EEF2E6] text-[#2B4C3B] font-black text-xl flex items-center justify-center border-l border-[#DDE2D6] transition-colors shrink-0"
+                          >
+                            <Plus size={18} strokeWidth={3} />
+                          </button>
+                        </div>
                       </div>
                       <div className="sm:col-span-1">
                         <label className="block text-sm font-black mb-2 text-[#2B4C3B] uppercase tracking-wider">Unit</label>
@@ -366,11 +424,14 @@ export default function NewProductPage() {
                         <span className="text-2xl font-black text-[#5A635B] mr-4">Rp</span>
                         <input 
                           required 
-                          type="number" 
-                          min="0" 
-                          step="100" 
-                          value={newProduct.price || ""} 
-                          onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})} 
+                          type="text" 
+                          inputMode="numeric"
+                          placeholder="0"
+                          value={newProduct.price > 0 ? newProduct.price.toLocaleString('id-ID') : ""} 
+                          onChange={e => {
+                            const rawVal = e.target.value.replace(/\D/g, "");
+                            setNewProduct({ ...newProduct, price: rawVal ? parseInt(rawVal, 10) : 0 });
+                          }}
                           className="w-full bg-white border-2 border-[#DDE2D6] rounded-2xl p-5 focus:ring-0 focus:border-[#4A7C59] outline-none transition-all text-3xl font-black text-[#1C241E] shadow-inner" 
                         />
                       </div>

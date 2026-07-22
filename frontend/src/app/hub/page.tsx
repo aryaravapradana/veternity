@@ -195,37 +195,60 @@ export default function MainDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               
           {/* Weather Widget */}
-          <div className="md:col-span-1 lg:col-span-1 order-1 bg-gradient-to-br from-[#4A7C59] to-[#2B4C3B] rounded-[2rem] p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[140px]">
-                <div className="absolute -right-10 -top-10 opacity-10">
-                  <CloudSun size={180} />
-                </div>
-                
-                <div className="relative z-10 flex justify-between items-start">
-                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold w-fit">
-                    <MapPin size={12} /> {locationName}
+          <div className="md:col-span-1 lg:col-span-1 order-1 bg-gradient-to-br from-[#4A7C59] via-[#3A6B49] to-[#2B4C3B] rounded-[2rem] p-6 sm:p-7 text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+            <div className="absolute -right-6 -bottom-6 opacity-15 pointer-events-none">
+              <CloudSun size={220} />
+            </div>
+            
+            <div className="relative z-10 flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase">
+                <MapPin size={14} className="text-[#F5990D]" /> {locationName}
+              </div>
+              <span className="text-[11px] font-bold text-[#EEF2E6]/80 bg-black/20 px-2.5 py-1 rounded-full">Cuaca Real-time</span>
+            </div>
+
+            <div className="relative z-10 my-auto">
+              {weather ? (
+                <div className="space-y-4">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-6xl lg:text-7xl font-black leading-none tracking-tight">{Math.round(weather.temperature_2m)}°</span>
+                      <span className="text-2xl font-black text-[#B4C179]">C</span>
+                    </div>
+                    <span className="text-sm font-black text-[#F5990D] bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-full backdrop-blur-md">
+                      Cerah
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="bg-black/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center gap-3">
+                      <div className="p-2 bg-[#4A7C59]/50 rounded-xl">
+                        <Droplets size={20} className="text-[#B4C179]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-[#A4C4A8] uppercase tracking-wider">Kelembapan</p>
+                        <p className="text-base font-black text-white">{weather.relative_humidity_2m}%</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center gap-3">
+                      <div className="p-2 bg-[#4A7C59]/50 rounded-xl">
+                        <Wind size={20} className="text-[#B4C179]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-[#A4C4A8] uppercase tracking-wider">Angin</p>
+                        <p className="text-base font-black text-white">{weather.wind_speed_10m} <span className="text-xs font-normal">km/j</span></p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div className="relative z-10 mt-4">
-                  {weather ? (
-                    <>
-                      <div className="flex items-end gap-3 mb-2">
-                        <span className="text-5xl font-black leading-none">{Math.round(weather.temperature_2m)}°</span>
-                        <span className="text-base font-bold text-[#A4C4A8] pb-1">Cerah</span>
-                      </div>
-                      <div className="flex gap-4 text-xs font-bold text-[#EEF2E6]">
-                        <span className="flex items-center gap-1.5"><Droplets size={16} className="text-[#84B0A5]" /> {weather.relative_humidity_2m}% Lem</span>
-                        <span className="flex items-center gap-1.5"><Wind size={16} className="text-[#84B0A5]" /> {weather.wind_speed_10m} km/j</span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-12 w-24 bg-white/20 rounded-xl"></div>
-                      <div className="h-4 w-40 bg-white/20 rounded-md"></div>
-                    </div>
-                  )}
+              ) : (
+                <div className="animate-pulse space-y-4">
+                  <div className="h-16 w-32 bg-white/20 rounded-2xl"></div>
+                  <div className="h-10 w-full bg-white/20 rounded-xl"></div>
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
 
               {/* Incoming Orders Tile */}
               <div className="md:col-span-1 lg:col-span-1 order-3 lg:order-2 bg-gradient-to-br from-[#2B4C3B] to-[#4A7C59] rounded-[2rem] p-5 border border-[#4A7C59] shadow-lg text-white flex flex-col relative overflow-hidden min-h-[140px]">

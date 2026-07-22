@@ -2,7 +2,8 @@
 import { fetchApi } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
-import { Store, Package, Plus, CheckCircle, Image as ImageIcon, Info, X, Edit2, Trash2, Sparkles, ChevronRight, Crown, Star, Medal, ArrowLeft } from "lucide-react";
+import { Store, Package, Plus, CheckCircle, Image as ImageIcon, Info, X, Edit2, Trash2, Sparkles, ChevronRight, Crown, Star, AlertTriangle, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
@@ -11,6 +12,11 @@ export default function StoreDashboardPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Custom Delete Modal State
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   usePageLoading(loading);
   const router = useRouter();
 
@@ -63,14 +69,21 @@ export default function StoreDashboardPage() {
     return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", icon: Info };
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus produk ini?")) return;
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete || isDeleting) return;
+    setIsDeleting(true);
     
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-    await fetchApi(`${API_BASE}/api/products/${id}`, { method: "DELETE" });
-    loadData();
+    try {
+      await fetchApi(`${API_BASE}/api/products/${productToDelete.id}`, { method: "DELETE" });
+      setProductToDelete(null);
+      await loadData();
+    } catch (error) {
+      alert("Gagal menghapus produk.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
-
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] p-6 sm:p-10 text-[#1C241E]">
@@ -175,7 +188,7 @@ export default function StoreDashboardPage() {
                         <button onClick={() => router.push(`/hub/store/edit/${p.id}`)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-emerald-100 hover:text-emerald-700 transition-colors">
                           <Edit2 size={16} />
                         </button>
-                        <button onClick={() => handleDeleteProduct(p.id)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                        <button onClick={() => setProductToDelete(p)} className="p-2 bg-[#F8F6F0] text-[#5A635B] rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -186,6 +199,73 @@ export default function StoreDashboardPage() {
             </div>
           </div>
       </div>
+
+      {/* Custom Designed Delete Confirmation Modal */}
+      <AnimatePresence>
+        {productToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setProductToDelete(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[2rem] p-6 sm:p-8 border border-[#E8E3D2] shadow-2xl z-10 space-y-6 text-center"
+            >
+              <button 
+                onClick={() => !isDeleting && setProductToDelete(null)}
+                disabled={isDeleting}
+                className="absolute top-6 right-6 p-2 rounded-full text-[#7A8678] hover:text-[#1C241E] hover:bg-[#F8F6F0] transition-colors"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                <AlertTriangle size={32} />
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-[#1C241E] mb-2">Hapus Produk Ini?</h3>
+                <p className="text-sm font-medium text-[#5A635B] leading-relaxed">
+                  Apakah Anda yakin ingin menghapus <span className="font-bold text-[#1C241E]">"{productToDelete.title}"</span>? Produk ini akan secara permanen dihapus dari toko Anda.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setProductToDelete(null)}
+                  disabled={isDeleting}
+                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#DDE2D6] text-[#1C241E] font-bold hover:bg-[#F8F6F0] transition-colors disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteProduct}
+                  disabled={isDeleting}
+                  className="flex-1 py-4 px-6 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      <span>Menghapus...</span>
+                    </>
+                  ) : (
+                    <span>Hapus Produk</span>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
