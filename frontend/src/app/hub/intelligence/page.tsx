@@ -46,12 +46,31 @@ export default function IntelligencePage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input && (!files || files.length === 0)) return;
     
+    let attachments: Array<{ name: string; contentType: string; url: string }> | undefined = undefined;
+    if (files && files.length > 0) {
+      attachments = await Promise.all(
+        Array.from(files).map((file) =>
+          new Promise<{ name: string; contentType: string; url: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () =>
+              resolve({
+                name: file.name,
+                contentType: file.type,
+                url: reader.result as string,
+              });
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })
+        )
+      );
+    }
+
     handleSubmit(e, {
-      experimental_attachments: files || undefined,
+      experimental_attachments: attachments as any,
     });
     setFiles(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -86,7 +105,7 @@ export default function IntelligencePage() {
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md relative z-10">
             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            <span className="text-xs font-bold text-white/90 uppercase tracking-widest">Gemini 2.5 Flash</span>
+            <span className="text-xs font-bold text-white/90 uppercase tracking-widest">Gemini 1.5 Flash</span>
           </div>
         </div>
 

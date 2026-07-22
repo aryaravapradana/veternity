@@ -38,10 +38,21 @@ INFO KONTEKS (HEMAT TOKEN):
   // Token Optimization: Limit history to last 6 messages max
   const recentMessages = Array.isArray(messages) ? messages.slice(-6) : [];
 
+  // Ensure messages with attachments have non-empty prompt text
+  const sanitizedMessages = recentMessages.map((msg: any) => {
+    if ((!msg.content || typeof msg.content !== 'string' || msg.content.trim() === '') && (msg.experimental_attachments?.length || msg.attachments?.length)) {
+      return {
+        ...msg,
+        content: 'Tolong analisis foto / lampiran ini.'
+      };
+    }
+    return msg;
+  });
+
   try {
     const result = await streamText({
-      model: google('gemini-flash-lite-latest') as any,
-      maxTokens: 350, // Strict output token limit to prevent quota exhaustion
+      model: google('gemini-2.5-flash') as any,
+      maxTokens: 1500, // Sufficient output token limit for complete responses
       system: `Anda adalah "Pranata Intelligence", konsultan AI peternakan, manajemen kandang, logistik, dan bisnis peternak.
 
 TUGAS:
@@ -56,15 +67,16 @@ INFORMASI PLATFORM PRANATA:
 FORMATTING:
 - Jawab singkat, padat, ramah, dan to the point.
 - Gunakan markdown bullet points dan **bold**. JANGAN buat paragraf panjang.${dynamicContext}`,
-      messages: convertToCoreMessages(recentMessages),
+      messages: convertToCoreMessages(sanitizedMessages),
     });
 
     return result.toAIStreamResponse();
   } catch (error: any) {
-    console.error("AI Insight Error:", error);
+    console.error("AI Insight Error:", error?.message || error);
+    if (error?.stack) console.error(error.stack);
     
-    // Auto fallback for 429 quota or other API errors
-    const fallbackText = "TITLE: Perhatian API\nVALUE: Limit Tercapai\nDESC: Kuota AI gratis telah habis atau API Key invalid. AI Insight sedang offline.\nCTA_TEXT: Mengerti\nCTA_URL: /hub\n---\nTITLE: Info Status\nVALUE: Mode Fallback\nDESC: Aplikasi tetap berfungsi normal, silakan lanjutkan pengelolaan toko Anda.\nCTA_TEXT: Lihat Etalase\nCTA_URL: /hub/store";
+    const errorDetails = error?.message ? ` (${error.message})` : "";
+    const fallbackText = `TITLE: Perhatian API\nVALUE: Limit / Key Invalid\nDESC: AI Insight offline${errorDetails}. Pastikan GEMINI_API_KEY di .env.local valid (dari Google AI Studio).\nCTA_TEXT: Mengerti\nCTA_URL: /hub\n---\nTITLE: Info Status\nVALUE: Mode Fallback\nDESC: Aplikasi tetap berfungsi normal, silakan lanjutkan pengelolaan toko Anda.\nCTA_TEXT: Lihat Etalase\nCTA_URL: /hub/store`;
     
     // Vercel AI SDK v1 stream protocol format
     const stream = new ReadableStream({
