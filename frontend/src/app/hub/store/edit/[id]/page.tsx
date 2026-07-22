@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchApi } from "@/lib/apiClient";
 import { usePageLoading } from "@/components/shared/loading-context";
@@ -22,6 +22,7 @@ export default function EditProductPage() {
   const [aiAnalysisResult, setAiAnalysisResult] = useState<{grade: string, analysis: string} | null>(null);
   const [showUnitDropdown, setShowUnitDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   usePageLoading(loading);
 
   useEffect(() => {
@@ -129,7 +130,6 @@ export default function EditProductPage() {
             imageUrls: [...prev.imageUrls, compressedBase64]
           }));
           
-          // HANYA proses foto pertama yang pernah diunggah untuk menghindari kecurangan
           if (newProduct.category === "Daging" && newProduct.imageUrls.length === 0 && index === 0) {
             setAiAnalysisResult(null);
             handleCheckGradeAIWithImage(compressedBase64);
@@ -144,12 +144,22 @@ export default function EditProductPage() {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isAiProcessing || !profile) return;
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    if (isSubmitting || isAiProcessing || !profile) return;
+
+    const isUnfitMeat = newProduct.category === "Daging" && aiAnalysisResult && (
+      aiAnalysisResult.grade === "Tidak Layak" || 
+      aiAnalysisResult.grade === "Bukan Daging" ||
+      aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") ||
+      aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
+    );
+
+    if (isUnfitMeat) {
+      alert(`Daging dinilai '${aiAnalysisResult?.grade}'. Produk tidak layak konsumsi tidak dapat dipublish!`);
+      return;
+    }
     
-    // If user changed image and category is daging, ensure it's graded
-    // For editing, we only require it if they uploaded a NEW image which triggered aiAnalysisResult to become non-null or null if not yet graded
-    // To simplify: we don't strictly block editing if they keep old images.
+    setIsSubmitting(true);
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     
     try {
       await fetchApi(`${API_BASE}/api/products/${productId}`, {
@@ -169,6 +179,7 @@ export default function EditProductPage() {
       router.push("/hub/store");
     } catch(err) {
       alert("Gagal mengupdate produk.");
+      setIsSubmitting(false);
     }
   };
 
@@ -380,16 +391,39 @@ export default function EditProductPage() {
             </form>
           </div>
           
-          <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">
-            <button 
-              type="submit" 
-              form="productForm" 
-              disabled={isAiProcessing} 
-              className={`w-full py-5 text-lg font-black text-white rounded-2xl transition-all ${isAiProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-pranata hover:opacity-90 shadow-xl shadow-green-900/20 hover:-translate-y-1'}`}
-            >
-              Simpan Perubahan
-            </button>
-          </div>
+          {(() => {
+            const isUnfit = newProduct.category === "Daging" && aiAnalysisResult && (
+              aiAnalysisResult.grade === "Tidak Layak" || 
+              aiAnalysisResult.grade === "Bukan Daging" || 
+              aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") || 
+              aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
+            );
+            const isDisabled = isSubmitting || isAiProcessing || isUnfit;
+
+            return (
+              <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">
+                <button 
+                  type="submit" 
+                  form="productForm" 
+                  disabled={isDisabled} 
+                  className={`w-full py-5 text-lg font-black text-white rounded-2xl transition-all flex items-center justify-center gap-3 ${
+                    isDisabled 
+                      ? 'bg-gray-400 opacity-60 cursor-not-allowed shadow-none' 
+                      : 'bg-pranata hover:opacity-90 shadow-xl shadow-green-900/20 hover:-translate-y-1'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={24} className="animate-spin text-white" />
+                      <span>Menyimpan Perubahan...</span>
+                    </>
+                  ) : (
+                    <span>Simpan Perubahan</span>
+                  )}
+                </button>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

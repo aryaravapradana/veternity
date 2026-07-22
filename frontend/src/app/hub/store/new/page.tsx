@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchApi } from "@/lib/apiClient";
 import { uploadImage } from "@/lib/supabaseStorage";
@@ -17,6 +17,7 @@ export default function NewProductPage() {
   
   const [benchmarkPrice, setBenchmarkPrice] = useState<number | null>(null);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<{grade: string, analysis: string} | null>(null);
   const [showUnitDropdown, setShowUnitDropdown] = useState(false);
 
@@ -91,7 +92,20 @@ export default function NewProductPage() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isAiProcessing || !profile) return;
+    if (isSubmitting || isAiProcessing || !profile) return;
+
+    const isUnfitMeat = newProduct.category === "Daging" && aiAnalysisResult && (
+      aiAnalysisResult.grade === "Tidak Layak" || 
+      aiAnalysisResult.grade === "Bukan Daging" ||
+      aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") ||
+      aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
+    );
+
+    if (isUnfitMeat) {
+      alert(`Daging dinilai '${aiAnalysisResult?.grade}'. Produk tidak layak konsumsi tidak dapat dipublish!`);
+      return;
+    }
+
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     
     let gradeToSave = undefined;
@@ -106,6 +120,8 @@ export default function NewProductPage() {
         aiAnalysisToSave = aiAnalysisResult.analysis;
       }
     }
+
+    setIsSubmitting(true);
 
     try {
       await fetchApi(`${API_BASE}/api/products`, {
@@ -128,6 +144,7 @@ export default function NewProductPage() {
       router.push("/hub/store");
     } catch(err) {
       alert("Gagal membuat produk.");
+      setIsSubmitting(false);
     }
   };
 
@@ -222,42 +239,60 @@ export default function NewProductPage() {
                       )}
                     </div>
                     
-                    {aiAnalysisResult && newProduct.category === "Daging" && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`mt-4 w-full p-4 rounded-2xl border-2 shadow-sm ${
-                        aiAnalysisResult.grade === "Premium" ? "bg-[#FFF9E6] border-[#F5990D]" :
-                        aiAnalysisResult.grade.includes("A") ? "bg-emerald-50 border-emerald-400" :
-                        aiAnalysisResult.grade.includes("B") ? "bg-cyan-50 border-cyan-400" :
-                        "bg-amber-50 border-amber-400"
-                      }`}>
-                        <div className="flex items-center gap-3 mb-2 pb-2 border-b border-black/5">
-                          <div className={`p-1.5 rounded-full ${
-                            aiAnalysisResult.grade === "Premium" ? "bg-[#F5990D]/20 text-[#F5990D]" :
-                            aiAnalysisResult.grade.includes("A") ? "bg-emerald-100 text-emerald-600" :
-                            aiAnalysisResult.grade.includes("B") ? "bg-cyan-100 text-cyan-600" :
-                            "bg-amber-100 text-amber-600"
-                          }`}>
-                            {aiAnalysisResult.grade === "Premium" && <Crown size={18} />}
-                            {aiAnalysisResult.grade.includes("A") && <Star size={18} />}
-                            {aiAnalysisResult.grade.includes("B") && <CheckCircle size={18} />}
-                            {aiAnalysisResult.grade.includes("C") && <Info size={18} />}
+                    {aiAnalysisResult && newProduct.category === "Daging" && (() => {
+                      const isUnfit = aiAnalysisResult.grade === "Tidak Layak" || 
+                                      aiAnalysisResult.grade === "Bukan Daging" || 
+                                      aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") || 
+                                      aiAnalysisResult.grade?.toLowerCase().includes("bukan daging");
+
+                      return (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`mt-4 w-full p-4 rounded-2xl border-2 shadow-sm ${
+                            isUnfit ? "bg-red-50 border-red-400" :
+                            aiAnalysisResult.grade === "Premium" ? "bg-[#FFF9E6] border-[#F5990D]" :
+                            aiAnalysisResult.grade.includes("A") ? "bg-emerald-50 border-emerald-400" :
+                            aiAnalysisResult.grade.includes("B") ? "bg-cyan-50 border-cyan-400" :
+                            "bg-amber-50 border-amber-400"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 mb-2 pb-2 border-b border-black/5">
+                            <div className={`p-1.5 rounded-full ${
+                              isUnfit ? "bg-red-100 text-red-600" :
+                              aiAnalysisResult.grade === "Premium" ? "bg-[#F5990D]/20 text-[#F5990D]" :
+                              aiAnalysisResult.grade.includes("A") ? "bg-emerald-100 text-emerald-600" :
+                              aiAnalysisResult.grade.includes("B") ? "bg-cyan-100 text-cyan-600" :
+                              "bg-amber-100 text-amber-600"
+                            }`}>
+                              {isUnfit && <XCircle size={18} />}
+                              {!isUnfit && aiAnalysisResult.grade === "Premium" && <Crown size={18} />}
+                              {!isUnfit && aiAnalysisResult.grade.includes("A") && <Star size={18} />}
+                              {!isUnfit && aiAnalysisResult.grade.includes("B") && <CheckCircle size={18} />}
+                              {!isUnfit && aiAnalysisResult.grade.includes("C") && <Info size={18} />}
+                            </div>
+                            <h4 className={`text-base font-black ${
+                              isUnfit ? "text-red-700" :
+                              aiAnalysisResult.grade === "Premium" ? "text-[#F5990D]" :
+                              aiAnalysisResult.grade.includes("A") ? "text-emerald-700" :
+                              aiAnalysisResult.grade.includes("B") ? "text-cyan-700" :
+                              "text-amber-700"
+                            }`}>{aiAnalysisResult.grade}</h4>
                           </div>
-                          <h4 className={`text-base font-black ${
-                            aiAnalysisResult.grade === "Premium" ? "text-[#F5990D]" :
-                            aiAnalysisResult.grade.includes("A") ? "text-emerald-700" :
-                            aiAnalysisResult.grade.includes("B") ? "text-cyan-700" :
-                            "text-amber-700"
-                          }`}>{aiAnalysisResult.grade}</h4>
-                        </div>
-                        <p className="text-xs font-semibold text-[#5A635B] leading-relaxed">{aiAnalysisResult.analysis}</p>
-                        <div className="flex items-center gap-1.5 mt-4 justify-start">
-                          <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
-                          <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-6 drop-shadow-sm"  loading="lazy" decoding="async" />
-                        </div>
-                      </motion.div>
-                    )}
+                          <p className="text-xs font-semibold text-[#5A635B] leading-relaxed">{aiAnalysisResult.analysis}</p>
+                          {isUnfit && (
+                            <div className="mt-3 p-3 bg-red-100/80 border border-red-300 rounded-xl text-red-800 text-xs font-bold flex items-center gap-2">
+                              <XCircle size={16} className="shrink-0 text-red-600" />
+                              <span>Produk tidak dapat dipublish karena kualitas daging dinilai 'Tidak Layak' / 'Bukan Daging'.</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5 mt-4 justify-start">
+                            <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
+                            <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-6 drop-shadow-sm" loading="lazy" decoding="async" />
+                          </div>
+                        </motion.div>
+                      );
+                    })()}
                   </div>
                   
                   <div className="flex-1 space-y-6">
@@ -361,18 +396,39 @@ export default function NewProductPage() {
             )}
           </div>
           
-          {stepperStep === 2 && (
-            <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">
-              <button 
-                type="submit" 
-                form="productForm" 
-                disabled={isAiProcessing || (newProduct.category === "Daging" && newProduct.imageUrls.length > 0 && !aiAnalysisResult)} 
-                className={`w-full py-5 text-lg font-black text-white rounded-2xl transition-all ${isAiProcessing || (newProduct.category === "Daging" && newProduct.imageUrls.length > 0 && !aiAnalysisResult) ? 'bg-gray-400 cursor-not-allowed' : 'bg-pranata hover:opacity-90 shadow-xl shadow-green-900/20 hover:-translate-y-1'}`}
-              >
-                Publish Listing
-              </button>
-            </div>
-          )}
+          {stepperStep === 2 && (() => {
+            const isUnfit = newProduct.category === "Daging" && aiAnalysisResult && (
+              aiAnalysisResult.grade === "Tidak Layak" || 
+              aiAnalysisResult.grade === "Bukan Daging" || 
+              aiAnalysisResult.grade?.toLowerCase().includes("tidak layak") || 
+              aiAnalysisResult.grade?.toLowerCase().includes("bukan daging")
+            );
+            const isDisabled = isSubmitting || isAiProcessing || (newProduct.category === "Daging" && newProduct.imageUrls.length > 0 && (!aiAnalysisResult || isUnfit));
+
+            return (
+              <div className="px-8 py-6 md:px-12 md:py-8 border-t border-[#E8E3D2] bg-[#F8F6F0] flex gap-4">
+                <button 
+                  type="submit" 
+                  form="productForm" 
+                  disabled={isDisabled} 
+                  className={`w-full py-5 text-lg font-black text-white rounded-2xl transition-all flex items-center justify-center gap-3 ${
+                    isDisabled 
+                      ? 'bg-gray-400 opacity-60 cursor-not-allowed shadow-none' 
+                      : 'bg-pranata hover:opacity-90 shadow-xl shadow-green-900/20 hover:-translate-y-1'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={24} className="animate-spin text-white" />
+                      <span>Memproses Listing...</span>
+                    </>
+                  ) : (
+                    <span>Publish Listing</span>
+                  )}
+                </button>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

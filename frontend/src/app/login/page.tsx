@@ -6,7 +6,7 @@ import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bird, Eye, EyeOff } from "lucide-react";
+import { Bird, Eye, EyeOff, Loader2 } from "lucide-react";
 import { RegisterForm } from "./RegisterForm";
 
 function AuthContent() {
@@ -125,9 +125,16 @@ function AuthContent() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-pranata hover:bg-[#1E362A] text-[#F8F6F0] rounded-xl font-bold text-lg py-4 shadow-lg transition-all disabled:opacity-50 mt-4"
+                className="w-full bg-pranata hover:bg-[#1E362A] text-[#F8F6F0] rounded-xl font-bold text-lg py-4 shadow-lg transition-all disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
               >
-                {loading ? "Authenticating..." : "Log In"}
+                {loading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  "Log In"
+                )}
               </button>
 
               <div className="mt-6 text-center text-sm font-semibold">

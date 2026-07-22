@@ -94,40 +94,47 @@ export default function CheckoutPage() {
   }, [markerCoords.lat, markerCoords.lng]);
 
   const handleCheckout = async () => {
-    if (cart.length === 0) return;
+    if (isSubmitting || cart.length === 0) return;
     const sessionStr = localStorage.getItem("farmpro_session");
     if (!sessionStr) return;
     const session = JSON.parse(sessionStr);
 
+    setIsSubmitting(true);
+
     // Assuming all items belong to same seller for MVP
     const sellerId = cart[0].product?.sellerId || cart[0].sellerId;
 
-    await fetchApi(`${API_BASE}/api/orders/checkout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        buyerId: session.id,
-        sellerId: sellerId,
-        shippingAddress: addressText,
-        shippingMethod,
-        paymentMethod,
-        shippingFee,
-        platformFee: 2500,
-        items: cart.map(item => ({ 
-          productId: item.product?.id || item.productId, 
-          quantity: item.quantity || item.orderQuantity || 1, 
-          price: item.product?.price || item.price || 0
-        })),
-        requestedArrivalDate: requestedArrivalDate ? requestedArrivalDate.toISOString() : undefined,
-      }),
-    });
-    
-    // Clear DB cart
     try {
-      await fetchApi(`${API_BASE}/api/cart/${session.id}`, { method: 'DELETE' });
-    } catch (e) {}
+      await fetchApi(`${API_BASE}/api/orders/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          buyerId: session.id,
+          sellerId: sellerId,
+          shippingAddress: addressText,
+          shippingMethod,
+          paymentMethod,
+          shippingFee,
+          platformFee: 2500,
+          items: cart.map(item => ({ 
+            productId: item.product?.id || item.productId, 
+            quantity: item.quantity || item.orderQuantity || 1, 
+            price: item.product?.price || item.price || 0
+          })),
+          requestedArrivalDate: requestedArrivalDate ? requestedArrivalDate.toISOString() : undefined,
+        }),
+      });
+      
+      // Clear DB cart
+      try {
+        await fetchApi(`${API_BASE}/api/cart/${session.id}`, { method: 'DELETE' });
+      } catch (e) {}
 
-    router.push("/market/checkout/success");
+      router.push("/market/checkout/success");
+    } catch (e) {
+      console.error(e);
+      setIsSubmitting(false);
+    }
   };
 
   const subtotal = cart.reduce((s, i) => s + (i.product?.price || i.price || 0) * (i.quantity || i.orderQuantity || 1), 0);
@@ -435,11 +442,26 @@ export default function CheckoutPage() {
                 </span>
               </div>
               <motion.button
-                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: isSubmitting ? 1 : 1.01 }} whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                 onClick={handleCheckout}
-                className="w-full mt-4 py-4 font-black text-white bg-pranata hover:bg-[#1E362A] rounded-2xl shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)] transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting || cart.length === 0}
+                className={`w-full mt-4 py-4 font-black text-white rounded-2xl transition-all flex items-center justify-center gap-2 ${
+                  isSubmitting || cart.length === 0
+                    ? 'bg-gray-400 opacity-60 cursor-not-allowed shadow-none'
+                    : 'bg-pranata hover:bg-[#1E362A] shadow-[0_8px_20px_-6px_rgba(43,76,59,0.5)]'
+                }`}
               >
-                <CheckCircle size={19} /> Bayar Sekarang
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={19} className="animate-spin text-white" />
+                    <span>Memproses Pesanan...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={19} />
+                    <span>Bayar Sekarang</span>
+                  </>
+                )}
               </motion.button>
             </div>
           </div>

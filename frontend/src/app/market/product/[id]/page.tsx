@@ -5,7 +5,7 @@ import { useState, useEffect, use, useCallback } from "react";
 import {
   Store, ShoppingCart, ArrowLeft, ShieldCheck, MapPin,
   Truck, CheckCircle, Package, Star, ChevronLeft, X,
-  ChevronDown, ChevronUp, Heart, Crown, Info
+  ChevronDown, ChevronUp, Heart, Crown, Info, Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,10 +53,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const handleAddToCart = async () => {
+    if (isSubmitting) return;
     const sessionStr = localStorage.getItem("farmpro_session");
     if (!sessionStr) { router.push("/login"); return; }
     const session = JSON.parse(sessionStr);
     
+    setIsSubmitting(true);
     try {
       await fetchApi(`${API_BASE}/api/cart/${session.id}`, {
         method: 'POST',
@@ -66,6 +68,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       router.push("/market/cart");
     } catch (e) {
       console.error(e);
+      setIsSubmitting(false);
     }
   };
 
@@ -328,17 +331,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Action Buttons */}
             <div className="flex gap-3 mb-10">
               <motion.button 
-                whileHover={maxQ > 0 ? { scale: 1.01 } : {}} 
-                whileTap={maxQ > 0 ? { scale: 0.97 } : {}}
+                whileHover={maxQ > 0 && !isSubmitting ? { scale: 1.01 } : {}} 
+                whileTap={maxQ > 0 && !isSubmitting ? { scale: 0.97 } : {}}
                 onClick={handleAddToCart}
-                disabled={maxQ === 0}
+                disabled={maxQ === 0 || isSubmitting}
                 className={`flex-1 h-14 rounded-2xl font-black text-lg shadow-[0_8px_20px_-6px_rgba(43,76,59,0.4)] flex items-center justify-center gap-2 transition-all text-white ${
-                  maxQ === 0 
-                    ? 'bg-gray-300 cursor-not-allowed shadow-none' 
+                  maxQ === 0 || isSubmitting 
+                    ? 'bg-gray-400 opacity-60 cursor-not-allowed shadow-none' 
                     : 'bg-pranata hover:bg-[#1E362A]'
                 }`}
               >
-                <ShoppingCart size={20} /> {maxQ === 0 ? 'Stok Habis' : 'Add to Cart'}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin text-white" />
+                    <span>Menambahkan...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart size={20} />
+                    <span>{maxQ === 0 ? 'Stok Habis' : 'Add to Cart'}</span>
+                  </>
+                )}
               </motion.button>
               <button className="w-14 h-14 flex items-center justify-center border-2 border-[#DDE2D6] rounded-2xl text-[#1C241E] hover:bg-white hover:border-[#1C241E] transition-all bg-transparent shrink-0">
                 <Heart size={24} />
