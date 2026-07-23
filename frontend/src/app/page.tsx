@@ -30,12 +30,12 @@ export default function LandingPage() {
         {/* Full-Bleed Background Image with Blend Modes */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img 
-            src="/images/hero section.png" 
+            src="/images/hero_section.webp" 
             alt="Pranata Hero Mobile Backdrop" 
             className="w-full h-full object-cover object-top opacity-80" 
             fetchPriority="high"
             decoding="async"
-           loading="lazy" />
+          />
           {/* Heavy Gradient Overlay to make text legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8F6F0] via-[#F8F6F0]/90 to-transparent h-full w-full" />
         </div>
@@ -210,12 +210,12 @@ export default function LandingPage() {
         className="hidden md:flex relative w-full items-center justify-center -mt-[19rem] z-20 pointer-events-none overflow-visible"
       >
         <img 
-          src="/images/hero section.png" 
+          src="/images/hero_section.webp" 
           alt="Pranata Hero Desktop" 
           className="w-full h-auto rounded-t-[8rem] pointer-events-none object-cover" 
           fetchPriority="high"
           decoding="async"
-         loading="lazy" />
+        />
         
         {/* Smooth Gradient Fade to Rope Section */}
         <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-b from-transparent to-[#32452C] pointer-events-none" />

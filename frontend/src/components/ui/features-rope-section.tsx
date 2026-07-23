@@ -16,7 +16,7 @@ const features = [
     description: "Your on-demand agricultural AI expert. Leverage advanced machine learning and real-time data to receive instant, actionable insights for diagnostics, yield predictions, and operational efficiency.",
     logoWhite: "/logos/intelligence/intelligence-white.png",
     logoBlack: "/logos/intelligence/intelligence-black.png",
-    illustration: "/images/PRANATA INTELLIGENCE.png",
+    illustration: "/images/PRANATA_INTELLIGENCE.webp",
     layout: "right-card"
   },
   {
@@ -24,7 +24,7 @@ const features = [
     description: "Connect directly with trusted suppliers and buyers. Track real-time commodity prices and securely trade agricultural products with zero hidden fees.",
     logoWhite: "/logos/market/market-white.png",
     logoBlack: "/logos/market/market-black.png",
-    illustration: "/images/PRANATA MARKET.png",
+    illustration: "/images/PRANATA_MARKET.webp",
     layout: "left-card"
   },
   {
@@ -32,7 +32,7 @@ const features = [
     description: "Your centralized dashboard for operations. Monitor micro-climate sensors, automate task scheduling, and track financial ROI with unprecedented clarity.",
     logoWhite: "/logos/hub/hub-white.png",
     logoBlack: "/logos/hub/hub-black.png",
-    illustration: "/images/PRANATA HUB.png",
+    illustration: "/images/PRANATA_HUB.webp",
     layout: "right-card"
   }
 ]
@@ -69,7 +69,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
         <div data-parallax="0.6" className="w-full relative z-50">
           <div className="w-full drop-shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:-translate-y-2">
             <div className={`w-full flex items-center justify-center border-[6px] rounded-[2.5rem] shadow-inner overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${active ? 'bg-[#2B4C3B]/20 border-[#F4F6F0]' : 'bg-white border-[#E8E3D2]'}`}>
-              <img src={feature.illustration} alt={feature.title} className="w-full h-auto object-contain block scale-[1.02]"  loading="lazy" decoding="async" />
+              <img src={feature.illustration} alt={feature.title} className="w-full h-auto object-contain block scale-[1.02]" decoding="async" />
             </div>
           </div>
         </div>
@@ -80,8 +80,20 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
         {/* Logo acting as Heading */}
         <div className="mb-4 lg:mb-8">
           <div className={`inline-flex items-center justify-center rounded-2xl transition-all duration-500 ${active ? 'p-3 lg:p-5 bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : ''}`}>
-            <div className="h-8 sm:h-12 lg:h-16 shrink-0 inline-block">
-              <img src={active ? feature.logoWhite : feature.logoBlack} alt={feature.title} className="h-full w-auto object-contain"  loading="lazy" decoding="async" />
+            <div className="h-8 sm:h-12 lg:h-16 shrink-0 inline-block relative">
+              {/* White logo (overlay layer) — always rendered, revealed by clip-path */}
+              {active && (
+                <img src={feature.logoWhite} alt={feature.title} className="h-full w-auto object-contain" decoding="async" />
+              )}
+              {/* Black logo (base layer) — fades out immediately when is-active fires so it doesn't ghost under the expanding clip-path */}
+              {!active && (
+                <img
+                  src={feature.logoBlack}
+                  alt={feature.title}
+                  className="h-full w-auto object-contain transition-opacity duration-150 group-[.is-active]/card:opacity-0"
+                  decoding="async"
+                />
+              )}
             </div>
           </div>
         </div>

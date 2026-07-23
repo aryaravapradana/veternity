@@ -25,6 +25,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn(nunito.variable, playfair.variable, "font-sans", geist.variable)}>
+      <head>
+        {/* ── Critical image preloads ─────────────────────────────────────────
+            These are fetched at highest priority alongside the HTML, so they
+            are ready the instant the browser paints them (no first-load flash). */}
+        {/* Hero illustration */}
+        <link rel="preload" href="/images/hero_section.webp" as="image" type="image/webp" fetchPriority="high" />
+        {/* Feature card logos — black (base) + white (overlay) for all 3 features */}
+        <link rel="preload" href="/logos/intelligence/intelligence-black.png" as="image" />
+        <link rel="preload" href="/logos/intelligence/intelligence-white.png" as="image" />
+        <link rel="preload" href="/logos/market/market-black.png" as="image" />
+        <link rel="preload" href="/logos/market/market-white.png" as="image" />
+        <link rel="preload" href="/logos/hub/hub-black.png" as="image" />
+        <link rel="preload" href="/logos/hub/hub-white.png" as="image" />
+        {/* Feature illustrations */}
+        <link rel="preload" href="/images/PRANATA_INTELLIGENCE.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/images/PRANATA_MARKET.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/images/PRANATA_HUB.webp" as="image" type="image/webp" />
+      </head>
       <body className={`${nunito.className} bg-forest text-white selection:bg-vibrant selection:text-white min-h-screen`}>
         <SmoothScroll>
           <LoadingProvider>
