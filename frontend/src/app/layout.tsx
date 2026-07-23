@@ -29,7 +29,8 @@ export default function RootLayout({
         {/* ── Critical image preloads ─────────────────────────────────────────
             These are fetched at highest priority alongside the HTML, so they
             are ready the instant the browser paints them (no first-load flash). */}
-        {/* Hero illustration */}
+        {/* Hero illustration & brand logo */}
+        <link rel="preload" href="/logos/basic/logo black.png" as="image" fetchPriority="high" />
         <link rel="preload" href="/images/hero_section.webp" as="image" type="image/webp" fetchPriority="high" />
         {/* Feature card logos — black (base) + white (overlay) for all 3 features */}
         <link rel="preload" href="/logos/intelligence/intelligence-black.png" as="image" />

@@ -43,7 +43,9 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   const isCenter = layout === "center-stack";
   const isLeft = layout === "left-card";
   
-  const flexDir = isCenter ? "flex-col items-center text-center" : (isLeft ? "flex-row-reverse items-center" : "flex-row items-center");
+  const flexDir = isCenter 
+    ? "flex-col items-center text-center" 
+    : (isLeft ? "flex-row-reverse items-center" : "flex-row items-center");
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -60,15 +62,15 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   }, []);
 
   const renderCardContent = (active: boolean) => (
-    <div className={`w-full flex ${flexDir} gap-6 lg:gap-16 p-6 lg:p-12 relative`}>
+    <div className={`w-full flex ${flexDir} gap-3.5 sm:gap-8 lg:gap-16 p-4 sm:p-7 lg:p-12 relative`}>
       {/* Graphic Container */}
       <div 
-        className={`relative flex items-center justify-center shrink-0 group w-32 sm:w-48 lg:w-72`} 
+        className={`relative flex items-center justify-center shrink-0 group w-28 sm:w-48 lg:w-72`} 
         {...(!active ? { "data-rope-anchor": true } : {})}
       >
         <div data-parallax="0.6" className="w-full relative z-50">
           <div className="w-full drop-shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 group-hover:-translate-y-2">
-            <div className={`w-full flex items-center justify-center border-[6px] rounded-[2.5rem] shadow-inner overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${active ? 'bg-[#2B4C3B]/20 border-[#F4F6F0]' : 'bg-white border-[#E8E3D2]'}`}>
+            <div className={`w-full flex items-center justify-center border-[3px] sm:border-[5px] lg:border-[6px] rounded-[1.5rem] sm:rounded-[2.2rem] lg:rounded-[2.5rem] shadow-inner overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${active ? 'bg-[#2B4C3B]/20 border-[#F4F6F0]' : 'bg-white border-[#E8E3D2]'}`}>
               <img src={feature.illustration} alt={feature.title} className="w-full h-auto object-contain block scale-[1.02]" decoding="async" />
             </div>
           </div>
@@ -76,11 +78,11 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
       </div>
 
       {/* Text Container */}
-      <div className={`flex-1 w-full relative z-10 flex flex-col ${isCenter ? 'items-center text-center' : 'items-start text-left'} justify-center`} data-parallax="-0.4">
+      <div className={`flex-1 w-full relative z-10 flex flex-col items-start text-left justify-center`} data-parallax="-0.4">
         {/* Logo acting as Heading */}
-        <div className="mb-4 lg:mb-8">
-          <div className={`inline-flex items-center justify-center rounded-2xl transition-all duration-500 ${active ? 'p-3 lg:p-5 bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : ''}`}>
-            <div className="h-8 sm:h-12 lg:h-16 shrink-0 inline-block relative">
+        <div className="mb-2 sm:mb-4 lg:mb-8">
+          <div className={`inline-flex items-center justify-center rounded-xl sm:rounded-2xl transition-all duration-500 ${active ? 'p-2 sm:p-3.5 lg:p-5 bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.12)]' : ''}`}>
+            <div className="h-6 sm:h-10 lg:h-16 shrink-0 inline-block relative">
               {/* White logo (overlay layer) — always rendered, revealed by clip-path */}
               {active && (
                 <img src={feature.logoWhite} alt={feature.title} className="h-full w-auto object-contain" decoding="async" />
@@ -98,12 +100,12 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
           </div>
         </div>
         
-        <p className={`hidden sm:block font-medium leading-[1.8] text-sm lg:text-[17px] transition-colors duration-0 max-w-[28rem] ${active ? 'text-white/95' : 'text-slate-600'}`}>
+        <p className={`font-medium leading-relaxed text-xs sm:text-sm lg:text-[17px] transition-colors duration-0 max-w-[28rem] ${active ? 'text-white/95' : 'text-slate-600'}`}>
           {feature.description}
         </p>
 
         {/* Interactive Pseudo-Action */}
-        <div className={`mt-2 lg:mt-8 flex items-center gap-1 lg:gap-2 text-[10px] sm:text-xs lg:text-sm font-semibold cursor-pointer group/link ${active ? 'text-white hover:text-white/80' : 'text-forest hover:text-vibrant'}`}>
+        <div className={`mt-2 sm:mt-5 lg:mt-8 flex items-center gap-1 lg:gap-2 text-xs sm:text-xs lg:text-sm font-semibold cursor-pointer group/link ${active ? 'text-white hover:text-white/80' : 'text-forest hover:text-vibrant'}`}>
           Explore Module 
           <svg className="w-3 h-3 lg:w-4 lg:h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -114,7 +116,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   );
 
   return (
-    <div ref={cardRef} className={`group/card relative overflow-clip transition-all duration-700 hover:-translate-y-2 border-[3px] border-[#E8E3D2] group-[.is-active]/card:border-white rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full max-w-4xl bg-white`}>
+    <div ref={cardRef} className={`group/card relative overflow-clip transition-all duration-700 hover:-translate-y-2 border-[3px] border-[#E8E3D2] group-[.is-active]/card:border-white rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] w-full max-w-4xl bg-white`}>
       
       {/* BASE LAYER (Dark Text, White BG) */}
       {renderCardContent(false)}
@@ -132,60 +134,8 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
   );
 }
 
-const MobileAccordionFeature = ({ feature, index, isActive, onToggle }: { feature: FeatureType, index: number, isActive: boolean, onToggle: () => void }) => {
-  return (
-    <div className="border-b border-slate-700/50 overflow-hidden">
-      <button 
-        onClick={onToggle}
-        className="w-full py-8 flex items-center justify-between text-left group"
-      >
-        <div className="flex flex-col pr-6 justify-center">
-          <div className={`inline-flex items-center justify-center rounded-xl transition-all duration-500 ${isActive ? 'p-3 bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg' : ''}`}>
-            <div className="h-6 sm:h-10 shrink-0 inline-block">
-              <img src={feature.logoWhite} alt={feature.title} className={`h-full w-auto object-contain transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40 grayscale'}`}  loading="lazy" decoding="async" />
-            </div>
-          </div>
-        </div>
-        <div className={`w-10 h-10 shrink-0 rounded-full border flex items-center justify-center transition-all duration-500 ${isActive ? 'border-rust bg-rust text-white' : 'border-slate-700 text-slate-500 group-hover:border-slate-500'}`}>
-          <svg className={`w-4 h-4 transition-transform duration-500 ${isActive ? 'rotate-45' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </div>
-      </button>
-      
-      <div 
-        className="grid transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
-        style={{ gridTemplateRows: isActive ? '1fr' : '0fr' }}
-      >
-        <div className="overflow-hidden">
-          <div className="pb-10 pt-2 flex flex-col gap-6">
-            <div className="w-full rounded-[2rem] bg-slate-800/50 border border-slate-700/50 flex flex-col sm:flex-row items-center gap-6 p-6 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-vibrant/10 to-rust/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="w-32 sm:w-48 shrink-0 relative z-10 flex items-center justify-center border-2 border-white/10 rounded-2xl overflow-hidden">
-                <img src={feature.illustration} alt={feature.title} className="w-full h-auto object-contain block"  loading="lazy" decoding="async" />
-              </div>
-              <div className="flex-1 relative z-10 text-center sm:text-left">
-                <p className="text-slate-300 font-medium leading-relaxed text-sm sm:text-base">
-                  {feature.description}
-                </p>
-                <div className="mt-5 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold cursor-pointer text-vibrant group/link">
-                  Explore Module 
-                  <svg className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function FeaturesRopeSection() {
   const containerRef = useRef<HTMLElement>(null);
-  const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
 
   useEffect(() => {
     // Refresh triggers when layout changes (images loading)
@@ -226,18 +176,18 @@ export function FeaturesRopeSection() {
         </div>
 
         {/* Hero Anchor - Kept for rope math to match the anchors */}
-        <div className="flex justify-center mb-48 relative z-20 w-full max-w-7xl mx-auto h-1 px-4 md:px-8 lg:px-12" data-rope-anchor>
+        <div className="flex justify-center mb-24 sm:mb-32 md:mb-48 relative z-20 w-full max-w-7xl mx-auto h-1 px-4 md:px-8 lg:px-12" data-rope-anchor>
         </div>
 
-        {/* Features Timeline - Desktop Cards */}
-        <div className="hidden md:flex flex-col relative gap-[10rem] lg:gap-[14rem]">
+        {/* Features Timeline Cards with Rope Anchors */}
+        <div className="flex flex-col relative gap-24 sm:gap-32 md:gap-[10rem] lg:gap-[14rem]">
           {features.map((feature, index) => {
             return (
               <div 
-                key={`desktop-feature-${index}`}
+                key={`feature-card-${index}`}
                 className="relative z-20 w-full flex justify-center"
               >
-                <div className="w-full md:w-[90%] lg:w-full flex items-center justify-center">
+                <div className="w-full sm:w-[90%] lg:w-full flex items-center justify-center">
                   <FeatureCard feature={feature} layout={feature.layout} index={index} />
                 </div>
               </div>
@@ -245,21 +195,8 @@ export function FeaturesRopeSection() {
           })}
         </div>
 
-        {/* Mobile Accordion */}
-        <div className="md:hidden flex flex-col max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-          {features.map((feature, index) => (
-            <MobileAccordionFeature 
-              key={`mobile-feature-${index}`}
-              feature={feature} 
-              index={index} 
-              isActive={activeAccordion === index}
-              onToggle={() => setActiveAccordion(activeAccordion === index ? null : index)}
-            />
-          ))}
-        </div>
-
         {/* Footer Anchor */}
-        <div className="flex justify-center mt-32 relative z-20 w-full h-1" data-rope-anchor></div>
+        <div className="flex justify-center mt-24 sm:mt-32 relative z-20 w-full h-1" data-rope-anchor></div>
         
       </div>
     </section>

@@ -21,11 +21,6 @@ export function GlobalRope() {
   const buildRopePath = (anchors: {x: number, y: number}[], totalWidth: number) => {
     if (!anchors || anchors.length < 2) return "";
 
-    const isMobile = window.innerWidth < 768;
-    
-    // Disable rope completely on mobile (accordion layout handles it)
-    if (isMobile) return "";
-
     const midX = totalWidth / 2;
     let d = `M ${midX},${anchors[0].y}`;
 

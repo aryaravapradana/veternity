@@ -26,7 +26,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-transparent font-sans overflow-x-hidden relative">
       
       {/* Unified Responsive Hero Section */}
-      <section className="relative w-full flex flex-col justify-start pt-4 sm:pt-8 md:pt-10 pb-0 bg-[#F8F6F0] overflow-hidden">
+      <section className="relative w-full flex flex-col justify-between min-h-[100dvh] md:min-h-0 pt-6 sm:pt-10 md:pt-12 pb-0 bg-[#F8F6F0] overflow-hidden">
         {/* Soft Organic Background Gradients */}
         <div className="absolute top-0 right-0 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[80px] sm:blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[60px] sm:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
@@ -41,7 +41,18 @@ export default function LandingPage() {
             transition={{ duration: 1.2, type: "spring", bounce: 0.2 }}
             className="relative flex flex-col items-center justify-center w-full will-change-transform will-change-opacity"
           >
-            <h1 className="text-[1.35rem] min-[380px]:text-[1.5rem] sm:text-4xl md:text-5xl lg:text-[4rem] font-bold text-[#1C241E] tracking-tight mt-3 sm:mt-5 mb-2 md:mb-3 leading-tight flex flex-col items-center justify-center text-center">
+            {/* Pranata Basic Black Logo (Top Center) */}
+            <div className="mb-2 sm:mb-4 flex justify-center">
+              <img 
+                src="/logos/basic/logo black.png" 
+                alt="Pranata Logo" 
+                className="h-7 sm:h-9 md:h-11 w-auto object-contain" 
+                fetchPriority="high"
+                decoding="async"
+              />
+            </div>
+
+            <h1 className="text-[1.35rem] min-[380px]:text-[1.5rem] sm:text-4xl md:text-5xl lg:text-[4rem] font-bold text-[#1C241E] tracking-tight mt-1 sm:mt-2 mb-2 md:mb-3 leading-tight flex flex-col items-center justify-center text-center">
               <span className="block whitespace-nowrap">Empowering farmers with</span>
               <FlipWords 
                 duration={3500}
