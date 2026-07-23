@@ -26,13 +26,15 @@ export default function LandingPage() {
     <div className="min-h-screen bg-transparent font-sans overflow-x-hidden relative">
       
       {/* Unified Responsive Hero Section */}
-      <section className="relative w-full flex flex-col justify-start pt-10 sm:pt-16 min-h-[70vh] md:min-h-[90vh] overflow-hidden bg-[#F8F6F0]">
+      <section className="relative w-full flex flex-col justify-start pt-12 sm:pt-16 bg-[#F8F6F0]">
         {/* Soft Organic Background Gradients */}
         <div className="absolute top-0 right-0 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[80px] sm:blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[60px] sm:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 w-[600px] sm:w-[1000px] h-[600px] sm:h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[100px] sm:blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
         {/* Text Content Container */}
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center mb-8 md:mb-12 pb-6 md:pb-12 px-5 sm:px-8 lg:px-12">
+          
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -43,7 +45,7 @@ export default function LandingPage() {
               Empowering farmers with
               <FlipWords 
                 duration={3500}
-                words={["precision.", "actionable insights.", "smart analytics."]} 
+                words={["beautiful precision.", "actionable insights.", "smart analytics."]} 
                 className="text-[#3A6B49] bg-clip-text font-black tracking-tight" 
               />
             </h1>
@@ -107,17 +109,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Breakout Hero Image Section (Cleanly stacked on mobile, breakout negative-margin on desktop) */}
+      {/* Hero Illustration Section */}
       <motion.div 
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, type: "spring", bounce: 0.1, delay: 0.1 }}
-        className="relative w-full flex items-center justify-center mt-2 sm:mt-4 md:-mt-[19rem] z-20 pointer-events-none overflow-visible px-0 sm:px-4"
+        className="relative w-full flex items-center justify-center mt-0 md:-mt-[19rem] z-20 pointer-events-none overflow-visible bg-[#F8F6F0] md:bg-transparent"
       >
         <img 
           src="/images/hero_section.webp" 
           alt="Pranata Hero" 
-          className="w-full h-auto rounded-t-[2.5rem] sm:rounded-t-[4rem] md:rounded-t-[8rem] pointer-events-none object-cover shadow-2xl" 
+          className="w-full h-auto pointer-events-none object-cover" 
           fetchPriority="high"
           decoding="async"
         />
