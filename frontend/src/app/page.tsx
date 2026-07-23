@@ -114,7 +114,7 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, type: "spring", bounce: 0.1, delay: 0.1 }}
-        className="relative w-full flex items-center justify-center mt-0 md:-mt-[19rem] z-20 pointer-events-none overflow-visible bg-[#F8F6F0] md:bg-transparent"
+        className="relative w-full flex items-center justify-center mt-6 md:-mt-[8rem] z-20 pointer-events-none overflow-visible bg-[#F8F6F0] md:bg-transparent"
       >
         <img 
           src="/images/hero_section.webp" 
