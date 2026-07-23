@@ -32,6 +32,7 @@ export default function RootLayout({
         {/* Hero illustration & brand logo */}
         <link rel="preload" href="/logos/basic/logo black.png" as="image" fetchPriority="high" />
         <link rel="preload" href="/images/hero_section.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/images/market_hero.webp" as="image" type="image/webp" fetchPriority="high" />
         {/* Feature card logos — black (base) + white (overlay) for all 3 features */}
         <link rel="preload" href="/logos/intelligence/intelligence-black.png" as="image" />
         <link rel="preload" href="/logos/intelligence/intelligence-white.png" as="image" />

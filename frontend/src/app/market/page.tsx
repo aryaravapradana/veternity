@@ -30,24 +30,21 @@ import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
   { name: "Semua", icon: "🌾", image: null },
-  { name: "Daging", icon: "🥩", image: "/icons/daging.png" },
-  { name: "Susu", icon: "🥛", image: "/icons/susu.png" },
-  { name: "Telur", icon: "🥚", image: "/icons/telor.png" },
-  { name: "Sayuran", icon: "🥬", image: "/mocks/mock_sayuran_1784287377280.png" },
-  { name: "Buah", icon: "🍎", image: "/mocks/mock_buah_1784287387762.png" },
+  { name: "Daging", icon: "🥩", image: "/icons/daging.webp" },
+  { name: "Susu", icon: "🥛", image: "/icons/susu.webp" },
+  { name: "Telur", icon: "🥚", image: "/icons/telor.webp" },
 ];
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 const getCategoryFallbackImage = (category: string) => {
   const c = (category || "").toLowerCase();
-  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
-  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
-  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
-  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
-  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
+  if (c.includes("daging")) return "/icons/daging.webp";
+  if (c.includes("susu")) return "/icons/susu.webp";
+  if (c.includes("telur")) return "/icons/telor.webp";
+  if (c.includes("sapi") || c.includes("ternak")) return "/icons/sapi.webp";
   if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
   if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
-  return "/mocks/mock_ternak_1784287398084.png";
+  return "/icons/sapi.webp";
 };
 
 // ─── Product Card Component ───────────────────────────────────────────────────
@@ -438,82 +435,44 @@ export default function MarketplacePage() {
                        -mx-4 sm:mx-0 -mt-0 sm:mt-0 
                        w-[calc(100%+2rem)] sm:w-full 
                        rounded-b-[2.2rem] sm:rounded-[2.5rem] md:rounded-t-[2.5rem] md:rounded-b-[4rem] lg:rounded-b-[5rem]
-                       p-6 sm:p-8 md:p-12 lg:p-16 
-                       flex flex-row items-center justify-between min-h-[175px] sm:min-h-[320px]"
+                       p-5 sm:p-8 md:p-12 lg:p-16 
+                       flex flex-row items-center justify-between min-h-[185px] min-[380px]:min-h-[200px] sm:min-h-[260px] md:min-h-[300px]"
           >
             {/* Ambient blur decorations — hidden on mobile (GPU-intensive, zero visual impact) */}
             <div className="hidden sm:block absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-[70px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
             <div className="hidden sm:block absolute bottom-0 right-0 w-64 h-64 bg-[#B4C179]/15 rounded-full blur-[60px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
             {/* Hero Copywriting */}
-            <div className="relative z-10 flex-1 max-w-xs sm:max-w-md lg:max-w-xl space-y-2 sm:space-y-4 pr-2 sm:pr-0">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight sm:leading-[1.1] tracking-tight">
+            <div className="relative z-10 flex-1 max-w-[54%] min-[380px]:max-w-[56%] sm:max-w-md lg:max-w-xl pr-2 sm:pr-4">
+              <h1 className="text-[1.2rem] min-[380px]:text-[1.35rem] sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight sm:leading-[1.1] tracking-tight">
                 Hasil panen segar <br className="hidden sm:inline" />
-                <span className="text-[#B4C179]">langsung ke pintu Anda</span>
+                <span>langsung ke pintu Anda</span>
               </h1>
-              
-              <p className="text-[#A4C4A8] text-xs sm:text-base font-medium max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none">
+
+              <p className="text-white text-[10.5px] min-[380px]:text-xs sm:text-base font-medium max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none mt-1.5 sm:mt-3">
                 Dapatkan produk organik dan kebutuhan harian bersumber dari petani lokal.
               </p>
-
-              <button 
-                onClick={() => document.getElementById("search-input")?.focus()}
-                className="hidden sm:inline-flex bg-[#EEF2E6] hover:bg-white text-[#2B4C3B] px-6 py-3 rounded-full font-black text-sm sm:text-base transition-colors shadow-lg items-center gap-2 mt-2"
-              >
-                <span>Belanja Sekarang</span>
-                <ArrowRight size={16} />
-              </button>
             </div>
 
-            {/* Hero PNG Image Graphic */}
-            <div className="relative z-10 flex justify-end items-center shrink-0">
-              <div className="w-32 h-32 sm:w-56 sm:h-64 md:w-72 md:h-80 relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-[#B4C179]/20 rounded-full blur-xl transform translate-y-2 pointer-events-none" />
-                <img 
-                  src="/mocks/mock_sayuran_1784287377280.png" 
-                  alt="Hasil Panen Segar"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.35)] transform hover:scale-105 transition-transform duration-300 pointer-events-none"
-                />
-              </div>
+            {/* Hero Image Graphic - Slightly larger & moved up on mobile */}
+            <div className="absolute right-0 bottom-0 pointer-events-none z-10 translate-x-1 sm:translate-x-3 translate-y-4 min-[380px]:translate-y-7 sm:translate-y-16 md:translate-y-20 lg:translate-y-24">
+              <img 
+                src="/images/market_hero.webp" 
+                alt="Hasil Panen Segar Pranata Market"
+                fetchPriority="high"
+                decoding="async"
+                className="w-36 min-[380px]:w-44 sm:w-56 md:w-72 lg:w-[22rem] h-auto object-contain pointer-events-none origin-bottom-right"
+              />
             </div>
           </motion.div>
         </div>
 
-        {/* MOBILE SEARCH BAR (Visible only on phone < 640px) */}
-        <div className="sm:hidden relative z-20 pt-1">
-          <div className="relative">
-            <input 
-              id="search-input-mobile"
-              type="text" 
-              placeholder="Cari sayuran, daging, susu, telur..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-[#1C241E] font-bold text-xs rounded-full py-3.5 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-[#2B4C3B] border border-[#E8E3D2] shadow-sm transition-all"
-            />
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5A635B]" />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* CATEGORY SELECTOR CAROUSEL / GRID */}
-        <section className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#1C241E]/70">
-              Kategori Produk
-            </h3>
-            <span className="text-xs font-bold text-[#2B4C3B]">{selectedCategory}</span>
-          </div>
-
+        {/* RECTANGLE CATEGORY CARDS (COMPACT & SLEEK WITH REDUCED WIDTH RATIO) */}
+        <section className="-mt-4 min-[360px]:-mt-5 sm:-mt-8 md:-mt-10 relative z-30 pt-0 w-full px-1 sm:px-0">
           <div 
             ref={categoryScrollRef}
             onScroll={handleScroll}
-            className="flex items-center gap-2.5 sm:gap-4 overflow-x-auto hide-scrollbar pb-1 scroll-smooth"
+            className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 md:gap-3.5 w-full max-w-[280px] min-[360px]:max-w-[340px] sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto"
           >
             {CATEGORIES.map((cat) => {
               const active = selectedCategory === cat.name;
@@ -524,14 +483,35 @@ export default function MarketplacePage() {
                     setSelectedCategory(cat.name);
                     if (cat.name !== "Daging") setSelectedGrade("Semua Grade");
                   }}
-                  className={`shrink-0 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition-all border ${
+                  className={`w-full aspect-[1/0.92] sm:aspect-[1/0.9] 
+                             rounded-[0.8rem] min-[360px]:rounded-[1.1rem] sm:rounded-[1.3rem] lg:rounded-[1.5rem] 
+                             p-1.5 min-[360px]:p-2.5 sm:p-3 
+                             flex flex-col justify-between items-start text-left transition-all duration-300 relative overflow-hidden group ${
                     active 
-                      ? "bg-[#1C241E] text-white border-[#32452C] shadow-md scale-105" 
-                      : "bg-white text-[#1C241E] border-[#E8E3D2] hover:bg-[#F2EFE9]"
+                      ? "bg-gradient-to-br from-[#8FA76B] to-[#405D46] text-white border-[1.5px] sm:border-2 border-white scale-[1.02]" 
+                      : "bg-white text-[#1C241E] border-[1.5px] sm:border-2 border-[#E8E3D2] hover:border-[#32452C]"
                   }`}
                 >
-                  <span className="text-base sm:text-lg">{cat.icon}</span>
-                  <span>{cat.name}</span>
+                  {/* Top-Left Category Name */}
+                  <div className="flex flex-col pt-0.5">
+                    <span className={`font-black text-[9px] min-[360px]:text-[11px] min-[400px]:text-xs sm:text-xs md:text-sm tracking-tight leading-none ${active ? "text-white" : "text-[#1C241E]"}`}>
+                      {cat.name}
+                    </span>
+                  </div>
+
+                  {/* Bottom-Right Category Icon/Image Graphic */}
+                  <div className="self-end mt-auto flex items-center justify-center">
+                    {cat.image ? (
+                      <img 
+                        src={cat.image} 
+                        alt={cat.name} 
+                        className="w-4 h-4 min-[360px]:w-6 min-[360px]:h-6 min-[400px]:w-7 min-[400px]:h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain transition-transform group-hover:scale-110" 
+                        decoding="async" 
+                      />
+                    ) : (
+                      <span className="text-sm min-[360px]:text-base min-[400px]:text-lg sm:text-xl md:text-2xl transition-transform group-hover:scale-110">{cat.icon}</span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -555,10 +535,10 @@ export default function MarketplacePage() {
                   <button
                     key={g}
                     onClick={() => setSelectedGrade(g)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                       selectedGrade === g 
-                        ? "bg-[#32452C] text-white border-[#32452C] shadow-sm" 
-                        : "bg-white text-[#1C241E]/70 border-[#E8E3D2] hover:bg-[#F2EFE9]"
+                        ? "bg-gradient-to-br from-[#8FA76B] to-[#405D46] text-white border-2 border-white shadow-md" 
+                        : "bg-white text-[#1C241E]/70 border border-[#E8E3D2] hover:bg-[#F2EFE9]"
                     }`}
                   >
                     {g}

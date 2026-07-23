@@ -52,45 +52,44 @@ export default function MarketplaceNavbar({
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full flex items-center justify-between gap-4 bg-white/95 backdrop-blur-md py-3.5 px-4 md:px-8 border-b border-[#E8E3D2] shadow-sm text-[#1C241E]">
+    <header className="sticky top-0 z-50 w-full flex items-center justify-between gap-1.5 min-[380px]:gap-3 md:gap-4 bg-white/95 backdrop-blur-md py-2 sm:py-3.5 px-2.5 min-[380px]:px-4 md:px-8 border-b border-[#E8E3D2] shadow-sm text-[#1C241E]">
       {/* Left */}
       {leftContent ? (
-        <div className="flex items-center gap-4 shrink-0">{leftContent}</div>
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">{leftContent}</div>
       ) : (
-        <div className="flex items-center gap-4 shrink-0">
-          <Link href="/market" className="flex items-center gap-2 group">
-            <div className="h-8 group-hover:scale-105 transition-transform">
-              <img src="/logos/market/market-black.png" alt="Pranata" className="h-full object-contain"  loading="lazy" decoding="async" />
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <Link href="/market" className="flex items-center gap-1.5 group">
+            <div className="h-6 min-[380px]:h-7 sm:h-8 group-hover:scale-105 transition-transform">
+              <img src="/logos/market/market-black.png" alt="Pranata" className="h-full object-contain" decoding="async" />
             </div>
           </Link>
         </div>
       )}
 
-      {/* Center */}
+      {/* Center: Search Bar (Always visible & scales fluidly down to 320px) */}
       {centerContent ? (
-        <div className="flex-1 flex justify-center mx-4">{centerContent}</div>
+        <div className="flex-1 flex justify-center mx-1 min-[380px]:mx-2 sm:mx-4">{centerContent}</div>
       ) : setSearchQuery !== undefined ? (
-        <div className="flex-1 max-w-xl mx-4 relative hidden md:block">
+        <div className="flex-1 max-w-xl mx-1 min-[380px]:mx-2 sm:mx-4 relative">
           <input 
+            id="search-input"
             type="text" 
-            placeholder="Cari sayuran, buah, atau ternak..." 
+            placeholder="Cari daging, susu, telur..." 
             value={searchQuery || ""}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-[#E8E3D2] text-[#1C241E] font-bold text-sm rounded-2xl py-3.5 pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#2B4C3B] transition-all shadow-sm"
+            className="w-full bg-white border border-[#E8E3D2] text-[#1C241E] font-bold text-[10.5px] min-[360px]:text-xs sm:text-sm rounded-xl min-[380px]:rounded-2xl py-1.5 sm:py-3.5 pl-2.5 sm:pl-5 pr-7 sm:pr-12 focus:outline-none focus:ring-2 focus:ring-[#2B4C3B] transition-all shadow-sm placeholder:text-[9.5px] min-[360px]:placeholder:text-[11px] sm:placeholder:text-sm"
           />
-          <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A635B]" />
+          <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute right-2.5 sm:right-4 top-1/2 -translate-y-1/2 text-[#5A635B]" />
         </div>
       ) : (
-        <div className="hidden md:flex flex-1 items-center justify-center gap-8 text-sm font-semibold text-[#84B0A5]">
-          {/* Removed default links */}
-        </div>
+        <div className="flex-1 items-center justify-center gap-8 text-sm font-semibold text-[#84B0A5]" />
       )}
 
-      {/* Right: Info & Profile */}
-      <div className="flex items-center gap-4 shrink-0">
+      {/* Right: Cart & Profile */}
+      <div className="flex items-center gap-1 min-[380px]:gap-2.5 sm:gap-4 shrink-0">
         {/* Cart */}
-        <Link href="/market/cart" className="relative p-2 text-[#5A635B] hover:text-[#2B4C3B] hover:bg-[#E8E3D2]/50 rounded-xl transition-all">
-          <ShoppingCart size={24} />
+        <Link href="/market/cart" className="relative p-1 min-[380px]:p-2 text-[#5A635B] hover:text-[#2B4C3B] hover:bg-[#E8E3D2]/50 rounded-xl transition-all">
+          <ShoppingCart className="w-4 h-4 min-[380px]:w-5 min-[380px]:h-5 sm:w-6 sm:h-6" />
           <AnimatePresence>
             {displayCartCount > 0 && (
               <motion.span 
@@ -99,19 +98,19 @@ export default function MarketplaceNavbar({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.5, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-[#F8F6F0]"
+                className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[9px] min-[380px]:text-[10px] font-black w-4 h-4 min-[380px]:w-5 min-[380px]:h-5 flex items-center justify-center rounded-full shadow-sm border-2 border-[#F8F6F0]"
               >
                 {displayCartCount}
               </motion.span>
             )}
           </AnimatePresence>
         </Link>
-        <button onClick={() => router.push("/settings")} className="flex items-center gap-3 transition-transform hover:scale-105 pl-2">
-          <div className="w-10 h-10 rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm flex items-center justify-center">
+        <button onClick={() => router.push("/settings")} className="flex items-center gap-2 transition-transform hover:scale-105 pl-1">
+          <div className="w-7 h-7 min-[380px]:w-8 min-[380px]:h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#E8E3D2] overflow-hidden shadow-sm flex items-center justify-center">
             {(profile?.avatarUrl || profile?.avatar) ? (
-              <img src={profile.avatarUrl || profile.avatar} alt="Profile" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
+              <img src={profile.avatarUrl || profile.avatar} alt="Profile" className="w-full h-full object-cover" decoding="async" />
             ) : (
-              <div className="w-full h-full bg-[#3A6B49] flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-full h-full bg-[#3A6B49] flex items-center justify-center text-white font-bold text-xs sm:text-lg">
                 {(profile?.fullName || profile?.username || 'U').charAt(0).toUpperCase()}
               </div>
             )}
