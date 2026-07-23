@@ -1,12 +1,18 @@
 "use client";
 import { fetchApi } from "@/lib/apiClient";
 
-import { useState, useEffect, memo, useMemo, useRef } from "react";
-import { Search, MapPin, ChevronRight, Package, ArrowRight, Minus, Plus, ShoppingBag, Store, User, Star, CheckCircle, Info, Crown, ChevronLeft, X, SlidersHorizontal, Sparkles, TrendingDown, TrendingUp, Layers } from "lucide-react";
+import { useState, useEffect, memo, useMemo, useRef, Suspense, useCallback } from "react";
+import { 
+  Search, MapPin, ChevronRight, Package, ArrowRight, Minus, Plus, 
+  ShoppingBag, Store, User, Star, CheckCircle, Info, Crown, ChevronLeft, 
+  X, SlidersHorizontal, Sparkles, TrendingDown, TrendingUp, Layers, Check 
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
+
+const ITEMS_PER_PAGE = 20;
 
 const CATEGORIES = [
   { name: "Semua", icon: "🌾", image: null },
@@ -29,16 +35,16 @@ const getCategoryFallbackImage = (category: string) => {
   return "/mocks/mock_ternak_1784287398084.png";
 };
 
-// ─── Product Card ─────────────────────────────────────────────────────────────
+// ─── Responsive Product Card ──────────────────────────────────────────────────
 const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUpdateQuantity }: { p: any; index: number; onClick: () => void; cartQty: number; onUpdateQuantity: (e: React.MouseEvent, delta: number) => void }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "500px" }}
       transition={{ duration: 0.3 }}
       onClick={p.stock > 0 ? onClick : undefined}
-      className={`rounded-[2rem] flex flex-col p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-500 overflow-hidden z-0 will-change-transform will-change-opacity ${
+      className={`rounded-3xl sm:rounded-[2rem] flex flex-col p-3 sm:p-4 shadow-[0_8px_20px_-8px_rgba(43,76,59,0.08)] group relative transition-all duration-300 overflow-hidden z-0 transform-gpu [content-visibility:auto] [contain-intrinsic-size:1px_280px] sm:[content-visibility:visible] ${
         cartQty > 0 ? "border-transparent shadow-[0_12px_24px_-8px_rgba(43,76,59,0.3)]" : "bg-white border border-[#E8E3D2]"
       } ${
         p.stock > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
@@ -46,48 +52,53 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
     >
       {/* Background Gradient Animation Layer */}
       <div 
-        className={`absolute inset-0 bg-pranata -z-10 transition-opacity duration-500 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
+        className={`absolute inset-0 bg-pranata -z-10 transition-opacity duration-300 ease-in-out ${cartQty > 0 ? 'opacity-100' : 'opacity-0'}`} 
       />
-      {/* Product Image */}
-      <div className="w-full h-32 flex items-center justify-center mb-4 bg-[#F8F6F0] rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
+
+      {/* Product Image Box */}
+      <div className="w-full h-34 sm:h-36 flex items-center justify-center mb-2.5 sm:mb-4 bg-[#F8F6F0] rounded-2xl sm:rounded-[1.5rem] group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
         {p.imageUrls && p.imageUrls.length > 0 ? (
           <img
             src={p.imageUrls[0]}
             alt={p.title}
             decoding="async"
-            className="w-full h-full object-cover"
-           loading="lazy" />
+            className="w-full h-full object-cover object-center scale-[1.05]"
+            loading="lazy" 
+          />
         ) : (
           <img 
             src={getCategoryFallbackImage(p.category)} 
             alt={p.title} 
             decoding="async"
-            className="w-full h-full object-cover opacity-90 mix-blend-multiply" 
-           loading="lazy" />
+            className="w-full h-full object-cover opacity-90 mix-blend-multiply scale-[1.05]" 
+            loading="lazy" 
+          />
         )}
         
         {p.stock === 0 && (
           <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[2px]">
-            <span className="bg-[#C25939] text-white font-black px-4 py-2 rounded-xl text-sm shadow-lg rotate-[-10deg]">
+            <span className="bg-[#C25939] text-white font-black px-3 py-1.5 rounded-xl text-xs shadow-lg rotate-[-10deg]">
               HABIS
             </span>
           </div>
         )}
 
         {index < 2 && p.stock > 0 && (
-          <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
-            <Star size={10} fill="currentColor" /> TERLARIS
+          <div className="absolute top-2 right-2 bg-[#F5990D] text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 z-10">
+            <Star size={9} fill="currentColor" /> TERLARIS
           </div>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="flex flex-col items-start flex-1 w-full text-left mt-1">
-        <h3 className={`font-black text-[15px] leading-tight mb-2 line-clamp-2 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>{p.title}</h3>
+      <div className="flex flex-col items-start flex-1 w-full text-left">
+        <h3 className={`font-black text-xs sm:text-[15px] leading-snug mb-1.5 line-clamp-2 w-full ${cartQty > 0 ? "text-white" : "text-[#1C241E]"}`} title={p.title}>
+          {p.title}
+        </h3>
         
-        <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          <div className={`px-2 py-1 rounded-lg ${cartQty > 0 ? "bg-white/10" : "bg-[#F8F6F0]"}`}>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</span>
+        <div className="flex flex-wrap items-center gap-1 mb-2">
+          <div className={`px-1.5 py-0.5 rounded-md ${cartQty > 0 ? "bg-white/10" : "bg-[#F8F6F0]"}`}>
+            <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider ${cartQty > 0 ? "text-white/80" : "text-[#5A635B]"}`}>{p.category || "Produk"}</span>
           </div>
           {p.grade && (() => {
             const g = p.grade.toLowerCase();
@@ -98,20 +109,20 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
             else if (g.includes("c")) style = { bg: "bg-gradient-to-r from-orange-100 to-orange-300", text: "text-orange-900", border: "border-orange-400", icon: Info };
             const GradeIcon = style.icon;
             return (
-              <span className={`${style.bg} ${style.text} border ${style.border} px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm ${cartQty > 0 ? "opacity-90" : ""}`}>
-                <GradeIcon size={10} strokeWidth={3} />
+              <span className={`${style.bg} ${style.text} border ${style.border} px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-0.5 shadow-sm ${cartQty > 0 ? "opacity-90" : ""}`}>
+                <GradeIcon size={9} strokeWidth={3} />
                 {p.grade}
               </span>
             );
           })()}
         </div>
         
-        <div className={`mt-auto w-full pt-3 border-t flex items-end justify-between ${cartQty > 0 ? "border-white/20" : "border-[#E8E3D2]/50"}`}>
+        <div className={`mt-auto w-full pt-2 border-t flex items-end justify-between ${cartQty > 0 ? "border-white/20" : "border-[#E8E3D2]/50"}`}>
           <div>
-            <p className={`text-lg font-black leading-none mb-1 ${cartQty > 0 ? "text-white" : "text-[#C25939]"}`}>
+            <p className={`text-sm sm:text-lg font-black leading-none mb-0.5 ${cartQty > 0 ? "text-white" : "text-[#C25939]"}`}>
               Rp {p.price?.toLocaleString()}
             </p>
-            <p className={`text-[10px] font-bold ${cartQty > 0 ? "text-white/80" : "text-[#2B4C3B]"}`}>Stok: {p.stock} {p.unit}</p>
+            <p className={`text-[9px] sm:text-[10px] font-bold ${cartQty > 0 ? "text-white/80" : "text-[#2B4C3B]"}`}>Stok: {p.stock} {p.unit}</p>
           </div>
         </div>
       </div>
@@ -119,8 +130,8 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       {/* Add Button */}
       {p.stock > 0 ? (
         cartQty > 0 ? (
-          <div className="mt-5 w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-2 rounded-xl rounded-b-[1.25rem] flex items-center justify-between px-4 shadow-sm" onClick={(e) => e.stopPropagation()}>
-            <button onClick={(e) => onUpdateQuantity(e, -1)} className="p-1 hover:bg-white/20 rounded-md transition-colors"><Minus size={18} strokeWidth={3} /></button>
+          <div className="mt-3 sm:mt-5 w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white py-1.5 sm:py-2 rounded-xl flex items-center justify-between px-3 shadow-sm" onClick={(e) => e.stopPropagation()}>
+            <button onClick={(e) => onUpdateQuantity(e, -1)} className="p-1 hover:bg-white/20 rounded-md transition-colors"><Minus size={15} strokeWidth={3} /></button>
             <AnimatePresence mode="popLayout">
               <motion.span 
                 key={cartQty}
@@ -128,31 +139,32 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 10, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="font-black"
+                className="font-black text-xs sm:text-sm"
               >
                 {cartQty}
               </motion.span>
             </AnimatePresence>
-            <button onClick={(e) => onUpdateQuantity(e, 1)} disabled={cartQty >= p.stock} className={`p-1 rounded-md transition-colors ${cartQty >= p.stock ? 'opacity-50 pointer-events-none' : 'hover:bg-white/20'}`}><Plus size={18} strokeWidth={3} /></button>
+            <button onClick={(e) => onUpdateQuantity(e, 1)} disabled={cartQty >= p.stock} className={`p-1 rounded-md transition-colors ${cartQty >= p.stock ? 'opacity-50 pointer-events-none' : 'hover:bg-white/20'}`}><Plus size={15} strokeWidth={3} /></button>
           </div>
         ) : (
           <button 
             onClick={(e) => onUpdateQuantity(e, 1)}
-            className="mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center transition-colors"
+            className="mt-3 sm:mt-5 w-full bg-[#EEF2E6] hover:bg-[#DDE2D6] text-[#2B4C3B] py-2.5 sm:py-3.5 rounded-xl flex items-center justify-center transition-colors active:scale-95"
           >
-            <Plus size={20} strokeWidth={3} />
+            <Plus size={18} strokeWidth={3} />
           </button>
         )
       ) : (
-        <div className="mt-5 w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl rounded-b-[1.25rem] flex items-center justify-center">
-          <X size={20} strokeWidth={3} />
+        <div className="mt-3 sm:mt-5 w-full bg-gray-100 text-gray-400 py-2.5 sm:py-3.5 rounded-xl flex items-center justify-center">
+          <X size={18} strokeWidth={3} />
         </div>
       )}
     </motion.div>
   );
 });
+
 // ─── Custom Dropdown ────────────────────────────────────────────────────────────
-const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: { value: string, options: {label: any, value: string}[], onChange: (val: string) => void, icon: any, placeholder?: string }) => {
+const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder, align = "right" }: { value: string, options: {label: any, value: string}[], onChange: (val: string) => void, icon: any, placeholder?: string, align?: "left" | "right" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -170,13 +182,13 @@ const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between gap-3 bg-white border-2 border-[#E8E3D2] text-[#2B4C3B] font-black text-sm rounded-full py-2.5 pl-4 pr-3 hover:bg-[#F8F6F0] hover:border-[#DDE2D6] transition-all shadow-sm min-w-[160px]"
+        className="flex items-center justify-between gap-2 sm:gap-3 bg-white border border-[#E8E3D2] text-[#2B4C3B] font-black text-xs sm:text-sm rounded-full py-2 px-3 sm:py-2.5 sm:pl-4 sm:pr-3 hover:bg-[#F8F6F0] transition-all shadow-sm shrink-0"
       >
-        <div className="flex items-center gap-2">
-          <Icon size={16} className="text-[#C25939]" />
-          <span>{displayValue}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Icon size={14} className="text-[#C25939] shrink-0" />
+          <span className="truncate">{displayValue}</span>
         </div>
-        <ChevronRight size={16} className={`text-[#A4B0A7] transition-transform duration-300 ${isOpen ? "rotate-90" : "rotate-0"}`} />
+        <ChevronRight size={14} className={`text-[#A4B0A7] transition-transform duration-300 shrink-0 ${isOpen ? "rotate-90" : "rotate-0"}`} />
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -185,16 +197,16 @@ const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-56 bg-white border-2 border-[#E8E3D2] rounded-3xl p-2 shadow-[0_12px_24px_-8px_rgba(43,76,59,0.15)] z-50 overflow-hidden"
+            className={`absolute ${align === "left" ? "left-0" : "left-0 sm:left-auto sm:right-0"} mt-2 w-52 sm:w-56 bg-white border border-[#E8E3D2] rounded-2xl sm:rounded-3xl p-2 shadow-xl z-50 overflow-hidden`}
           >
             {options.map((opt, i) => (
               <motion.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: i * 0.05 }}
+                transition={{ duration: 0.2, delay: i * 0.04 }}
                 key={opt.value}
                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors flex items-center gap-2 ${
+                className={`w-full text-left px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-colors flex items-center gap-2 ${
                   value === opt.value ? "bg-[#2B4C3B] text-white" : "text-[#5A635B] hover:bg-[#F8F6F0] hover:text-[#1C241E]"
                 }`}
               >
@@ -208,8 +220,10 @@ const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder }: {
   );
 };
 
+function MarketplaceProductsContent() {
+  const searchParams = useSearchParams();
+  const initialCategoryParam = searchParams.get("category") || "Semua";
 
-export default function MarketplaceProductsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,11 +231,29 @@ export default function MarketplaceProductsPage() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(initialCategoryParam);
   const [sortBy, setSortBy] = useState("Terbaru");
   const [selectedGrade, setSelectedGrade] = useState("Semua Grade");
+  const [currentPage, setCurrentPage] = useState(1);
   
   usePageLoading(loading);
+
+  // Debounce search query — prevents re-render on every mobile keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 200);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) setSelectedCategory(cat);
+  }, [searchParams]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, debouncedSearch, selectedGrade, sortBy]);
 
   useEffect(() => { loadData(); }, []);
 
@@ -265,7 +297,6 @@ export default function MarketplaceProductsPage() {
   const handleUpdateQuantity = async (e: React.MouseEvent, p: any, delta: number) => {
     e.stopPropagation();
     
-    // Spawn animation if adding for the first time
     const existing = cartItems.find(item => item.productId === p.id);
     const currentQty = existing ? existing.quantity : 0;
     if (currentQty === 0 && delta > 0) {
@@ -274,7 +305,7 @@ export default function MarketplaceProductsPage() {
       setAnimations(prev => [...prev, { id: animId, x: rect.left + rect.width/2 - 20, y: rect.top, image: p.imageUrls?.[0] }]);
       setTimeout(() => {
         setAnimations(prev => prev.filter(a => a.id !== animId));
-      }, 500); // 0.5s animation
+      }, 500);
     }
 
     const sessionStr = localStorage.getItem("farmpro_session");
@@ -282,10 +313,8 @@ export default function MarketplaceProductsPage() {
     const session = JSON.parse(sessionStr);
 
     const newQty = currentQty + delta;
-
     if (newQty > p.stock) return;
 
-    // Optimistic update
     let newCart = [...cartItems];
     if (newQty <= 0) {
       newCart = newCart.filter(item => item.productId !== p.id);
@@ -298,7 +327,7 @@ export default function MarketplaceProductsPage() {
     }
     setCartItems(newCart);
     if (currentQty === 0 && delta > 0) {
-      setTimeout(() => setCartCount(newCart.length), 400); // Sync with animation arrival
+      setTimeout(() => setCartCount(newCart.length), 400);
     } else {
       setCartCount(newCart.length);
     }
@@ -320,8 +349,9 @@ export default function MarketplaceProductsPage() {
 
   const filteredProducts = useMemo(() => {
     const filtered = products.filter(p => {
-      const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
-      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCat = selectedCategory === "Semua" || (p.category || "").toLowerCase() === selectedCategory.toLowerCase();
+      // Use debouncedSearch to avoid filtering on every mobile keystroke
+      const matchSearch = p.title.toLowerCase().includes(debouncedSearch.toLowerCase());
       
       let matchGrade = true;
       if (selectedCategory === "Daging" && selectedGrade !== "Semua Grade") {
@@ -333,12 +363,19 @@ export default function MarketplaceProductsPage() {
     filtered.sort((a, b) => {
       if (sortBy === "Harga Terendah") return a.price - b.price;
       if (sortBy === "Harga Tertinggi") return b.price - a.price;
-      // Terbaru
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return filtered;
-  }, [products, searchQuery, selectedCategory, selectedGrade, sortBy]);
+  }, [products, debouncedSearch, selectedCategory, selectedGrade, sortBy]);
+
+  // Exactly 20 items per page pagination
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]">
@@ -349,53 +386,76 @@ export default function MarketplaceProductsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E]" >
-      <MarketplaceNavbar cartCount={cartCount} />
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] overflow-x-clip font-sans selection:bg-[#B4C179]">
+      
+      {/* Sticky White Navbar */}
+      <div className="sticky top-0 z-50 w-full">
+        <MarketplaceNavbar cartCount={cartCount} />
+      </div>
 
-      <main className="max-w-7xl mx-auto pt-8 pb-24 px-4 md:px-8 lg:px-12">
-        {/* Header & Back Button */}
-        <div className="flex items-center gap-4 mb-8">
-          <button 
-            onClick={() => router.push('/market')}
-            className="w-10 h-10 bg-white border border-[#E8E3D2] rounded-full flex items-center justify-center text-[#5A635B] hover:text-[#2B4C3B] shadow-sm transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <h1 className="text-3xl font-black text-[#1C241E]">Semua Produk</h1>
+      <main className="max-w-7xl mx-auto pt-4 sm:pt-8 pb-24 px-4 sm:px-6 md:px-8 lg:px-12 space-y-4">
+        
+        {/* Header & Back Navigation */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => router.push('/market')}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-white border border-[#E8E3D2] rounded-full flex items-center justify-center text-[#5A635B] hover:text-[#2B4C3B] shadow-sm active:scale-95 transition-all"
+            >
+              <ChevronLeft size={18} className="stroke-[2.5]" />
+            </button>
+            <div>
+              <h1 className="text-xl sm:text-3xl font-black text-[#1C241E] tracking-tight">
+                {selectedCategory === "Semua" ? "Semua Produk" : selectedCategory}
+              </h1>
+            </div>
+          </div>
         </div>
 
-        {/* Filter Section (Moved from Homepage) */}
-        <div className="bg-white rounded-t-[2.5rem] rounded-b-xl md:rounded-full p-2 pl-2 md:pl-6 shadow-[0_8px_30px_-12px_rgba(43,76,59,0.12)] border border-[#E8E3D2]/50 flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-8">
-          <div className="flex items-center gap-3 w-full md:w-auto px-4 md:px-0 py-2 md:py-0">
-            <Search className="text-[#A4B0A7] shrink-0" size={20} />
+        {/* Filter Bar (Responsive for Mobile & Desktop) */}
+        <div className="bg-white rounded-3xl sm:rounded-full p-2.5 sm:p-2 sm:pl-6 shadow-sm border border-[#E8E3D2] flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          
+          {/* Search Input inside filter bar */}
+          <div className="flex items-center gap-2.5 w-full md:w-auto px-3 sm:px-0 py-1 sm:py-0 bg-[#F8F6F0] md:bg-transparent rounded-2xl md:rounded-none">
+            <Search className="text-[#A4B0A7] shrink-0" size={16} />
             <input 
               type="text"
-              placeholder="Cari sayuran, alat tani..."
+              placeholder="Cari sayuran, daging, buah..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-64 bg-transparent outline-none text-[#1C241E] placeholder:text-[#A4B0A7] font-medium"
+              className="w-full md:w-64 bg-transparent outline-none text-[#1C241E] placeholder:text-[#A4B0A7] text-xs sm:text-sm font-bold"
             />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-gray-600">
+                <X size={14} />
+              </button>
+            )}
           </div>
+
           <div className="hidden md:block w-px h-8 bg-[#E8E3D2]" />
           
+          {/* Scrollable Category Filter Pills */}
           <div className="w-full md:flex-1 overflow-x-auto hide-scrollbar relative">
-            <div className="flex items-center gap-2 px-2 pb-2 md:pb-0">
+            <div className="flex items-center gap-2 px-1 pb-1 md:pb-0">
               {CATEGORIES.map(cat => (
                 <button
                   key={cat.name}
-                  onClick={() => setSelectedCategory(cat.name)}
-                  className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${
+                  onClick={() => {
+                    setSelectedCategory(cat.name);
+                    router.replace(`/market/products?category=${encodeURIComponent(cat.name)}`);
+                  }}
+                  className={`shrink-0 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition-all border ${
                     selectedCategory === cat.name
-                      ? "bg-[#2B4C3B] text-white shadow-md"
-                      : "bg-[#F8F6F0] text-[#5A635B] hover:bg-[#E8E3D2] hover:text-[#1C241E]"
+                      ? "bg-[#2B4C3B] text-white border-[#2B4C3B] shadow-sm scale-105"
+                      : "bg-[#F8F6F0] text-[#5A635B] border-[#E8E3D2] hover:bg-[#E8E3D2] hover:text-[#1C241E]"
                   }`}
                 >
                   {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-5 h-5 object-contain"  loading="lazy" decoding="async" />
+                    <img src={cat.image} alt={cat.name} className="w-4 h-4 object-contain" loading="lazy" decoding="async" />
                   ) : (
-                    <span className="text-lg">{cat.icon}</span>
+                    <span className="text-sm">{cat.icon}</span>
                   )}
-                  {cat.name}
+                  <span>{cat.name}</span>
                 </button>
               ))}
             </div>
@@ -403,9 +463,11 @@ export default function MarketplaceProductsPage() {
           
           <div className="hidden md:block w-px h-8 bg-[#E8E3D2]" />
           
-          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 relative z-20 shrink-0 px-4 md:px-0">
+          {/* Dropdown Filters */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 relative z-20 shrink-0 pt-1 md:pt-0 border-t md:border-t-0 border-[#F8F6F0]">
             {selectedCategory === "Daging" && (
               <CustomDropdown
+                align="left"
                 value={selectedGrade}
                 onChange={setSelectedGrade}
                 icon={Star}
@@ -434,28 +496,83 @@ export default function MarketplaceProductsPage() {
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* ── RESPONSIVE PRODUCT GRID (20 ITEMS PER PAGE) ── */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-[#DDE2D6] rounded-[2rem] bg-white max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-            <h3 className="text-xl font-black text-[#5A635B] mb-2">Produk tidak ditemukan</h3>
-            <p className="text-[#A4B0A7] text-sm font-medium">Coba ubah kata kunci atau kategori pencarian.</p>
+          <div className="text-center py-20 border-2 border-dashed border-[#E8E3D2] rounded-3xl bg-white max-w-7xl mx-auto px-4">
+            <Package size={44} className="mx-auto text-[#C4BAA8] mb-3" />
+            <h3 className="text-lg font-black text-[#5A635B] mb-1">Produk tidak ditemukan</h3>
+            <p className="text-gray-400 text-xs font-medium">Coba ubah kata kunci atau kategori pencarian {selectedCategory !== "Semua" ? `"${selectedCategory}"` : ""}.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 pb-8">
-            {filteredProducts.map((p, i) => {
-              const qty = cartItems.find(item => item.productId === p.id)?.quantity || 0;
-              return (
-                <ProductCard 
-                  key={p.id} 
-                  p={p} 
-                  index={i} 
-                  onClick={() => router.push(`/market/product/${p.id}`)}
-                  cartQty={qty}
-                  onUpdateQuantity={(e, delta) => handleUpdateQuantity(e, p, delta)} 
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 pb-6 pt-2">
+              {paginatedProducts.map((p, i) => {
+                const qty = cartItems.find(item => item.productId === p.id)?.quantity || 0;
+                return (
+                  <ProductCard 
+                    key={p.id} 
+                    p={p} 
+                    index={i} 
+                    onClick={() => router.push(`/market/product/${p.id}`)}
+                    cartQty={qty}
+                    onUpdateQuantity={(e, delta) => handleUpdateQuantity(e, p, delta)} 
+                  />
+                );
+              })}
+            </div>
+
+            {/* Pagination Controls (20 Products per Page) */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-[#E8E3D2] rounded-3xl p-4 shadow-sm mt-4">
+                <span className="text-xs sm:text-sm font-bold text-[#5A635B]">
+                  Menampilkan <strong className="text-[#1C241E] font-black">{((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}</strong> dari <strong className="text-[#2B4C3B] font-black">{filteredProducts.length}</strong> Produk
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(p - 1, 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 1}
+                    className="w-9 h-9 rounded-2xl bg-[#F8F6F0] hover:bg-[#E8E3D2] text-[#1C241E] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    title="Halaman Sebelumnya"
+                  >
+                    <ChevronLeft size={18} className="stroke-[2.5]" />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => {
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className={`w-9 h-9 rounded-2xl font-black text-xs transition-all ${
+                        currentPage === page
+                          ? "bg-[#2B4C3B] text-white shadow-md scale-105"
+                          : "bg-[#F8F6F0] hover:bg-[#E8E3D2] text-[#5A635B]"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(p + 1, totalPages));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="w-9 h-9 rounded-2xl bg-[#F8F6F0] hover:bg-[#E8E3D2] text-[#1C241E] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    title="Halaman Berikutnya"
+                  >
+                    <ChevronRight size={18} className="stroke-[2.5]" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
 
@@ -468,7 +585,7 @@ export default function MarketplaceProductsPage() {
           transition={{ duration: 0.4, ease: "easeInOut" }}
           className="fixed top-0 left-0 z-[100] w-12 h-12 rounded-xl shadow-xl overflow-hidden border-2 border-[#2B4C3B] bg-white flex items-center justify-center pointer-events-none"
         >
-          {anim.image ? <img src={anim.image} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : <Package size={20} className="text-[#2B4C3B]" />}
+          {anim.image ? <img src={anim.image} className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <Package size={20} className="text-[#2B4C3B]" />}
         </motion.div>
       ))}
 
@@ -477,5 +594,17 @@ export default function MarketplaceProductsPage() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
+  );
+}
+
+export default function MarketplaceProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F8F6F0] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full skeleton-shimmer bg-[#E8E3D2]" />
+      </div>
+    }>
+      <MarketplaceProductsContent />
+    </Suspense>
   );
 }

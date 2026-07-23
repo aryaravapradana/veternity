@@ -1,7 +1,7 @@
 "use client";
 import { fetchApi } from "@/lib/apiClient";
 
-import { useState, useEffect, memo, useRef, useMemo } from "react";
+import { useState, useEffect, memo, useRef, useMemo, useCallback } from "react";
 import { 
   Search, 
   ChevronRight, 
@@ -62,7 +62,7 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       viewport={{ once: true, margin: "300px" }}
       transition={{ duration: 0.3 }}
       onClick={p.stock > 0 ? onClick : undefined}
-      className={`rounded-[2rem] flex flex-col p-3.5 sm:p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-300 overflow-hidden z-0 ${
+      className={`rounded-[2rem] flex flex-col p-3.5 sm:p-4 shadow-[0_12px_24px_-12px_rgba(43,76,59,0.08)] group relative transition-all duration-300 overflow-hidden z-0 transform-gpu [content-visibility:auto] [contain-intrinsic-size:1px_280px] sm:[content-visibility:visible] ${
         cartQty > 0 ? "border-transparent shadow-[0_12px_24px_-8px_rgba(43,76,59,0.3)] ring-2 ring-[#2B4C3B]" : "bg-white border border-[#E8E3D2]"
       } ${
         p.stock > 0 ? "cursor-pointer hover:shadow-lg hover:-translate-y-1" : "cursor-not-allowed opacity-60 grayscale-[0.8]"
@@ -73,7 +73,7 @@ const ProductCard = memo(function ProductCard({ p, index, onClick, cartQty, onUp
       />
       
       {/* Product Image Container */}
-      <div className="w-full h-28 sm:h-36 flex items-center justify-center mb-3 bg-[#F8F6F0] rounded-2xl sm:rounded-3xl group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
+      <div className="w-full h-34 sm:h-36 flex items-center justify-center mb-3 bg-[#F8F6F0] rounded-2xl sm:rounded-3xl group-hover:scale-[0.98] transition-transform overflow-hidden relative shrink-0">
         <img
           src={imgUrl}
           alt={p.title}
@@ -200,7 +200,7 @@ const CustomDropdown = ({ value, options, onChange, icon: Icon, placeholder, ali
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`absolute ${align === "left" ? "left-0" : "right-0"} mt-2 w-52 sm:w-56 bg-white border border-[#E8E3D2] rounded-2xl sm:rounded-3xl p-2 shadow-xl z-50 overflow-hidden`}
+            className={`absolute ${align === "left" ? "left-0" : "left-0 sm:left-auto sm:right-0"} mt-2 w-52 sm:w-56 bg-white border border-[#E8E3D2] rounded-2xl sm:rounded-3xl p-2 shadow-xl z-50 overflow-hidden`}
           >
             {options.map((opt) => (
               <button
@@ -229,6 +229,7 @@ export default function MarketplacePage() {
   usePageLoading(loading);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [sortBy, setSortBy] = useState("Terbaru");
   const [selectedGrade, setSelectedGrade] = useState("Semua Grade");
@@ -241,19 +242,26 @@ export default function MarketplacePage() {
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
 
-  const handleScroll = () => {
+  // Debounce search to avoid re-filtering on every mobile keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 200);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  const handleScroll = useCallback(() => {
     if (!categoryScrollRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = categoryScrollRef.current;
     setCanScroll(scrollWidth > clientWidth + 2);
     setIsAtStart(scrollLeft <= 40);
     setIsAtEnd(Math.ceil(scrollLeft) >= scrollWidth - clientWidth - 40);
-  };
+  }, []);
 
   useEffect(() => {
     handleScroll();
-    window.addEventListener("resize", handleScroll);
+    // Passive event listener — prevents scroll jank on mobile
+    window.addEventListener("resize", handleScroll, { passive: true });
     return () => window.removeEventListener("resize", handleScroll);
-  }, [products]);
+  }, [products, handleScroll]);
 
   const scrollCategories = (direction: 'left' | 'right') => {
     if (categoryScrollRef.current) {
@@ -356,7 +364,8 @@ export default function MarketplacePage() {
   const { displayedProducts, hasMore } = useMemo(() => {
     const filtered = products.filter(p => {
       const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
-      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      // Use debouncedSearch for filtering to avoid jank on mobile keystrokes
+      const matchSearch = p.title.toLowerCase().includes(debouncedSearch.toLowerCase());
       
       let matchGrade = true;
       if (selectedCategory === "Daging" && selectedGrade !== "Semua Grade") {
@@ -376,7 +385,7 @@ export default function MarketplacePage() {
       displayedProducts: filtered.slice(0, 16),
       hasMore: filtered.length > 16
     };
-  }, [products, searchQuery, selectedCategory, selectedGrade, sortBy]);
+  }, [products, debouncedSearch, selectedCategory, selectedGrade, sortBy]);
 
   const cartTotalQty = useMemo(() => {
     return cartItems.reduce((acc, curr) => acc + (curr.quantity || 1), 0);
@@ -410,82 +419,41 @@ export default function MarketplacePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans selection:bg-[#B4C179] selection:text-[#1C241E] overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans selection:bg-[#B4C179] selection:text-[#1C241E] overflow-x-clip">
       
-      {/* ── Desktop & Tablet Sticky Navbar (Visible on sm/md/lg) ── */}
-      <div className="hidden sm:block">
+      {/* ── Sticky Top Navbar (Visible & Sticky on Mobile, Tablet & Desktop) ── */}
+      <div className="sticky top-0 z-50 w-full">
         <MarketplaceNavbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} cartCount={cartCount} />
       </div>
 
       {/* ── Main Container: Seamlessly Fluid across 320px -> 1400px ── */}
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pt-0 sm:pt-4 space-y-4 sm:space-y-6 pb-28">
         
-        {/* HERO BANNER SECTION (Fluid smooth transition) */}
-        <div className="relative z-10 transition-all duration-500 ease-out">
+        {/* HERO BANNER SECTION (Slightly taller mobile height) */}
+        <div className="relative z-10">
+          {/* layout animation disabled on mobile — too expensive on low-end devices */}
           <motion.div 
             layout
-            className="bg-pranata text-white overflow-hidden shadow-2xl relative transition-all duration-500 ease-out
+            className="bg-pranata text-white overflow-hidden shadow-xl relative
                        -mx-4 sm:mx-0 -mt-0 sm:mt-0 
                        w-[calc(100%+2rem)] sm:w-full 
-                       rounded-b-[2.5rem] sm:rounded-[2.5rem] md:rounded-t-[2.5rem] md:rounded-b-[4rem] lg:rounded-b-[5rem]
-                       p-5 sm:p-8 md:p-12 lg:p-16 
-                       flex flex-col md:flex-row items-stretch md:items-center justify-between min-h-[220px] sm:min-h-[320px]"
+                       rounded-b-[2.2rem] sm:rounded-[2.5rem] md:rounded-t-[2.5rem] md:rounded-b-[4rem] lg:rounded-b-[5rem]
+                       p-6 sm:p-8 md:p-12 lg:p-16 
+                       flex flex-row items-center justify-between min-h-[175px] sm:min-h-[320px]"
           >
-            {/* Ambient Background Blur Elements */}
-            <div className="absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-[70px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#B4C179]/15 rounded-full blur-[60px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
-
-            {/* Mobile Top Header (White Logo + Cart & Profile Avatar) - Hidden on sm/desktop */}
-            <div className="sm:hidden relative z-20 flex items-center justify-between mb-4 w-full border-b border-white/10 pb-3">
-              <Link href="/market" className="flex items-center gap-2 group">
-                <img 
-                  src="/logos/market/market-white.png" 
-                  alt="Pranata Market" 
-                  className="h-7 object-contain transition-transform group-hover:scale-105" 
-                />
-              </Link>
-
-              <div className="flex items-center space-x-2">
-                <Link 
-                  href="/market/cart" 
-                  className="relative w-8 h-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all shadow-sm"
-                >
-                  <ShoppingCart className="w-3.5 h-3.5" />
-                  {cartTotalQty > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#C25939] text-white text-[8px] font-black w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-sm border border-white/40">
-                      {cartTotalQty}
-                    </span>
-                  )}
-                </Link>
-
-                <Link 
-                  href="/settings"
-                  className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 p-0.5 overflow-hidden active:scale-95 transition-transform shadow-sm flex items-center justify-center"
-                >
-                  {profile?.avatarUrl || profile?.avatar ? (
-                    <img 
-                      src={profile.avatarUrl || profile.avatar} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover rounded-full" 
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[#32452C] flex items-center justify-center text-[#B4C179] font-black text-[10px]">
-                      {(profile?.fullName || profile?.username || 'P').charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </Link>
-              </div>
-            </div>
+            {/* Ambient blur decorations — hidden on mobile (GPU-intensive, zero visual impact) */}
+            <div className="hidden sm:block absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-[70px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="hidden sm:block absolute bottom-0 right-0 w-64 h-64 bg-[#B4C179]/15 rounded-full blur-[60px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
             {/* Hero Copywriting */}
-            <div className="relative z-10 max-w-xs sm:max-w-md lg:max-w-xl space-y-2 sm:space-y-4">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight">
-                Hasil panen segar <br />
+            <div className="relative z-10 flex-1 max-w-xs sm:max-w-md lg:max-w-xl space-y-2 sm:space-y-4 pr-2 sm:pr-0">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight sm:leading-[1.1] tracking-tight">
+                Hasil panen segar <br className="hidden sm:inline" />
                 <span className="text-[#B4C179]">langsung ke pintu Anda</span>
               </h1>
               
-              <p className="text-[#A4C4A8] text-xs sm:text-base font-medium max-w-md leading-relaxed">
-                Dapatkan produk organik dan kebutuhan harian yang bersumber dari petani lokal dengan potongan harga hingga 40%.
+              <p className="text-[#A4C4A8] text-xs sm:text-base font-medium max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none">
+                Dapatkan produk organik dan kebutuhan harian bersumber dari petani lokal.
               </p>
 
               <button 
@@ -498,13 +466,15 @@ export default function MarketplacePage() {
             </div>
 
             {/* Hero PNG Image Graphic */}
-            <div className="relative z-10 mt-4 md:mt-0 flex justify-end items-end shrink-0">
-              <div className="w-32 h-36 sm:w-56 sm:h-64 md:w-72 md:h-80 relative flex items-end justify-center">
-                <div className="absolute inset-0 bg-[#B4C179]/20 rounded-full blur-2xl transform translate-y-4 pointer-events-none" />
+            <div className="relative z-10 flex justify-end items-center shrink-0">
+              <div className="w-32 h-32 sm:w-56 sm:h-64 md:w-72 md:h-80 relative flex items-center justify-center">
+                <div className="absolute inset-0 bg-[#B4C179]/20 rounded-full blur-xl transform translate-y-2 pointer-events-none" />
                 <img 
                   src="/mocks/mock_sayuran_1784287377280.png" 
                   alt="Hasil Panen Segar"
-                  className="w-full h-full object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.35)] transform hover:scale-105 transition-transform duration-300 pointer-events-none"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.35)] transform hover:scale-105 transition-transform duration-300 pointer-events-none"
                 />
               </div>
             </div>
@@ -639,7 +609,7 @@ export default function MarketplacePage() {
               <p className="text-gray-400 text-xs">Coba ubah kata kunci atau kategori pencarian.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
               {displayedProducts.map((p, i) => {
                 const qty = cartItems.find(item => item.productId === p.id)?.quantity || 0;
                 return (
@@ -655,6 +625,17 @@ export default function MarketplacePage() {
               })}
             </div>
           )}
+
+          {/* Mobile Bottom "Lihat Semua Produk" Button */}
+          <div className="pt-4 sm:hidden">
+            <button 
+              onClick={() => router.push(`/market/products?category=${encodeURIComponent(selectedCategory)}`)} 
+              className="w-full bg-[#C25939] hover:bg-[#A34529] active:scale-95 text-white font-extrabold text-sm py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-[#C25939]/20 transition-all"
+            >
+              <span>Lihat Semua Produk</span>
+              <ArrowRight size={16} strokeWidth={2.5} />
+            </button>
+          </div>
         </section>
 
         {/* STICKY BOTTOM CART BAR (Shown on small screens when cart has items) */}

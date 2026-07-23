@@ -242,18 +242,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const GradeIconComponent = gradeStyle.icon;
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-36 md:pb-12 overflow-x-hidden selection:bg-[#B4C179]">
+    <div className="min-h-screen bg-[#F8F6F0] text-[#1C241E] font-sans pb-36 md:pb-12 overflow-x-clip selection:bg-[#B4C179]">
       
       {/* Desktop/Tablet Sticky Navbar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block sticky top-0 z-50">
         <MarketplaceNavbar />
       </div>
 
       {/* ── MOBILE PRODUCT DETAIL PAGE (<768px) ── */}
-      <div className="md:hidden w-full max-w-md mx-auto px-4 pt-3 pb-36 space-y-4">
+      <div className="md:hidden w-full">
         
-        {/* Mobile Top Header Row */}
-        <div className="flex items-center justify-between py-1">
+        {/* Mobile Sticky Top Header Row */}
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#E8E3D2] py-3 px-4 shadow-sm flex items-center justify-between">
           <button 
             onClick={() => router.push("/market")}
             className="w-9 h-9 rounded-full bg-white border border-[#E8E3D2] flex items-center justify-center text-[#1C241E] hover:bg-[#F8F6F0] active:scale-95 transition-all shadow-sm"
@@ -270,6 +270,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <Heart size={18} className={liked ? "fill-[#C25939] stroke-[#C25939]" : "stroke-[#1C241E] stroke-[2.2]"} />
           </button>
         </div>
+
+        <div className="max-w-md mx-auto px-4 pt-3 pb-36 space-y-4">
 
         {/* Product Category Badge & Title */}
         <div className="space-y-1.5 pt-1">
@@ -437,6 +439,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </button>
           </div>
         </div>
+
+      </div>
 
       </div>
 

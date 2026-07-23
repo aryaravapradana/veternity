@@ -52,7 +52,7 @@ export default function MarketplaceNavbar({
   }, []);
 
   return (
-    <header className="flex items-center justify-between gap-4 sticky top-0 z-50 bg-[#F8F6F0] py-4 px-4 md:px-8 border-b border-[#E8E3D2]/50 shadow-[0_4px_24px_-8px_rgba(43,76,59,0.05)] text-[#1C241E]" >
+    <header className="sticky top-0 z-50 w-full flex items-center justify-between gap-4 bg-white/95 backdrop-blur-md py-3.5 px-4 md:px-8 border-b border-[#E8E3D2] shadow-sm text-[#1C241E]">
       {/* Left */}
       {leftContent ? (
         <div className="flex items-center gap-4 shrink-0">{leftContent}</div>
