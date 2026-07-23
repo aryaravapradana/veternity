@@ -41,7 +41,7 @@ export default function LandingPage() {
         </div>
 
         {/* Text Content - Centered */}
-        <div className="relative z-10 w-full px-5 pb-52 flex flex-col items-center text-center">
+        <div className="relative z-10 w-full px-5 pb-40 sm:pb-52 flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export default function LandingPage() {
             className="w-full will-change-transform will-change-opacity"
           >
             <h1 
-              className="text-[2.2rem] sm:text-4xl font-black text-[#1C241E] tracking-tight mb-5 leading-none whitespace-nowrap flex flex-col items-center justify-center"
+              className="text-[2rem] sm:text-4xl font-black text-[#1C241E] tracking-tight mb-5 leading-tight flex flex-col items-center justify-center text-center"
               
             >
               Empowering farmers with
@@ -230,23 +230,23 @@ export default function LandingPage() {
       </section>
 
       {/* Global Network Section */}
-      <section className="py-24 px-6 relative bg-transparent">
+      <section className="py-12 sm:py-24 px-4 sm:px-6 relative bg-transparent">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
           <motion.div 
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="bg-rust rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden"
+            className="bg-rust rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-20 text-center relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-96 h-96 bg-vibrant/40 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-sage/40 rounded-full blur-3xl" />
             
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-4 sm:mb-6">
                 Ready to transform your farm?
               </h2>
-              <p className="text-slate-400 font-medium text-lg max-w-xl mx-auto mb-10 px-4 md:px-8 lg:px-12">
+              <p className="text-slate-400 font-medium text-sm sm:text-base lg:text-lg max-w-xl mx-auto mb-8 sm:mb-10 px-0">
                 Join our non-profit initiative to digitalize local agriculture. Setup takes less than 5 minutes and is completely free forever.
               </p>
               <Link href="/hub">
@@ -264,7 +264,7 @@ export default function LandingPage() {
       </section>
       
       {/* Footer */}
-      <footer className="bg-sage border-t border-olive/30 py-12 text-center text-forest font-bold">
+      <footer className="bg-sage border-t border-olive/30 py-8 sm:py-12 px-4 text-center text-forest font-bold">
         <p>© 2026 Pranata Org. A non-profit initiative.</p>
       </footer>
     </div>

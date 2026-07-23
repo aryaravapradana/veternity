@@ -191,7 +191,7 @@ export function FeaturesRopeSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="py-24 md:py-32 relative bg-forest features-rope-container overflow-hidden">
+    <section ref={containerRef} className="py-16 sm:py-24 md:py-32 relative bg-forest features-rope-container overflow-hidden">
       
       {/* Decorative Background Elements */}
       <div className="block">
@@ -201,14 +201,14 @@ export function FeaturesRopeSection() {
       <div className="max-w-7xl mx-auto relative z-10 px-4 md:px-8 lg:px-12">
         
         {/* Header section */}
-        <div className="text-center mb-32 flex flex-col items-center">
+        <div className="text-center mb-12 sm:mb-20 md:mb-32 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100/10 text-slate-50 font-semibold text-sm mb-8" data-parallax="-0.2">
             <span>Core Ecosystem</span>
           </div>
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-50 tracking-tighter mb-8 leading-[0.9]"  data-parallax="0.5">
+          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-slate-50 tracking-tighter mb-4 sm:mb-8 leading-[0.9]"  data-parallax="0.5">
             Intelligent by design.
           </h2>
-          <p className="text-xl md:text-2xl text-slate-300 max-w-xl font-medium leading-snug" data-parallax="0.8">
+          <p className="text-base sm:text-xl md:text-2xl text-slate-300 max-w-xl font-medium leading-snug px-2 sm:px-0" data-parallax="0.8">
             Three core pillars seamlessly connected to transform your agricultural operations. Follow the thread.
           </p>
         </div>
