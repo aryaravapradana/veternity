@@ -26,7 +26,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-transparent font-sans overflow-x-hidden relative">
       
       {/* Unified Responsive Hero Section */}
-      <section className="relative w-full flex flex-col justify-start pt-12 sm:pt-16 bg-[#F8F6F0]">
+      <section className="relative w-full flex flex-col justify-center min-h-[55vh] md:min-h-[75vh] pt-16 sm:pt-24 pb-12 md:pb-24 bg-[#F8F6F0]">
         {/* Soft Organic Background Gradients */}
         <div className="absolute top-0 right-0 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[80px] sm:blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[60px] sm:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
