@@ -29,7 +29,7 @@ export default function DashboardNavbar() {
       {/* Brand Logo - Kiri */}
       <div className="flex items-center gap-3 shrink-0">
         <Link href="/hub" className="h-8 transition-transform hover:scale-105">
-          <img src="/logos/hub/hub-black.png" alt="Pranata" className="h-full object-contain"  loading="lazy" decoding="async" />
+          <img src="/logos/hub/hub-black.webp" alt="Pranata" className="h-full object-contain"  loading="lazy" decoding="async" />
         </Link>
       </div>
 

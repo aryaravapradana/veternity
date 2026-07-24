@@ -1,6 +1,6 @@
 "use client";
 import Cookies from 'js-cookie';
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,7 +51,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
     setCheckingUsername(true);
     const timeoutId = setTimeout(async () => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+        const API_BASE = getApiBaseUrl();
         const res = await fetchApi(`${API_BASE}/api/profile/check-username?username=${encodeURIComponent(username.trim().toLowerCase())}`);
         const data = await res.json();
         setUsernameAvailable(data.available);
@@ -85,7 +85,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: { onSuccess: () => 
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchApi(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/profile/register`, {
+      const res = await fetchApi(`${getApiBaseUrl()}/api/profile/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -14,24 +14,24 @@ const features = [
   {
     title: "Pranata Intelligence",
     description: "Your on-demand agricultural AI expert. Leverage advanced machine learning and real-time data to receive instant, actionable insights for diagnostics, yield predictions, and operational efficiency.",
-    logoWhite: "/logos/intelligence/intelligence-white.png",
-    logoBlack: "/logos/intelligence/intelligence-black.png",
+    logoWhite: "/logos/intelligence/intelligence-white.webp",
+    logoBlack: "/logos/intelligence/intelligence-black.webp",
     illustration: "/images/PRANATA_INTELLIGENCE.webp",
     layout: "right-card"
   },
   {
     title: "Pranata Market",
     description: "Connect directly with trusted suppliers and buyers. Track real-time commodity prices and securely trade agricultural products with zero hidden fees.",
-    logoWhite: "/logos/market/market-white.png",
-    logoBlack: "/logos/market/market-black.png",
+    logoWhite: "/logos/market/market-white.webp",
+    logoBlack: "/logos/market/market-black.webp",
     illustration: "/images/PRANATA_MARKET.webp",
     layout: "left-card"
   },
   {
     title: "Pranata Hub",
     description: "Your centralized dashboard for operations. Monitor micro-climate sensors, automate task scheduling, and track financial ROI with unprecedented clarity.",
-    logoWhite: "/logos/hub/hub-white.png",
-    logoBlack: "/logos/hub/hub-black.png",
+    logoWhite: "/logos/hub/hub-white.webp",
+    logoBlack: "/logos/hub/hub-black.webp",
     illustration: "/images/PRANATA_HUB.webp",
     layout: "right-card"
   }
@@ -100,7 +100,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
           </div>
         </div>
         
-        <p className={`font-medium leading-relaxed text-xs sm:text-sm lg:text-[17px] transition-colors duration-0 max-w-[28rem] ${active ? 'text-white/95' : 'text-slate-600'}`}>
+        <p className={`font-medium leading-relaxed text-xs sm:text-sm lg:text-[17px] transition-colors duration-0 max-w-md ${active ? 'text-white/95' : 'text-slate-600'}`}>
           {feature.description}
         </p>
 
@@ -123,7 +123,7 @@ const FeatureCard = ({ feature, layout, index }: { feature: FeatureType, layout?
 
       {/* OVERLAY LAYER (White Text, Soft Green BG with Clip Path) */}
       <div 
-        className="absolute inset-0 bg-gradient-to-br from-[#8FA76B] to-[#405D46] z-20 transition-all duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] flex items-center justify-center pointer-events-none [clip-path:circle(0%_at_50%_50%)] group-[.is-active]/card:[clip-path:circle(150%_at_50%_50%)]"
+        className="absolute inset-0 bg-linear-to-br from-[#8FA76B] to-[#405D46] z-20 transition-all duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] flex items-center justify-center pointer-events-none [clip-path:circle(0%_at_50%_50%)] group-[.is-active]/card:[clip-path:circle(150%_at_50%_50%)]"
       >
         {renderCardContent(true)}
       </div>
@@ -180,7 +180,7 @@ export function FeaturesRopeSection() {
         </div>
 
         {/* Features Timeline Cards with Rope Anchors */}
-        <div className="flex flex-col relative gap-24 sm:gap-32 md:gap-[10rem] lg:gap-[14rem]">
+        <div className="flex flex-col relative gap-24 sm:gap-32 md:gap-40 lg:gap-56">
           {features.map((feature, index) => {
             return (
               <div 

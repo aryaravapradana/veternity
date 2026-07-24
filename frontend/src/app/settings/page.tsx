@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 import { uploadImage } from "@/lib/supabaseStorage";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 type Toast = { type: "success" | "error"; message: string };
 

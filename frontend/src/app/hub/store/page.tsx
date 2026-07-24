@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { Store, Package, Plus, CheckCircle, Image as ImageIcon, Info, X, Edit2, Trash2, Sparkles, ChevronRight, Crown, Star, AlertTriangle, Loader2 } from "lucide-react";
@@ -41,7 +41,7 @@ export default function StoreDashboardPage() {
     
     setProfile(session);
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
 
     try {
       const prodRes = await fetchApi(`${API_BASE}/api/products/seller/${session.id}`);
@@ -73,7 +73,7 @@ export default function StoreDashboardPage() {
     if (!productToDelete || isDeleting) return;
     setIsDeleting(true);
     
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     try {
       await fetchApi(`${API_BASE}/api/products/${productToDelete.id}`, { method: "DELETE" });
       setProductToDelete(null);

@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect, use } from "react";
 import {
@@ -15,18 +15,18 @@ import { useRouter } from "next/navigation";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const getCategoryFallbackImage = (category: string) => {
   const c = (category || "").toLowerCase();
-  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
-  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
-  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
-  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
-  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
-  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
-  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
-  return "/mocks/mock_ternak_1784287398084.png";
+  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.webp";
+  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.webp";
+  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.webp";
+  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.webp";
+  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.webp";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.webp";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.webp";
+  return "/mocks/mock_ternak_1784287398084.webp";
 };
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -370,7 +370,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-black/5 justify-start">
               <span className="text-[9px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
-              <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-5 drop-shadow-sm" loading="lazy" decoding="async" />
+              <img src="/logos/intelligence/intelligence-black.webp" alt="Pranata Intelligence" className="h-5 drop-shadow-sm" loading="lazy" decoding="async" />
             </div>
           </div>
         </div>
@@ -578,7 +578,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                   <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-black/5 justify-start">
                     <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
-                    <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-5 drop-shadow-sm" loading="lazy" decoding="async" />
+                    <img src="/logos/intelligence/intelligence-black.webp" alt="Pranata Intelligence" className="h-5 drop-shadow-sm" loading="lazy" decoding="async" />
                   </div>
                 </div>
               </div>

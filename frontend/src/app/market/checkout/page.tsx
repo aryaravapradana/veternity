@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { CheckCircle, ShieldCheck, MapPin, Truck, Store, ChevronLeft, Building2, QrCode, HandCoins, Calendar, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Logo } from "idn-finlogos/react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 export default function CheckoutPage() {
   const router = useRouter();

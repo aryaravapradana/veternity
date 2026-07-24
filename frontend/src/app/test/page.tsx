@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 import { 
   Search, 
   ShoppingCart, 
@@ -17,29 +17,29 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const CATEGORIES = [
   { name: "Semua", icon: "🌾", image: null },
-  { name: "Daging", icon: "🥩", image: "/icons/daging.png" },
-  { name: "Susu", icon: "🥛", image: "/icons/susu.png" },
-  { name: "Telur", icon: "🥚", image: "/icons/telor.png" },
-  { name: "Sayuran", icon: "🥬", image: "/mocks/mock_sayuran_1784287377280.png" },
-  { name: "Buah", icon: "🍎", image: "/mocks/mock_buah_1784287387762.png" },
+  { name: "Daging", icon: "🥩", image: "/icons/daging.webp" },
+  { name: "Susu", icon: "🥛", image: "/icons/susu.webp" },
+  { name: "Telur", icon: "🥚", image: "/icons/telor.webp" },
+  { name: "Sayuran", icon: "🥬", image: "/mocks/mock_sayuran_1784287377280.webp" },
+  { name: "Buah", icon: "🍎", image: "/mocks/mock_buah_1784287387762.webp" },
 ];
 
 const GRADES = ["Semua Grade", "Premium", "Grade A", "Grade B", "Grade C"];
 
 const getCategoryFallbackImage = (category: string) => {
   const c = (category || "").toLowerCase();
-  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
-  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
-  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
-  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
-  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
-  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
-  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
-  return "/mocks/mock_ternak_1784287398084.png";
+  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.webp";
+  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.webp";
+  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.webp";
+  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.webp";
+  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.webp";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.webp";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.webp";
+  return "/mocks/mock_ternak_1784287398084.webp";
 };
 
 export default function MobileTestPage() {
@@ -189,7 +189,7 @@ export default function MobileTestPage() {
           <div className="relative z-10 flex items-center justify-between mb-4 px-1">
             <Link href="/market" className="flex items-center gap-2 group">
               <img 
-                src="/logos/market/market-white.png" 
+                src="/logos/market/market-white.webp" 
                 alt="Pranata Market" 
                 className="h-7 sm:h-8 object-contain transition-transform group-hover:scale-105" 
               />
@@ -246,7 +246,7 @@ export default function MobileTestPage() {
               <div className="relative w-36 h-44 flex items-end justify-center">
                 <div className="absolute inset-0 bg-[#B4C179]/30 rounded-full blur-xl transform translate-y-3 pointer-events-none"></div>
                 <img 
-                  src="/mocks/mock_sayuran_1784287377280.png" 
+                  src="/mocks/mock_sayuran_1784287377280.webp" 
                   alt="Hasil Panen Segar"
                   className="w-full h-full object-contain drop-shadow-[0_15px_20px_rgba(0,0,0,0.35)] transform hover:scale-105 transition-transform duration-300 pointer-events-none mix-blend-normal"
                 />

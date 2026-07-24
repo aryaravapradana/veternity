@@ -1,12 +1,12 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, Package, Clock, User, ChevronRight, CheckCircle, Truck, MapPin, Search, Filter, Calendar } from "lucide-react";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-[#FFF3E0] text-[#C25939]",

@@ -26,11 +26,11 @@ export default function LandingPage() {
     <div className="min-h-screen bg-transparent font-sans overflow-x-hidden relative">
       
       {/* Unified Responsive Hero Section */}
-      <section className="relative w-full flex flex-col justify-between min-h-[100dvh] md:min-h-0 pt-6 sm:pt-10 md:pt-12 pb-0 bg-[#F8F6F0] overflow-hidden">
+      <section className="relative w-full flex flex-col justify-between min-h-dvh md:min-h-0 pt-6 sm:pt-10 md:pt-12 pb-0 bg-[#F8F6F0] overflow-hidden">
         {/* Soft Organic Background Gradients */}
-        <div className="absolute top-0 right-0 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-[#E8E3D2]/40 rounded-full blur-[80px] sm:blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#DDE2D6]/50 rounded-full blur-[60px] sm:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 w-[600px] sm:w-[1000px] h-[600px] sm:h-[1000px] bg-[#F1EBE1]/30 rounded-full blur-[100px] sm:blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-100 sm:w-200 h-100 sm:h-200 bg-[#E8E3D2]/40 rounded-full blur-[80px] sm:blur-[120px] -translate-y-1/4 translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-75 sm:w-150 h-75 sm:h-150 bg-[#DDE2D6]/50 rounded-full blur-[60px] sm:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 w-150 sm:w-250 h-150 sm:h-250 bg-[#F1EBE1]/30 rounded-full blur-[100px] sm:blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
         {/* Text Content Container */}
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center mb-2 md:mb-4 px-5 sm:px-8 lg:px-12">
@@ -44,7 +44,7 @@ export default function LandingPage() {
             {/* Pranata Basic Black Logo (Top Center) */}
             <div className="mb-2 sm:mb-4 flex justify-center">
               <img 
-                src="/logos/basic/logo black.png" 
+                src="/logos/basic/logo black.webp" 
                 alt="Pranata Logo" 
                 className="h-7 sm:h-9 md:h-11 w-auto object-contain" 
                 fetchPriority="high"
@@ -135,7 +135,7 @@ export default function LandingPage() {
           />
           
           {/* Smooth Gradient Fade to Rope Section */}
-          <div className="absolute bottom-0 left-0 w-full h-32 sm:h-48 md:h-64 bg-gradient-to-b from-transparent to-[#32452C] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-full h-32 sm:h-48 md:h-64 bg-linear-to-b from-transparent to-forest pointer-events-none" />
         </motion.div>
       </section>
 

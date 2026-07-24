@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle, Minus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 import { usePageLoading } from "@/components/shared/loading-context";
 
 export default function EditProductPage() {
@@ -42,7 +42,7 @@ export default function EditProductPage() {
 
   const loadProductData = async () => {
     setLoading(true);
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     try {
       const prodRes = await fetchApi(`${API_BASE}/api/products/${productId}`);
       const product = await prodRes.json();
@@ -159,7 +159,7 @@ export default function EditProductPage() {
     }
     
     setIsSubmitting(true);
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     
     try {
       await fetchApi(`${API_BASE}/api/products/${productId}`, {
@@ -285,7 +285,7 @@ export default function EditProductPage() {
                       <p className="text-xs font-semibold text-[#5A635B] leading-relaxed">{aiAnalysisResult.analysis}</p>
                       <div className="flex items-center gap-1.5 mt-4 justify-start">
                         <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
-                        <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-6 drop-shadow-sm"  loading="lazy" decoding="async" />
+                        <img src="/logos/intelligence/intelligence-black.webp" alt="Pranata Intelligence" className="h-6 drop-shadow-sm"  loading="lazy" decoding="async" />
                       </div>
                     </motion.div>
                   )}

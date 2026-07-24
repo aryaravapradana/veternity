@@ -97,7 +97,7 @@ export function SplashScreen() {
           
           <svg x="calc(50vw - min(40vw, 200px))" y="calc(50vh - min(11.89vw, 59.45px))" width="min(80vw, 400px)" height="min(23.78vw, 118.9px)" viewBox="0 0 3343 994" overflow="visible">
             {/* The Colored Logo remains static in the center. Only the circular hole expands/shrinks. */}
-            <image href="/logos/basic/logo black.png" width="3343" height="994" />
+            <image href="/logos/basic/logo black.webp" width="3343" height="994" />
           </svg>
         </g>
       </svg>

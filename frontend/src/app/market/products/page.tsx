@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect, memo, useMemo, useRef, Suspense, useCallback } from "react";
 import { 
@@ -11,28 +11,29 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
+import { ProductGridSkeleton } from "@/components/ui/skeleton";
 
 const ITEMS_PER_PAGE = 20;
 
 const CATEGORIES = [
   { name: "Semua", icon: "🌾", image: null },
-  { name: "Daging", icon: "🥩", image: "/icons/daging.png" },
-  { name: "Susu", icon: "🥛", image: "/icons/susu.png" },
-  { name: "Telur", icon: "🥚", image: "/icons/telor.png" },
+  { name: "Daging", icon: "🥩", image: "/icons/daging.webp" },
+  { name: "Susu", icon: "🥛", image: "/icons/susu.webp" },
+  { name: "Telur", icon: "🥚", image: "/icons/telor.webp" },
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const getCategoryFallbackImage = (category: string) => {
   const c = (category || "").toLowerCase();
-  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.png";
-  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.png";
-  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.png";
-  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.png";
-  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.png";
-  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
-  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
-  return "/mocks/mock_ternak_1784287398084.png";
+  if (c.includes("sayur")) return "/mocks/mock_sayuran_1784287377280.webp";
+  if (c.includes("buah")) return "/mocks/mock_buah_1784287387762.webp";
+  if (c.includes("daging")) return "/mocks/mock_daging_1784287407027.webp";
+  if (c.includes("susu")) return "/mocks/mock_susu_1784287426207.webp";
+  if (c.includes("telur")) return "/mocks/mock_telur_1784287417129.webp";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.webp";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.webp";
+  return "/mocks/mock_ternak_1784287398084.webp";
 };
 
 // ─── Responsive Product Card ──────────────────────────────────────────────────
@@ -497,7 +498,9 @@ function MarketplaceProductsContent() {
         </div>
 
         {/* ── RESPONSIVE PRODUCT GRID (20 ITEMS PER PAGE) ── */}
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <ProductGridSkeleton count={10} />
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed border-[#E8E3D2] rounded-3xl bg-white max-w-7xl mx-auto px-4">
             <Package size={44} className="mx-auto text-[#C4BAA8] mb-3" />
             <h3 className="text-lg font-black text-[#5A635B] mb-1">Produk tidak ditemukan</h3>

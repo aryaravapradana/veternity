@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { Bot, User, Send, Paperclip, Loader2, Sparkles, X, Briefcase, TrendingUp, BrainCircuit, Cpu, LineChart, Sprout } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 export default function IntelligencePage() {
   const [contextData, setContextData] = useState<any>(null);
@@ -23,7 +23,7 @@ export default function IntelligencePage() {
       const sessionStr = localStorage.getItem("farmpro_session");
       if (!sessionStr) return;
       const session = JSON.parse(sessionStr);
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const API_BASE = getApiBaseUrl();
       
       try {
         const [prodRes, ordRes] = await Promise.all([
@@ -142,7 +142,7 @@ export default function IntelligencePage() {
           <div className="absolute top-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
           
           <div className="flex items-center gap-4 text-white relative z-10">
-            <img src="/logos/intelligence/intelligence-white.png" alt="Intelligence Logo" className="h-12 w-auto object-contain drop-shadow-md"  loading="lazy" decoding="async" />
+            <img src="/logos/intelligence/intelligence-white.webp" alt="Intelligence Logo" className="h-12 w-auto object-contain drop-shadow-md"  loading="lazy" decoding="async" />
             <div>
               <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">Pranata Intelligence</h1>
               <p className="text-white/60 text-sm font-medium">Advanced agricultural analytics & veterinary AI</p>

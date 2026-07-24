@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect, memo, useRef, useMemo, useCallback } from "react";
 import { 
@@ -26,6 +26,7 @@ import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
+import { ProductGridSkeleton } from "@/components/ui/skeleton";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -34,7 +35,7 @@ const CATEGORIES = [
   { name: "Susu", icon: "🥛", image: "/icons/susu.webp" },
   { name: "Telur", icon: "🥚", image: "/icons/telor.webp" },
 ];
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const getCategoryFallbackImage = (category: string) => {
   const c = (category || "").toLowerCase();
@@ -42,8 +43,8 @@ const getCategoryFallbackImage = (category: string) => {
   if (c.includes("susu")) return "/icons/susu.webp";
   if (c.includes("telur")) return "/icons/telor.webp";
   if (c.includes("sapi") || c.includes("ternak")) return "/icons/sapi.webp";
-  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.png";
-  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.png";
+  if (c.includes("pupuk")) return "/mocks/mock_pupuk_1784287436416.webp";
+  if (c.includes("alat")) return "/mocks/mock_alat_1784287447181.webp";
   return "/icons/sapi.webp";
 };
 
@@ -442,26 +443,26 @@ export default function MarketplacePage() {
             <div className="hidden sm:block absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-[70px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
             <div className="hidden sm:block absolute bottom-0 right-0 w-64 h-64 bg-[#B4C179]/15 rounded-full blur-[60px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-            {/* Hero Copywriting */}
-            <div className="relative z-10 flex-1 max-w-[54%] min-[380px]:max-w-[56%] sm:max-w-md lg:max-w-xl pr-2 sm:pr-4">
-              <h1 className="text-[1.2rem] min-[380px]:text-[1.35rem] sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight sm:leading-[1.1] tracking-tight">
+            {/* Hero Copywriting - Left ~55% container */}
+            <div className="relative z-10 flex-1 max-w-[55%] min-[380px]:max-w-[58%] sm:max-w-md lg:max-w-xl pr-2 sm:pr-4">
+              <h1 className="text-[1.25rem] min-[360px]:text-[1.35rem] min-[400px]:text-[1.45rem] sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight sm:leading-[1.1] tracking-tight">
                 Hasil panen segar <br className="hidden sm:inline" />
                 <span>langsung ke pintu Anda</span>
               </h1>
 
-              <p className="text-white text-[10.5px] min-[380px]:text-xs sm:text-base font-medium max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none mt-1.5 sm:mt-3">
+              <p className="text-white text-[10.5px] min-[360px]:text-xs sm:text-base font-medium max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none mt-1.5 sm:mt-3">
                 Dapatkan produk organik dan kebutuhan harian bersumber dari petani lokal.
               </p>
             </div>
 
-            {/* Hero Image Graphic - Slightly larger & moved up on mobile */}
-            <div className="absolute right-0 bottom-0 pointer-events-none z-10 translate-x-1 sm:translate-x-3 translate-y-4 min-[380px]:translate-y-7 sm:translate-y-16 md:translate-y-20 lg:translate-y-24">
+            {/* Hero Image Graphic - Large & prominent, bleeding down right corner */}
+            <div className="absolute right-0 bottom-0 pointer-events-none z-10 translate-x-1 sm:translate-x-3 translate-y-4 min-[360px]:translate-y-6 sm:translate-y-12 md:translate-y-16 lg:translate-y-20">
               <img 
                 src="/images/market_hero.webp" 
                 alt="Hasil Panen Segar Pranata Market"
                 fetchPriority="high"
                 decoding="async"
-                className="w-36 min-[380px]:w-44 sm:w-56 md:w-72 lg:w-[22rem] h-auto object-contain pointer-events-none origin-bottom-right"
+                className="w-48 min-[360px]:w-56 min-[400px]:w-64 sm:w-[24rem] md:w-[30rem] lg:w-[34rem] h-auto object-contain pointer-events-none origin-bottom-right"
               />
             </div>
           </motion.div>
@@ -488,7 +489,7 @@ export default function MarketplacePage() {
                              p-1.5 min-[360px]:p-2.5 sm:p-3 
                              flex flex-col justify-between items-start text-left transition-all duration-300 relative overflow-hidden group ${
                     active 
-                      ? "bg-gradient-to-br from-[#8FA76B] to-[#405D46] text-white border-[1.5px] sm:border-2 border-white scale-[1.02]" 
+                      ? "bg-linear-to-br from-[#8FA76B] to-[#405D46] text-white border-[1.5px] sm:border-2 border-white scale-[1.02]" 
                       : "bg-white text-[#1C241E] border-[1.5px] sm:border-2 border-[#E8E3D2] hover:border-[#32452C]"
                   }`}
                 >
@@ -537,7 +538,7 @@ export default function MarketplacePage() {
                     onClick={() => setSelectedGrade(g)}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                       selectedGrade === g 
-                        ? "bg-gradient-to-br from-[#8FA76B] to-[#405D46] text-white border-2 border-white shadow-md" 
+                        ? "bg-linear-to-br from-[#8FA76B] to-[#405D46] text-white border-2 border-white shadow-md" 
                         : "bg-white text-[#1C241E]/70 border border-[#E8E3D2] hover:bg-[#F2EFE9]"
                     }`}
                   >
@@ -582,7 +583,9 @@ export default function MarketplacePage() {
           </div>
 
           {/* Products Grid: Fluidly 2 cols on mobile -> 3 cols on tablet -> 4 cols on desktop */}
-          {displayedProducts.length === 0 ? (
+          {loading ? (
+            <ProductGridSkeleton count={8} />
+          ) : displayedProducts.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed border-[#E8E3D2] rounded-[2rem] bg-white max-w-7xl mx-auto px-4">
               <Package size={40} className="mx-auto text-gray-300 mb-3" />
               <h3 className="text-base font-black text-[#5A635B] mb-1">Produk tidak ditemukan</h3>

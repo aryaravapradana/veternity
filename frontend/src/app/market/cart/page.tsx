@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, ShoppingCart, Menu, Zap, Trash2, Package, ChevronLeft, Clock, CheckCircle, Truck, Store, MapPin } from "lucide-react";
@@ -8,7 +8,7 @@ import { usePageLoading } from "@/components/shared/loading-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import MarketplaceNavbar from "@/components/layout/MarketplaceNavbar";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = getApiBaseUrl();
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-[#FFF3E0] text-[#C25939]",

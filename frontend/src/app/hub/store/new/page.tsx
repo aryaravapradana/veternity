@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Sparkles, X, Image as ImageIcon, Crown, Star, CheckCircle, Info, Loader2, XCircle, Minus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 import { uploadImage } from "@/lib/supabaseStorage";
 
 export default function NewProductPage() {
@@ -37,7 +37,7 @@ export default function NewProductPage() {
   }, []);
 
   const checkBenchmark = async () => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     try {
       const res = await fetchApi(`${API_BASE}/api/prices`);
       const data = await res.json();
@@ -106,7 +106,7 @@ export default function NewProductPage() {
       return;
     }
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     
     let gradeToSave = undefined;
     let aiAnalysisToSave = undefined;
@@ -174,9 +174,9 @@ export default function NewProductPage() {
             {stepperStep === 1 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { name: "Daging", image: "/icons/daging.png", desc: "Sapi, Kambing, Ayam, dll.", theme: "hover:border-red-400 hover:bg-red-50" },
-                  { name: "Susu", image: "/icons/susu.png", desc: "Susu sapi segar, kambing, dll.", theme: "hover:border-blue-400 hover:bg-blue-50" },
-                  { name: "Telur", image: "/icons/telor.png", desc: "Telur ayam, bebek, puyuh, dll.", theme: "hover:border-amber-400 hover:bg-amber-50" }
+                  { name: "Daging", image: "/icons/daging.webp", desc: "Sapi, Kambing, Ayam, dll.", theme: "hover:border-red-400 hover:bg-red-50" },
+                  { name: "Susu", image: "/icons/susu.webp", desc: "Susu sapi segar, kambing, dll.", theme: "hover:border-blue-400 hover:bg-blue-50" },
+                  { name: "Telur", image: "/icons/telor.webp", desc: "Telur ayam, bebek, puyuh, dll.", theme: "hover:border-amber-400 hover:bg-amber-50" }
                 ].map(cat => (
                   <button 
                     key={cat.name}
@@ -288,7 +288,7 @@ export default function NewProductPage() {
                           )}
                           <div className="flex items-center gap-1.5 mt-4 justify-start">
                             <span className="text-[10px] font-light tracking-tight text-[#2B4C3B] uppercase">Powered By</span>
-                            <img src="/logos/intelligence/intelligence-black.png" alt="Pranata Intelligence" className="h-6 drop-shadow-sm" loading="lazy" decoding="async" />
+                            <img src="/logos/intelligence/intelligence-black.webp" alt="Pranata Intelligence" className="h-6 drop-shadow-sm" loading="lazy" decoding="async" />
                           </div>
                         </motion.div>
                       );

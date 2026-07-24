@@ -1,6 +1,6 @@
 "use client";
 import Cookies from 'js-cookie';
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +37,7 @@ function AuthContent() {
     setError(null);
     
     try {
-      const res = await fetchApi(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/profile/login`, {
+      const res = await fetchApi(`${getApiBaseUrl()}/api/profile/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

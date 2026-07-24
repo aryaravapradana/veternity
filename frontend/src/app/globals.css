@@ -140,19 +140,14 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-}
-
-@layer base {
-  body {
-    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'SFUIDisplay', sans-serif;
     letter-spacing: -0.01em;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    @apply font-sans;
   }
 
   h1 {

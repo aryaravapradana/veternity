@@ -1,5 +1,5 @@
 "use client";
-import { fetchApi } from "@/lib/apiClient";
+import { fetchApi, getApiBaseUrl } from "@/lib/apiClient";
 
 import React, { useState, useEffect } from "react";
 import { Search, Bell, Settings, Store, TrendingUp, CloudSun, Calendar, Package, ChevronRight, Droplets, Wind, MapPin, Sparkles, Loader2, Info } from "lucide-react";
@@ -65,7 +65,7 @@ export default function MainDashboard() {
     setProfile(session);
 
     // 2. Fetch Orders, Products, & Prices
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE = getApiBaseUrl();
     
     Promise.all([
       fetchApi(`${API_BASE}/api/orders/PRODUCER/${session.id}`).catch(() => null),
@@ -408,7 +408,7 @@ export default function MainDashboard() {
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-300 opacity-20 blur-[80px] rounded-full pointer-events-none" />
 
               <div className="p-5 relative z-10 flex flex-col h-full">
-                <img src="/logos/intelligence/intelligence-white.png" alt="Pranata Intelligence" className="h-7 sm:h-8 w-auto object-contain mb-2 drop-shadow-md origin-left self-start"  loading="lazy" decoding="async" />
+                <img src="/logos/intelligence/intelligence-white.webp" alt="Pranata Intelligence" className="h-7 sm:h-8 w-auto object-contain mb-2 drop-shadow-md origin-left self-start"  loading="lazy" decoding="async" />
                 
                 <h3 className="text-lg font-black text-white mb-1 leading-tight">
                   Business Insight
